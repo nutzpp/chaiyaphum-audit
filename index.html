@@ -675,20 +675,11 @@
               ประเมินความเสี่ยงเรื่องการรับงานเกินขีดความสามารถ, การหมุนเวียนวิศวกร/เครื่องจักรกล และความเสี่ยงทิ้งงานตามระเบียบพัสดุฯ
             </p>
           </div>
-          <div style="display: flex; gap: 1rem; align-items: flex-end; flex-wrap: wrap;">
-            <div style="min-width: 320px; flex: 1;">
-              <label style="font-size: 0.75rem; font-weight: 600; color: var(--muted);">เลือกชื่อผู้รับจ้าง/บริษัท เพื่อวิเคราะห์ไทม์ไลน์:</label>
-              <select id="overlapContractorSelect" onchange="renderContractorOverlapAnalysis(this.value)" style="border: 2px solid #f59e0b; font-weight: 600; color: var(--primary); width: 100%;">
-                <option value="">-- กรุณาเลือกผู้รับจ้างที่ต้องการตรวจสอบ --</option>
-              </select>
-            </div>
-            <div style="min-width: 220px;">
-              <label style="font-size: 0.75rem; font-weight: 600; color: var(--muted);">เกณฑ์ทับซ้อนตั้งแต่ (วันขึ้นไป):</label>
-              <div style="display: flex; align-items: center; gap: 6px;">
-                <input type="number" id="minOverlapDaysInput" value="15" min="1" max="999" style="border: 2px solid #f59e0b; font-weight: 700; padding: 0.45rem 0.6rem; border-radius: 6px; width: 90px; text-align: center; color: #b45309;" onchange="renderContractorOverlapAnalysis(document.getElementById('overlapContractorSelect').value)">
-                <span style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">วันขึ้นไป</span>
-              </div>
-            </div>
+          <div style="min-width: 320px; flex: 1;">
+            <label style="font-size: 0.75rem; font-weight: 600; color: var(--muted);">เลือกชื่อผู้รับจ้าง/บริษัท เพื่อวิเคราะห์ไทม์ไลน์:</label>
+            <select id="overlapContractorSelect" onchange="renderContractorOverlapAnalysis(this.value)" style="border: 2px solid #f59e0b; font-weight: 600; color: var(--primary); width: 100%;">
+              <option value="">-- กรุณาเลือกผู้รับจ้างที่ต้องการตรวจสอบ --</option>
+            </select>
           </div>
         </div>
 
@@ -737,21 +728,21 @@
         </div>
       </div>
 
-      <!-- 2. TIME WINDOW CLUSTERS (มิติที่ 2: แยกเป็นชุดก้อนห้วงเวลาที่ทับซ้อนกันจริง) -->
+      <!-- 2. QUARTERLY CLUSTERS (แบ่งตาม 4 ไตรมาสของปีงบประมาณ 1 ต.ค. - 30 ก.ย.) -->
       <div class="card" style="margin-bottom: 1.25rem;">
         <div class="card-header">
           <div>
             <div class="card-title">
-              🗂️ การจัดกลุ่มห้วงเวลาทับซ้อน (Overlap Time Window Clusters)
+              📅 การจัดกลุ่มห้วงเวลาตามไตรมาสปีงบประมาณ (Quarterly Workload Clusters)
             </div>
             <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-              แยกโครงการที่คาบเกี่ยวกันจริงตามไทม์ไลน์เป็นกลุ่มๆ ไม่นำโครงการที่จบไปแล้วมานับปนกับโครงการใหม่ (คลิกเลือกดูทีละกลุ่ม)
+              แบ่ง 4 ไตรมาสตามปีงบประมาณ (ต.ค.-ธ.ค., ม.ค.-มี.ค., เม.ย.-มิ.ย., ก.ค.-ก.ย.) เพื่อประเมินโครงการที่ส่งมอบชนกันในแต่ละไตรมาส
             </p>
           </div>
-          <span style="font-size: 0.8rem; color: var(--muted);" id="clusterCountBadge">พบ 0 กลุ่มเวลา</span>
+          <span style="font-size: 0.8rem; color: var(--muted);" id="clusterCountBadge">4 ไตรมาส</span>
         </div>
         <div id="clusterPillsContainer" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 0.5rem 0;">
-          <!-- Dynamically populated cluster buttons -->
+          <!-- Dynamically populated quarterly buttons -->
         </div>
       </div>
 
@@ -1540,8 +1531,7 @@
 
           if (overlapStart <= overlapEnd) {
             let days = Math.round((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
-            // นับเฉพาะเมื่อคาบเกี่ยวกันตั้งแต่ minOverlapDays วันขึ้นไป
-            if (days >= minOverlapDays) {
+            if (days > 0) {
               overlappingContractIds.add(a.project_id);
               overlappingContractIds.add(b.project_id);
               a.overlapsWith.push({
@@ -1562,9 +1552,9 @@
       const monthlyStats = computeMonthlyWorkload(parsedList);
       renderMonthlyHeatmap(monthlyStats);
 
-      // คำนวณ Time Window Clusters (จัดกลุ่มก้อนสัญญาที่ทับซ้อนกันจริง)
-      const clusters = computeTimeWindowClusters(parsedList, minOverlapDays);
-      renderClusterPills(clusters);
+      // คำนวณ Quarterly Clusters (จัดกลุ่ม 4 ไตรมาสตามปีงบประมาณ 1 ต.ค. - 30 ก.ย.)
+      const quarters = computeFiscalQuarterClusters(parsedList);
+      renderQuarterPills(quarters);
 
       // อัปเดต KPI Cards
       let totalMoney = parsedList.reduce((acc, p) => acc + p.contract_price, 0);
@@ -1689,122 +1679,114 @@
       };
     }
 
-    // คำนวณ Time Window Clusters (จัดกลุ่มสัญญาทับซ้อนที่เกี่ยวเนื่องกันเป็นทอดๆ ในห้วงเวลาเดียวกัน)
-    function computeTimeWindowClusters(parsedList, minOverlapDays) {
+    // คำนวณ 4 ไตรมาสตามปีงบประมาณราชการ (เริ่ม 1 ต.ค. - 30 ก.ย.)
+    function computeFiscalQuarterClusters(parsedList) {
       if (parsedList.length === 0) return [];
 
-      let clusters = [];
-      let visited = new Set();
+      let minDate = new Date(Math.min(...parsedList.map(p => p.startDate)));
+      let maxDate = new Date(Math.max(...parsedList.map(p => p.endDate)));
 
-      // สร้าง Adjacent Graph จากสัญญาที่ทับซ้อนกันจริง >= minOverlapDays
-      let adj = {};
-      parsedList.forEach(p => adj[p.project_id] = []);
+      // กำหนดปีงบประมาณ (ต.ค.-ธ.ค. นับเป็นปีงบถัดไป)
+      let startFiscalYear = minDate.getMonth() >= 9 ? minDate.getFullYear() + 1 : minDate.getFullYear();
+      let endFiscalYear = maxDate.getMonth() >= 9 ? maxDate.getFullYear() + 1 : maxDate.getFullYear();
 
-      for (let i = 0; i < parsedList.length; i++) {
-        for (let j = i + 1; j < parsedList.length; j++) {
-          let a = parsedList[i];
-          let b = parsedList[j];
-          let overlapStart = new Date(Math.max(a.startDate, b.startDate));
-          let overlapEnd = new Date(Math.min(a.endDate, b.endDate));
-          if (overlapStart <= overlapEnd) {
-            let days = Math.round((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
-            if (days >= minOverlapDays) {
-              adj[a.project_id].push(b.project_id);
-              adj[b.project_id].push(a.project_id);
-            }
-          }
-        }
-      }
+      let quarters = [];
 
-      // หา Connected Components (แต่ละ Component คือ 1 ห้วงเวลา Cluster)
-      parsedList.forEach(p => {
-        if (!visited.has(p.project_id)) {
-          let componentIds = [];
-          let q = [p.project_id];
-          visited.add(p.project_id);
+      for (let fy = startFiscalYear; fy <= endFiscalYear; fy++) {
+        let thaiFY = (fy + 543).toString().slice(-2);
+        
+        // ไตรมาส 1: 1 ต.ค. (fy-1) - 31 ธ.ค. (fy-1)
+        let q1Start = new Date(fy - 1, 9, 1);
+        let q1End = new Date(fy - 1, 11, 31, 23, 59, 59);
 
-          while (q.length > 0) {
-            let curr = q.shift();
-            componentIds.push(curr);
-            (adj[curr] || []).forEach(nextId => {
-              if (!visited.has(nextId)) {
-                visited.add(nextId);
-                q.push(nextId);
-              }
+        // ไตรมาส 2: 1 ม.ค. (fy) - 31 มี.ค. (fy)
+        let q2Start = new Date(fy, 0, 1);
+        let q2End = new Date(fy, 2, 31, 23, 59, 59);
+
+        // ไตรมาส 3: 1 เม.ย. (fy) - 30 มิ.ย. (fy)
+        let q3Start = new Date(fy, 3, 1);
+        let q3End = new Date(fy, 5, 30, 23, 59, 59);
+
+        // ไตรมาส 4: 1 ก.ค. (fy) - 30 ก.ย. (fy)
+        let q4Start = new Date(fy, 6, 1);
+        let q4End = new Date(fy, 8, 30, 23, 59, 59);
+
+        const defs = [
+          { qName: 'ไตรมาส 1', rangeText: `1 ต.ค. - 31 ธ.ค. ${parseInt(thaiFY)-1}`, start: q1Start, end: q1End },
+          { qName: 'ไตรมาส 2', rangeText: `1 ม.ค. - 31 มี.ค. ${thaiFY}`, start: q2Start, end: q2End },
+          { qName: 'ไตรมาส 3', rangeText: `1 เม.ย. - 30 มิ.ย. ${thaiFY}`, start: q3Start, end: q3End },
+          { qName: 'ไตรมาส 4', rangeText: `1 ก.ค. - 30 ก.ย. ${thaiFY}`, start: q4Start, end: q4End }
+        ];
+
+        defs.forEach((d, idx) => {
+          let activeProjects = parsedList.filter(p => p.startDate <= d.end && p.endDate >= d.start);
+          if (activeProjects.length > 0) {
+            let totalMoney = activeProjects.reduce((sum, item) => sum + item.contract_price, 0);
+            quarters.push({
+              id: `${fy}_Q${idx+1}`,
+              label: `${d.qName} (ปีงบ ${thaiFY})`,
+              rangeText: d.rangeText,
+              start: d.start,
+              end: d.end,
+              projects: activeProjects,
+              count: activeProjects.length,
+              totalMoney: totalMoney
             });
           }
+        });
+      }
 
-          let compProjects = parsedList.filter(item => componentIds.includes(item.project_id));
-          let clusterStart = new Date(Math.min(...compProjects.map(item => item.startDate)));
-          let clusterEnd = new Date(Math.max(...compProjects.map(item => item.endDate)));
-
-          clusters.push({
-            id: clusters.length + 1,
-            projects: compProjects,
-            count: compProjects.length,
-            isOverlapping: compProjects.length > 1,
-            startDate: clusterStart,
-            endDate: clusterEnd,
-            totalMoney: compProjects.reduce((sum, item) => sum + item.contract_price, 0)
-          });
-        }
-      });
-
-      // จัดเรียงตามวันเริ่มต้น
-      clusters.sort((a, b) => a.startDate - b.startDate);
-      return clusters;
+      return quarters;
     }
 
-    // แสดงปุ่มเลือกกลุ่มห้วงเวลา (Cluster Pills)
-    function renderClusterPills(clusters) {
+    // แสดงปุ่มเลือกไตรมาส (Quarter Pills)
+    function renderQuarterPills(quarters) {
       const container = document.getElementById('clusterPillsContainer');
       const badge = document.getElementById('clusterCountBadge');
       container.innerHTML = '';
 
-      let overlapClusters = clusters.filter(c => c.isOverlapping);
-      badge.textContent = `พบ ${overlapClusters.length} กลุ่มห้วงเวลาทับซ้อน (จากทั้งหมด ${clusters.length} ช่วง)`;
+      badge.textContent = `พบข้อมูลใน ${quarters.length} ไตรมาส`;
 
       // ปุ่มแสดงทุกโครงการ
       let allBtn = document.createElement('button');
       allBtn.className = 'view-pill-btn active';
-      allBtn.id = 'clusterBtn_all';
+      allBtn.id = 'quarterBtn_all';
       allBtn.innerHTML = `🌐 แสดงทั้งหมด (${currentOverlapData.length} สัญญา)`;
-      allBtn.onclick = () => selectCluster(null, allBtn);
+      allBtn.onclick = () => selectQuarter(null, allBtn);
       container.appendChild(allBtn);
 
-      clusters.forEach((c, idx) => {
+      quarters.forEach(q => {
         let btn = document.createElement('button');
         btn.className = 'view-pill-btn';
-        btn.id = `clusterBtn_${c.id}`;
+        btn.id = `quarterBtn_${q.id}`;
 
-        let icon = c.isOverlapping ? '⚠️' : '🟢';
-        let style = c.isOverlapping ? 'border: 1px solid #fca5a5;' : '';
-        btn.setAttribute('style', style);
+        let icon = q.count >= 4 ? '⚠️' : (q.count >= 2 ? '⚡' : '🟢');
+        let borderStyle = q.count >= 4 ? 'border: 1px solid #fca5a5; background: #fff5f5;' : '';
+        btn.setAttribute('style', borderStyle);
 
-        let dateRange = `${c.startDate.toLocaleDateString('th-TH', {month:'short', year:'2-digit'})} - ${c.endDate.toLocaleDateString('th-TH', {month:'short', year:'2-digit'})}`;
-        btn.innerHTML = `${icon} กลุ่มที่ ${idx+1} [${dateRange}]: ชนกัน ${c.count} โครงการ (฿${(c.totalMoney/1000000).toFixed(1)}M)`;
-        btn.onclick = () => selectCluster(c, btn);
+        btn.innerHTML = `${icon} <strong>${q.label}</strong> [${q.rangeText}]: ดำเนินงาน ${q.count} สัญญา (฿${(q.totalMoney/1000000).toFixed(1)}M)`;
+        btn.onclick = () => selectQuarter(q, btn);
         container.appendChild(btn);
       });
     }
 
-    // กรองการแสดงผลตาม Cluster ที่เลือก
-    function selectCluster(cluster, btnElement) {
+    // กรองการแสดงผลตามไตรมาสที่เลือก
+    function selectQuarter(quarter, btnElement) {
       document.querySelectorAll('#clusterPillsContainer .view-pill-btn').forEach(b => b.classList.remove('active'));
       if (btnElement) btnElement.classList.add('active');
 
-      if (!cluster) {
+      if (!quarter) {
         // แสดงทั้งหมด
         document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดโครงการของผู้รับจ้าง (แสดงทั้งหมด ${currentOverlapData.length} โครงการ)`;
         let overlappingContractIds = new Set(currentOverlapData.filter(p => p.overlapsWith.length > 0).map(p => p.project_id));
         renderContractorMapMarkers(currentOverlapData, overlappingContractIds);
         renderGanttChart(currentOverlapData, overlappingContractIds);
       } else {
-        // แสดงเฉพาะ Cluster ที่เลือก
-        document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดเฉพาะ กลุ่มที่ ${cluster.id} [${cluster.count} โครงการ] ช่วง ${cluster.startDate.toLocaleDateString('th-TH')} - ${cluster.endDate.toLocaleDateString('th-TH')}`;
-        let clusterIds = new Set(cluster.projects.map(p => p.project_id));
-        renderContractorMapMarkers(cluster.projects, clusterIds, currentOverlapData);
-        renderGanttChart(cluster.projects, clusterIds);
+        // แสดงเฉพาะไตรมาสที่เลือก
+        document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดเฉพาะ ${quarter.label} [${quarter.count} โครงการ] ห้วงเวลา ${quarter.rangeText}`;
+        let quarterIds = new Set(quarter.projects.map(p => p.project_id));
+        renderContractorMapMarkers(quarter.projects, quarterIds, currentOverlapData);
+        renderGanttChart(quarter.projects, quarterIds);
       }
     }
 
@@ -1819,7 +1801,7 @@
 
     function selectTimeWindow(mode) {
       if (mode === 'all') {
-        selectCluster(null, document.getElementById('clusterBtn_all'));
+        selectQuarter(null, document.getElementById('quarterBtn_all'));
       }
     }
 
@@ -1931,18 +1913,26 @@
         let widthPct = Math.max(2, ((p.endDate - p.startDate) / (maxDate - minDate)) * 100);
 
         let barColor = isOverlap ? '#ef4444' : '#10b981';
-        let badgeOverlapText = isOverlap ? `⚠️ ชนกับ ${p.overlapsWith.length} สัญญา (${p.overlapsWith.map(o => o.targetDept + ' ' + o.overlapDays + 'วัน').join(', ')})` : 'ปกติ';
+
+        // ป้ายแสดงสถานะสั้นๆ กระชับ ไม่รกสายตา
+        let badgeHtml = isOverlap ? 
+          `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">⚠️ ชน ${p.overlapsWith.length} สัญญา</span>` :
+          `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🟢 ปกติ</span>`;
 
         timelineHtml += `
-          <div style="margin-bottom: 12px; position: relative;" title="${p.project_name}">
-            <div style="display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 3px;">
-              <span style="font-weight: 600; color: #0a2540;">#${idx+1} ${p.project_name.substring(0, 65)}... [${p.dept_name}]</span>
-              <span style="font-size: 0.75rem; color: ${isOverlap ? '#dc2626' : '#16a34a'}; font-weight: bold;">
-                ${badgeOverlapText} (฿${(p.contract_price/1000000).toFixed(2)}M)
-              </span>
+          <div style="margin-bottom: 12px; position: relative;" title="คลิกเพื่อดูรายละเอียดโครงการ">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; margin-bottom: 3px; gap: 8px;">
+              <div style="font-weight: 600; color: #0a2540; flex: 1;">
+                <span style="color: #64748b; font-weight: bold;">#${idx+1}</span> ${p.project_name} 
+                <span style="font-weight: normal; color: #64748b; font-size: 0.78rem;">[${p.dept_name}]</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px; font-size: 0.75rem;">
+                ${badgeHtml}
+                <strong style="color: #1e40af; font-size: 0.8rem; white-space: nowrap;">฿${(p.contract_price/1000000).toFixed(2)}M</strong>
+              </div>
             </div>
-            <div style="width: 100%; height: 26px; background: #f1f5f9; border-radius: 6px; position: relative; overflow: hidden; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
-              <div style="position: absolute; left: ${leftPct}%; width: ${widthPct}%; height: 100%; background: ${barColor}; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; color: white; font-size: 0.75rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.15);">
+            <div style="width: 100%; height: 24px; background: #f1f5f9; border-radius: 6px; position: relative; overflow: hidden; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
+              <div style="position: absolute; left: ${leftPct}%; width: ${widthPct}%; height: 100%; background: ${barColor}; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; color: white; font-size: 0.73rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
                 ${p.startDate.toLocaleDateString('th-TH')} ➔ ${p.endDate.toLocaleDateString('th-TH')}
               </div>
             </div>
@@ -1952,50 +1942,6 @@
 
       timelineHtml += '</div>';
       container.innerHTML = timelineHtml;
-    }
-
-    // วาดตารางรายละเอียดการทับซ้อน (Overlap Matrix Table)
-    function renderOverlapTable(parsedList, overlappingIds) {
-      const tbody = document.getElementById('overlapTableBody');
-      tbody.innerHTML = '';
-
-      let overlapRows = parsedList.filter(p => overlappingIds.has(p.project_id));
-      if (overlapRows.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #16a34a; padding: 2.5rem; font-weight: 600;">✅ ไม่พบสัญญาที่มีห้วงเวลาทับซ้อนกันของผู้รับจ้างรายนี้ ดำเนินงานเป็นช่วงๆ ตามลำดับ</td></tr>`;
-        return;
-      }
-
-      overlapRows.forEach((p, idx) => {
-        let targetsHtml = p.overlapsWith.map(t => `
-          <div style="font-size: 0.78rem; margin-bottom: 4px; padding: 4px 6px; background: #fff5f5; border-left: 3px solid #dc2626; border-radius: 3px;">
-            <strong>ทับซ้อนกับ:</strong> ${t.targetName.substring(0, 50)}...<br>
-            <span style="color: #64748b;">(${t.targetDept}) คาบเกี่ยว ${t.overlapDays} วัน [${t.periodText}]</span>
-          </div>
-        `).join('');
-
-        let maxDays = Math.max(...p.overlapsWith.map(t => t.overlapDays));
-
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
-          <td style="text-align: center; font-weight: bold;">${idx+1}</td>
-          <td>
-            <div style="font-weight: 600; color: var(--primary);">${p.project_name}</div>
-            <div style="font-size: 0.75rem; color: var(--muted);">รหัส: ${p.project_id} | ${p.procure_method}</div>
-          </td>
-          <td>${p.dept_name}</td>
-          <td style="font-size: 0.8rem;">
-            ${p.startDate.toLocaleDateString('th-TH')} ถึง<br>${p.endDate.toLocaleDateString('th-TH')}
-          </td>
-          <td style="text-align: right; font-weight: bold; color: var(--primary);">฿${(p.contract_price).toLocaleString()}</td>
-          <td>${targetsHtml}</td>
-          <td style="text-align: center; font-weight: bold; color: #dc2626;">${maxDays} วัน</td>
-          <td style="text-align: center;">
-            <span class="badge-risk risk-high">เสี่ยงบุคลากรซ้ำซ้อน</span>
-            <div style="font-size: 0.7rem; color: var(--muted); margin-top: 2px;">ตรวจใบ กว./เครื่องจักร</div>
-          </td>
-        `;
-        tbody.appendChild(tr);
-      });
     }
 
     // ส่งออกรายงานสัญญาทับซ้อนเป็น Excel
