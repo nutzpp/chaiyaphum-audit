@@ -15,8 +15,6 @@
   <!-- Leaflet Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!-- Region 4 GeoJSON Boundary Data (Chaiyaphum, Korat, Buriram, Surin) -->
-  <script src="region4_inline.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -439,30 +437,44 @@
 
     <!-- Dropdowns & Filters Panel -->
     <div class="filter-card">
-      <!-- 0. Filter Fiscal Year -->
-      <div class="filter-item" style="max-width: 170px;">
-        <label class="filter-label">📅 ปีงบประมาณ:</label>
-        <select id="filterFiscalYear" onchange="applyGlobalFilters()" style="border: 1.5px solid #3b82f6; font-weight: 600; color: #1e40af; background: #eff6ff;">
-          <option value="ALL">ทุกปีงบประมาณ</option>
-          <option value="2568">ปีงบประมาณ 2568</option>
-          <option value="2567" selected>ปีงบประมาณ 2567</option>
-          <option value="2566">ปีงบประมาณ 2566</option>
-          <option value="2565">ปีงบประมาณ 2565</option>
+    <!-- Active Data Info Banner (แสดงปีงบประมาณและจังหวัดตามไฟล์ที่อัพโหลดอัตโนมัติ) -->
+    <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 1.25rem;">
+      <div style="font-size: 0.85rem; font-weight: 700; color: #0f2b5c; display: flex; align-items: center; gap: 6px;">
+        <span>📂 ข้อมูลปัจจุบัน:</span>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
+        <span>📅 ปีงบประมาณ:</span>
+        <strong id="displayBudgetYear">2568</strong>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
+        <span>🏛️ จังหวัด:</span>
+        <strong id="displayProvince">ชัยภูมิ</strong>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
+        <span>📊 สัญญาในระบบ:</span>
+        <strong id="displayRecordCount">0 รายการ</strong>
+      </div>
+    </div>
+
+    <!-- Dropdowns & Filters Panel -->
+    <div class="filter-card">
+      <!-- 1. Filter Dept Type (จำแนกประเภทหน่วยรับตรวจ 145 หน่วย อปท. + กรมจังหวัด + มรภ.) -->
+      <div class="filter-item" style="min-width: 260px;">
+        <label class="filter-label">🏢 จำแนกกลุ่มหน่วยรับตรวจ (dept_name):</label>
+        <select id="filterDeptCategory" onchange="applyGlobalFilters()" style="border: 1.5px solid #2563eb; font-weight: 600; color: #1e40af; background: #eff6ff;">
+          <option value="ALL">ทุกกลุ่มหน่วยรับตรวจ (ทั้งหมด)</option>
+          <option value="GROUP_PAO">1. อบจ.ชัยภูมิ (องค์การบริหารส่วนจังหวัด) [1 หน่วย]</option>
+          <option value="GROUP_MUNICIPALITY_CITY">2. เทศบาลเมืองชัยภูมิ [1 หน่วย]</option>
+          <option value="GROUP_MUNICIPALITY_SUB">3. เทศบาลตำบล [44 หน่วย]</option>
+          <option value="GROUP_TAO">4. องค์การบริหารส่วนตำบล (อบต.) [97 หน่วย]</option>
+          <option value="GROUP_LOCAL_ALL">🌟 รวม อปท. ในกำกับดูแล จ.ชัยภูมิ ทั้งหมด [145 หน่วย]</option>
+          <option value="GROUP_PROV_DEPT">5. กรมจังหวัด (จังหวัดชัยภูมิ) [1 หน่วย]</option>
+          <option value="GROUP_CPRU">6. มหาวิทยาลัยราชภัฏชัยภูมิ [1 หน่วย]</option>
+          <option value="GROUP_OTHER">7. หน่วยงานอื่น (ส่วนกลาง/ภูมิภาค)</option>
         </select>
       </div>
 
-      <!-- 0.1 Filter Province -->
-      <div class="filter-item" style="max-width: 200px;">
-        <label class="filter-label">🏛️ จังหวัด (เขต สตภ.4):</label>
-        <select id="filterProvince" onchange="applyGlobalFilters()" style="border: 1.5px solid #3b82f6; font-weight: 600; color: #1e40af; background: #eff6ff;">
-          <option value="ชัยภูมิ" selected>จังหวัดชัยภูมิ</option>
-          <option value="นครราชสีมา">จังหวัดนครราชสีมา</option>
-          <option value="บุรีรัมย์">จังหวัดบุรีรัมย์</option>
-          <option value="สุรินทร์">จังหวัดสุรินทร์</option>
-        </select>
-      </div>
-
-      <!-- 1. Filter District -->
+      <!-- 2. Filter District -->
       <div class="filter-item">
         <label class="filter-label">📍 แยกอำเภอ:</label>
         <select id="filterDistrict" onchange="applyGlobalFilters()">
@@ -470,7 +482,7 @@
         </select>
       </div>
 
-      <!-- 2. Filter project_type_name (ครบทั้ง 6 ประเภทตามไฟล์จริง) -->
+      <!-- 3. Filter project_type_name -->
       <div class="filter-item">
         <label class="filter-label">🏷️ แยกประเภทโครงการ:</label>
         <select id="filterProjectType" onchange="applyGlobalFilters()">
@@ -484,7 +496,7 @@
         </select>
       </div>
 
-      <!-- 3. Filter project_name category -->
+      <!-- 4. Filter project_name category -->
       <div class="filter-item">
         <label class="filter-label">🔍 จำแนกลักษณะงาน:</label>
         <select id="filterNameKeyword" onchange="applyGlobalFilters()">
@@ -498,45 +510,10 @@
         </select>
       </div>
 
-      <!-- 4. Text Search -->
+      <!-- 5. Text Search -->
       <div class="filter-item">
         <label class="filter-label">🔎 ค้นหาข้อความอิสระ:</label>
         <input type="text" id="searchInput" placeholder="พิมพ์ชื่อโครงการ, ผู้รับเหมา, หรือ อบต..." onkeyup="applyGlobalFilters()">
-      </div>
-    </div>
-
-    <!-- Region 4 Map & Overview Card -->
-    <div class="card" style="margin-bottom: 0.5rem; padding: 1rem 1.25rem;">
-      <div style="display: flex; gap: 1.25rem; align-items: stretch; flex-wrap: wrap;">
-        <!-- Left Province Table Panel (เหมือนแบบในรูป) -->
-        <div style="width: 220px; min-width: 200px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
-          <div style="background: #e2e8f0; padding: 8px 12px; font-weight: 700; font-size: 0.85rem; color: #334155;">
-            จังหวัด
-          </div>
-          <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 10px 14px;">
-            <div>
-              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
-                <span id="reg4CurrentProvName" style="font-size: 1.15rem; font-weight: 700; color: #0f2b5c;">ชัยภูมิ</span>
-                <span id="reg4CurrentProvCount" style="font-size: 1.15rem; font-weight: 700; color: #0f2b5c;">7,240</span>
-              </div>
-              <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">โครงการตามสัญญา</div>
-            </div>
-            <div style="margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
-              <div style="font-size: 0.78rem; font-weight: 700; color: #1e40af;">สตภ.4 (สำนักตรวจเงินแผ่นดินภูมิภาคที่ 4)</div>
-              <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">
-                ครอบคลุม 4 จังหวัด: ชัยภูมิ, นครราชสีมา, บุรีรัมย์, สุรินทร์
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right Region 4 Interactive Map -->
-        <div style="flex: 1; min-width: 320px; height: 190px; border-radius: 10px; overflow: hidden; border: 1.5px solid #cbd5e1; position: relative;">
-          <div id="region4Map" style="width: 100%; height: 100%; background: #f1f5f9;"></div>
-          <div style="position: absolute; bottom: 6px; right: 8px; background: rgba(255,255,255,0.88); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; color: #475569; z-index: 500; font-weight: 600;">
-            🗺️ แผนที่เขตอำนาจ สตภ.4 (คลิกเลือกจังหวัดได้)
-          </div>
-        </div>
       </div>
     </div>
 
@@ -895,128 +872,8 @@
 
     let currentStage = 1; // 1 = ปม.1, 2 = ปม.2, 3 = สัญญาทับซ้อน
     let map, markers = [], entityRiskChart;
-    let region4Map = null;
-    let region4GeoLayer = null;
-
-    // Initialize Map for Region 4 (Chaiyaphum, Korat, Buriram, Surin)
-    function initRegion4Map() {
-      if (region4Map) return;
-      const mapEl = document.getElementById('region4Map');
-      if (!mapEl) return;
-
-      // Region 4 Center (approx Korat/Chaiyaphum area)
-      region4Map = L.map('region4Map', {
-        zoomControl: false,
-        attributionControl: false,
-        scrollWheelZoom: false,
-        doubleClickZoom: false
-      }).setView([15.2, 102.5], 7);
-
-      // Add light gray tile layer or plain canvas
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
-        maxZoom: 10
-      }).addTo(region4Map);
-
-      if (typeof region4GeoData !== 'undefined' && region4GeoData.features) {
-        let currentProvSelect = document.getElementById('filterProvince')?.value || 'ชัยภูมิ';
-
-        function getProvinceStyle(feature) {
-          let name = feature.properties.name || '';
-          let isChaiyaphum = name === 'Chaiyaphum';
-          let isKorat = name === 'Nakhon Ratchasima';
-          let isBuriram = name === 'Buri Ram';
-          let isSurin = name === 'Surin';
-
-          let isCurrent = false;
-          if (currentProvSelect.includes('ชัยภูมิ') && isChaiyaphum) isCurrent = true;
-          if (currentProvSelect.includes('นครราชสีมา') && isKorat) isCurrent = true;
-          if (currentProvSelect.includes('บุรีรัมย์') && isBuriram) isCurrent = true;
-          if (currentProvSelect.includes('สุรินทร์') && isSurin) isCurrent = true;
-
-          if (isCurrent) {
-            // Selected active province (สีน้ำเงินเข้มเหมือนในรูปที่แนบ)
-            return {
-              fillColor: '#1e40af',
-              weight: 2,
-              opacity: 1,
-              color: '#0f2b5c',
-              fillOpacity: 0.92
-            };
-          } else {
-            // Other Region 4 provinces (สีเทาอ่อนโปร่งแสงเหมือนในรูป)
-            return {
-              fillColor: '#cbd5e1',
-              weight: 1.5,
-              opacity: 0.8,
-              color: '#ffffff',
-              fillOpacity: 0.55
-            };
-          }
-        }
-
-        region4GeoLayer = L.geoJSON(region4GeoData, {
-          style: getProvinceStyle,
-          onEachFeature: function(feature, layer) {
-            let pName = feature.properties.name;
-            let thName = 'ชัยภูมิ';
-            if (pName === 'Nakhon Ratchasima') thName = 'นครราชสีมา';
-            if (pName === 'Buri Ram') thName = 'บุรีรัมย์';
-            if (pName === 'Surin') thName = 'สุรินทร์';
-
-            layer.bindTooltip(`<strong>จ.${thName}</strong><br><small style="color:#64748b;">(คลิกเพื่อเลือกจังหวัด)</small>`, { sticky: true });
-
-            layer.on('click', function() {
-              const provSelect = document.getElementById('filterProvince');
-              if (provSelect) {
-                provSelect.value = thName;
-                applyGlobalFilters();
-              }
-            });
-          }
-        }).addTo(region4Map);
-
-        // Fit bounds to the 4 provinces
-        try {
-          region4Map.fitBounds(region4GeoLayer.getBounds(), { padding: [10, 10] });
-        } catch(e) {}
-      }
-    }
-
-    function updateRegion4MapHighlight(selectedProvince) {
-      if (!region4GeoLayer) return;
-      region4GeoLayer.eachLayer(layer => {
-        let name = layer.feature.properties.name || '';
-        let isChaiyaphum = name === 'Chaiyaphum';
-        let isKorat = name === 'Nakhon Ratchasima';
-        let isBuriram = name === 'Buri Ram';
-        let isSurin = name === 'Surin';
-
-        let isCurrent = false;
-        if (selectedProvince.includes('ชัยภูมิ') && isChaiyaphum) isCurrent = true;
-        if (selectedProvince.includes('นครราชสีมา') && isKorat) isCurrent = true;
-        if (selectedProvince.includes('บุรีรัมย์') && isBuriram) isCurrent = true;
-        if (selectedProvince.includes('สุรินทร์') && isSurin) isCurrent = true;
-
-        if (isCurrent) {
-          layer.setStyle({
-            fillColor: '#1e40af',
-            weight: 2,
-            opacity: 1,
-            color: '#0f2b5c',
-            fillOpacity: 0.92
-          });
-          layer.bringToFront();
-        } else {
-          layer.setStyle({
-            fillColor: '#cbd5e1',
-            weight: 1.5,
-            opacity: 0.8,
-            color: '#ffffff',
-            fillOpacity: 0.55
-          });
-        }
-      });
-    }
+    let overlapMap = null, overlapMarkers = [];
+    let currentTimelineMode = 'executive'; // 'executive' or 'gantt'
 
     // Initialize Map for Stage 2 (Entity Projects)
     function initMap() {
@@ -1267,6 +1124,8 @@
           f6: { lvl: f6_lvl, val: f6_val },
           f7: { lvl: f7_lvl, val: f7_val },
           f8: { lvl: f8_lvl, val: f8_val },
+          budget_year: (row.budget_year || '').trim() || '2568',
+          province: (row.province || '').trim() || 'ชัยภูมิ',
           lat: coords.lat,
           lng: coords.lng
         });
@@ -1274,6 +1133,19 @@
 
       rawCSVRecords = list;
       document.getElementById('fileInfoText').textContent = `✅ โหลดไฟล์ "${fileName}" สำเร็จ: นำเข้า ${list.length.toLocaleString()} สัญญา`;
+
+      // Auto-detect Year and Province from uploaded CSV
+      let foundYears = [...new Set(list.map(p => p.budget_year).filter(Boolean))];
+      let foundProvs = [...new Set(list.map(p => p.province).filter(Boolean))];
+      let yrText = foundYears.length > 0 ? foundYears.join(', ') : '2568';
+      let provText = foundProvs.length > 0 ? foundProvs.join(', ') : 'ชัยภูมิ';
+
+      const yrEl = document.getElementById('displayBudgetYear');
+      const prEl = document.getElementById('displayProvince');
+      const cntEl = document.getElementById('displayRecordCount');
+      if (yrEl) yrEl.textContent = yrText;
+      if (prEl) prEl.textContent = provText;
+      if (cntEl) cntEl.textContent = `${list.length.toLocaleString()} สัญญา`;
 
       // Populate District Dropdown
       const distSelect = document.getElementById('filterDistrict');
@@ -1286,36 +1158,37 @@
       applyGlobalFilters();
     }
 
-    // Apply Global Filters (Fiscal Year, Province, District, Project Type, Project Name Keyword, Text Search)
-    function applyGlobalFilters() {
-      const fy = document.getElementById('filterFiscalYear')?.value || 'ALL';
-      const prov = document.getElementById('filterProvince')?.value || 'ชัยภูมิ';
-      const dist = document.getElementById('filterDistrict').value;
-      const type = document.getElementById('filterProjectType').value;
-      const nameKey = document.getElementById('filterNameKeyword').value;
-      const query = document.getElementById('searchInput').value.toLowerCase().trim();
+    // Helper: จำแนกประเภทของหน่วยรับตรวจ (dept_name classification)
+    function classifyDept(deptName) {
+      if (!deptName) return 'GROUP_OTHER';
+      if (deptName.includes('องค์การบริหารส่วนจังหวัด')) return 'GROUP_PAO';
+      if (deptName.includes('เทศบาลเมือง')) return 'GROUP_MUNICIPALITY_CITY';
+      if (deptName.includes('เทศบาลตำบล')) return 'GROUP_MUNICIPALITY_SUB';
+      if (deptName.includes('องค์การบริหารส่วนตำบล') || deptName.includes('อบต.')) return 'GROUP_TAO';
+      if (deptName === 'จังหวัดชัยภูมิ' || deptName.includes('ที่ทำการปกครองจังหวัดชัยภูมิ')) return 'GROUP_PROV_DEPT';
+      if (deptName.includes('มหาวิทยาลัยราชภัฏชัยภูมิ')) return 'GROUP_CPRU';
+      return 'GROUP_OTHER';
+    }
 
-      // อัปเดตการ์ดแผนที่และตารางจังหวัดภาค 4
-      const reg4ProvNameEl = document.getElementById('reg4CurrentProvName');
-      const reg4ProvCountEl = document.getElementById('reg4CurrentProvCount');
-      if (reg4ProvNameEl) reg4ProvNameEl.textContent = prov;
+    // Apply Global Filters (Dept Category, District, Project Type, Project Name Keyword, Text Search)
+    function applyGlobalFilters() {
+      const deptCat = document.getElementById('filterDeptCategory')?.value || 'ALL';
+      const dist = document.getElementById('filterDistrict')?.value || 'ALL';
+      const type = document.getElementById('filterProjectType')?.value || 'ALL';
+      const nameKey = document.getElementById('filterNameKeyword')?.value || 'ALL';
+      const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
       filteredRecords = rawCSVRecords.filter(p => {
-        // กรองปีงบประมาณจากวันเริ่มสัญญา (ถ้ามี)
-        let matchFy = true;
-        if (fy !== 'ALL') {
-          let sDate = parseThaiDate(p.raw_contract_date);
-          if (sDate) {
-            // ปีงบประมาณไทย: ต.ค. (เดือน 9) เป็นต้นไปนับเป็นปีงบถัดไป
-            let fiscalYearNum = sDate.getMonth() >= 9 ? sDate.getFullYear() + 544 : sDate.getFullYear() + 543;
-            matchFy = fiscalYearNum.toString() === fy;
+        // กรองตามกลุ่มหน่วยรับตรวจ (dept_name)
+        let matchDeptCat = true;
+        if (deptCat !== 'ALL') {
+          let cat = classifyDept(p.dept_name);
+          if (deptCat === 'GROUP_LOCAL_ALL') {
+            // รวม อปท. 145 หน่วย (อบจ. + เทศบาลเมือง + เทศบาลตำบล + อบต.)
+            matchDeptCat = (cat === 'GROUP_PAO' || cat === 'GROUP_MUNICIPALITY_CITY' || cat === 'GROUP_MUNICIPALITY_SUB' || cat === 'GROUP_TAO');
+          } else {
+            matchDeptCat = (cat === deptCat);
           }
-        }
-
-        // กรองจังหวัด (หากไฟล์มีระบุจังหวัด หรือถ้าเป็นไฟล์ชัยภูมิ ให้สัมพันธ์กับจังหวัดที่เลือก)
-        let matchProv = true;
-        if (prov && p.province) {
-          matchProv = p.province.includes(prov);
         }
 
         const matchDist = dist === 'ALL' || p.district === dist;
@@ -1326,14 +1199,11 @@
           p.winner.toLowerCase().includes(query) ||
           p.dept_name.toLowerCase().includes(query);
 
-        return matchFy && matchProv && matchDist && matchType && matchNameKey && matchQuery;
+        return matchDeptCat && matchDist && matchType && matchNameKey && matchQuery;
       });
 
-      if (reg4ProvCountEl) {
-        reg4ProvCountEl.textContent = filteredRecords.length.toLocaleString();
-      }
-
-      updateRegion4MapHighlight(prov);
+      const cntEl = document.getElementById('displayRecordCount');
+      if (cntEl) cntEl.textContent = `${filteredRecords.length.toLocaleString()} สัญญา (ตรงตามเงื่อนไข)`;
 
       computePm1Entities(filteredRecords);
       updateTopKPIs(filteredRecords);
@@ -1919,7 +1789,7 @@
 
       // กรองเฉพาะโครงการที่ไทม์ไลน์คาบเกี่ยวอยู่ในเดือนที่เลือก (โครงการที่ไม่อยู่ในเดือนนี้จะถูกซ่อน)
       let filteredProjects = currentOverlapData.filter(p => {
-        let finish = p.actualEndDate > p.contractEndDate ? p.actualEndDate : p.contractEndDate;
+        let finish = p.endDate || p.contractEndDate;
         return p.startDate <= mEnd && finish >= mStart;
       });
 
@@ -2759,7 +2629,6 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
-      initRegion4Map();
       initMap();
       initChart();
       tryAutoLoadSample();
