@@ -762,7 +762,7 @@
         <div id="overlapMap"></div>
       </div>
 
-      <!-- 2. GANTT TIMELINE CARD -->
+      <!-- 4. GANTT TIMELINE CARD -->
       <div class="card" style="margin-bottom: 1.25rem;">
         <div class="card-header">
           <div>
@@ -770,7 +770,7 @@
               📊 แผนผังไทม์ไลน์ห้วงเวลาปฏิบัติงาน (Gantt Chart Timeline)
             </div>
             <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-              แถบสีแดง = มีช่วงเวลาดำเนินการทับซ้อนกับโครงการอื่นเกินเกณฑ์ที่กำหนด | แถบสีเขียว = ปฏิบัติงานปกติ
+              🟢 แถบสีเขียว = ระยะเวลาตามสัญญา | 🔴 แถบสีแดง = ระยะเวลาที่ผู้รับจ้างปฏิบัติงานจริง (เกินสัญญา) | 📍 เส้นขีดแนวตั้งสีดำ = วันสิ้นสุดตามสัญญา | 🟨 แถบโปร่งแสงแนวดิ่ง = ไตรมาส/เดือนที่เลือก
             </p>
           </div>
           <button class="btn btn-outline" onclick="exportOverlapExcel()" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
@@ -1064,6 +1064,7 @@
           winner_tin: row.winner_tin || '-',
           raw_contract_date: row.contract_date || row.contract_sign_date || '',
           raw_contract_finish_date: row.contract_finish_date || row.contract_end_date || '',
+          raw_transaction_date: row.transaction_date || '',
           status: row.project_status || row.contract_status || 'ระหว่างดำเนินการ',
           risk_level: riskLevel,
           risk_score: riskScore,
@@ -1494,24 +1495,43 @@
       // ค้นหาช่วงวันที่เริ่มและสิ้นสุดของแต่ละสัญญา
       let parsedList = contracts.map(p => {
         let start = parseThaiDate(p.raw_contract_date);
-        let end = parseThaiDate(p.raw_contract_finish_date);
+        let contractEnd = parseThaiDate(p.raw_contract_finish_date);
+        let actualDelivery = parseThaiDate(p.raw_transaction_date);
         
-        // ถ้าไม่มีวันสิ้นสุด ให้ประมาณการ 120 วันเป็นค่าเริ่มต้น
-        if (start && !end) {
-          end = new Date(start);
-          end.setDate(end.getDate() + 120);
-        } else if (!start && end) {
-          start = new Date(end);
+        // ถ้าไม่มีวันสิ้นสุดตามสัญญา ให้ประมาณการ 120 วันเป็นค่าเริ่มต้น
+        if (start && !contractEnd) {
+          contractEnd = new Date(start);
+          contractEnd.setDate(contractEnd.getDate() + 120);
+        } else if (!start && contractEnd) {
+          start = new Date(contractEnd);
           start.setDate(start.getDate() - 120);
         }
+
+        // หาวันที่สิ้นสุดการปฏิบัติงานจริงของผู้รับจ้าง (actualEndDate)
+        let actualEnd = actualDelivery ? new Date(actualDelivery) : new Date(contractEnd);
+        let isDelivered = (p.status === 'สิ้นสุดสัญญา' || !!actualDelivery);
+        
+        // ถ้าสถานะยังไม่สิ้นสุดสัญญา และเลยวันสิ้นสุดสัญญามาแล้ว ให้ใช้วันปัจจุบัน
+        let today = new Date();
+        if (!isDelivered && today > contractEnd) {
+          actualEnd = today;
+        }
+
+        let isOverdue = actualEnd > contractEnd;
+        let isEarly = actualEnd < contractEnd;
 
         return {
           ...p,
           startDate: start,
-          endDate: end,
+          contractEndDate: contractEnd,
+          actualEndDate: actualEnd,
+          isOverdue: isOverdue,
+          isEarly: isEarly,
+          isDelivered: isDelivered,
+          endDate: actualEnd > contractEnd ? actualEnd : contractEnd, // ใช้สำหรับคำนวณห้วงเวลาทับซ้อนรวม
           overlapsWith: []
         };
-      }).filter(p => p.startDate && p.endDate);
+      }).filter(p => p.startDate && p.contractEndDate);
 
       // เรียงตามวันเริ่มสัญญา
       parsedList.sort((a, b) => a.startDate - b.startDate);
@@ -1770,23 +1790,27 @@
       });
     }
 
+    let currentActiveWindow = null; // { label: '...', start: Date, end: Date }
+
     // กรองการแสดงผลตามไตรมาสที่เลือก
     function selectQuarter(quarter, btnElement) {
       document.querySelectorAll('#clusterPillsContainer .view-pill-btn').forEach(b => b.classList.remove('active'));
       if (btnElement) btnElement.classList.add('active');
 
       if (!quarter) {
+        currentActiveWindow = null;
         // แสดงทั้งหมด
         document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดโครงการของผู้รับจ้าง (แสดงทั้งหมด ${currentOverlapData.length} โครงการ)`;
         let overlappingContractIds = new Set(currentOverlapData.filter(p => p.overlapsWith.length > 0).map(p => p.project_id));
         renderContractorMapMarkers(currentOverlapData, overlappingContractIds);
-        renderGanttChart(currentOverlapData, overlappingContractIds);
+        renderGanttChart(currentOverlapData, overlappingContractIds, null);
       } else {
+        currentActiveWindow = { label: quarter.label, start: quarter.start, end: quarter.end };
         // แสดงเฉพาะไตรมาสที่เลือก
         document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดเฉพาะ ${quarter.label} [${quarter.count} โครงการ] ห้วงเวลา ${quarter.rangeText}`;
         let quarterIds = new Set(quarter.projects.map(p => p.project_id));
         renderContractorMapMarkers(quarter.projects, quarterIds, currentOverlapData);
-        renderGanttChart(quarter.projects, quarterIds);
+        renderGanttChart(currentOverlapData, quarterIds, currentActiveWindow);
       }
     }
 
@@ -1795,8 +1819,13 @@
       let filtered = currentOverlapData.filter(p => monthObj.projectIds.includes(p.project_id));
       document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดโครงการที่เปิดหน้างานในเดือน ${monthObj.label} (${filtered.length} โครงการ)`;
       let filteredIds = new Set(filtered.map(p => p.project_id));
+
+      let mStart = new Date(monthObj.year, monthObj.month, 1);
+      let mEnd = new Date(monthObj.year, monthObj.month + 1, 0, 23, 59, 59);
+      currentActiveWindow = { label: `เดือน ${monthObj.label}`, start: mStart, end: mEnd };
+
       renderContractorMapMarkers(filtered, filteredIds, currentOverlapData);
-      renderGanttChart(filtered, filteredIds);
+      renderGanttChart(currentOverlapData, filteredIds, currentActiveWindow);
     }
 
     function selectTimeWindow(mode) {
@@ -1883,7 +1912,9 @@
     }
 
     // วาดแผนผังไทม์ไลน์แบบ Gantt Chart Bars
-    function renderGanttChart(parsedList, overlappingIds) {
+    // แสดงระยะเวลาตามสัญญา (เขียว) + ระยะเวลาปฏิบัติงานจริง (แดงถ้าเกิน) ในแถบเดียวกัน
+    // พร้อมเส้นมาร์กวันสิ้นสุดสัญญา และแถบคร่อมไฮไลต์แนวตั้งโปร่งแสงตามช่วงเวลาที่เลือก
+    function renderGanttChart(parsedList, highlightIds = null, activeWindow = null) {
       const container = document.getElementById('ganttTimelineContainer');
       container.innerHTML = '';
 
@@ -1892,10 +1923,35 @@
         return;
       }
 
-      // หาจุดเริ่มต้นและสิ้นสุดของ Timeline รวม
+      // หาจุดเริ่มต้นและสิ้นสุดของ Timeline รวมทั้งหมด
       let minDate = new Date(Math.min(...parsedList.map(p => p.startDate)));
-      let maxDate = new Date(Math.max(...parsedList.map(p => p.endDate)));
-      let totalDays = Math.max(1, Math.round((maxDate - minDate) / (1000 * 60 * 60 * 24)));
+      let maxDate = new Date(Math.max(...parsedList.map(p => Math.max(p.contractEndDate, p.actualEndDate))));
+      
+      // ขยายกรอบให้ครอบคลุม activeWindow ด้วย (ถ้ามี)
+      if (activeWindow) {
+        if (activeWindow.start < minDate) minDate = new Date(activeWindow.start);
+        if (activeWindow.end > maxDate) maxDate = new Date(activeWindow.end);
+      }
+
+      let totalTimeSpan = maxDate.getTime() - minDate.getTime();
+      if (totalTimeSpan <= 0) totalTimeSpan = 86400000;
+      let totalDays = Math.max(1, Math.round(totalTimeSpan / (1000 * 60 * 60 * 24)));
+
+      // คำนวณตำแหน่งแถบไฮไลต์แนวดิ่งโปร่งแสง (Window Overlay Column)
+      let overlayHtml = '';
+      if (activeWindow && activeWindow.start && activeWindow.end) {
+        let winLeft = Math.max(0, ((activeWindow.start.getTime() - minDate.getTime()) / totalTimeSpan) * 100);
+        let winRight = Math.min(100, ((activeWindow.end.getTime() - minDate.getTime()) / totalTimeSpan) * 100);
+        let winWidth = Math.max(1.5, winRight - winLeft);
+
+        overlayHtml = `
+          <div style="position: absolute; left: ${winLeft}%; width: ${winWidth}%; top: 38px; bottom: 0; background: rgba(245, 158, 11, 0.12); border-left: 2px dashed #f59e0b; border-right: 2px dashed #f59e0b; pointer-events: none; z-index: 5;" title="ห้วงเวลาที่เลือก: ${activeWindow.label}">
+            <div style="position: sticky; top: 0; font-size: 0.7rem; font-weight: 700; color: #b45309; background: rgba(254, 243, 199, 0.95); padding: 2px 6px; border-radius: 4px; display: inline-block; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+              📍 ${activeWindow.label}
+            </div>
+          </div>
+        `;
+      }
 
       let timelineHtml = `
         <div style="min-width: 850px; position: relative; padding: 15px 0;">
@@ -1905,23 +1961,83 @@
             <span>ห้วงเวลาปฏิบัติงานรวม ${totalDays} วัน (${parsedList.length} โครงการ)</span>
             <span>สิ้นสุด: ${maxDate.toLocaleDateString('th-TH')}</span>
           </div>
+
+          ${overlayHtml}
       `;
 
       parsedList.forEach((p, idx) => {
-        let isOverlap = overlappingIds.has(p.project_id);
-        let leftPct = ((p.startDate - minDate) / (maxDate - minDate)) * 100;
-        let widthPct = Math.max(2, ((p.endDate - p.startDate) / (maxDate - minDate)) * 100);
+        let isHighlighted = !highlightIds || highlightIds.has(p.project_id);
+        let rowOpacity = isHighlighted ? '1' : '0.35';
 
-        let barColor = isOverlap ? '#ef4444' : '#10b981';
+        // คำนวณช่วงเวลาตามสัญญา (Contract Range)
+        let cStartPct = ((p.startDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
+        let cEndPct = ((p.contractEndDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
+        let cWidthPct = Math.max(1.5, cEndPct - cStartPct);
 
-        // ป้ายแสดงสถานะสั้นๆ กระชับ ไม่รกสายตา
-        let badgeHtml = isOverlap ? 
-          `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">⚠️ ชน ${p.overlapsWith.length} สัญญา</span>` :
-          `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🟢 ปกติ</span>`;
+        // คำนวณช่วงเวลาการปฏิบัติงานจริง (Actual Range)
+        let aEndPct = ((p.actualEndDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
+
+        let isOverdue = p.isOverdue;
+        let isEarly = p.isEarly && p.isDelivered;
+
+        // ป้ายแสดงสถานะสั้นๆ
+        let badgeHtml = '';
+        if (isOverdue) {
+          let overdueDays = Math.round((p.actualEndDate - p.contractEndDate) / (1000 * 60 * 60 * 24));
+          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🔴 เกินสัญญา +${overdueDays} วัน</span>`;
+        } else if (isEarly) {
+          let earlyDays = Math.round((p.contractEndDate - p.actualEndDate) / (1000 * 60 * 60 * 24));
+          badgeHtml = `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🟢 ส่งมอบก่อน ${earlyDays} วัน</span>`;
+        } else {
+          badgeHtml = `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🟢 ตามสัญญา</span>`;
+        }
+
+        // สร้างแถบสีใน Track เดียวกัน:
+        let segmentsHtml = '';
+        let contractMarkerPos = cEndPct; // ตำแหน่งขีดวันสิ้นสุดสัญญา
+
+        if (isOverdue) {
+          // ช่วงสัญญาปกติ (สีเขียว)
+          segmentsHtml += `
+            <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: #10b981; border-top-left-radius: 4px; border-bottom-left-radius: 4px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2;">
+              สัญญา: ${p.startDate.toLocaleDateString('th-TH')} - ${p.contractEndDate.toLocaleDateString('th-TH')}
+            </div>
+          `;
+          // ช่วงที่ทำเกินสัญญา (สีแดง)
+          let redStartPct = cEndPct;
+          let redWidthPct = Math.max(1.5, aEndPct - cEndPct);
+          segmentsHtml += `
+            <div style="position: absolute; left: ${redStartPct}%; width: ${redWidthPct}%; height: 100%; background: #ef4444; border-top-right-radius: 4px; border-bottom-right-radius: 4px; display: flex; align-items: center; padding: 0 4px; color: white; font-size: 0.7rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; box-shadow: 0 1px 3px rgba(239,68,68,0.4);" title="เกินกำหนดสัญญา: สิ้นสุดจริง ${p.actualEndDate.toLocaleDateString('th-TH')}">
+              ➔ ปฏิบัติงานจริงถึง ${p.actualEndDate.toLocaleDateString('th-TH')}
+            </div>
+          `;
+        } else if (isEarly) {
+          // ส่งมอบก่อน: แถบเขียวถึงวันส่งมอบจริง
+          let earlyWidthPct = Math.max(1.5, aEndPct - cStartPct);
+          segmentsHtml += `
+            <div style="position: absolute; left: ${cStartPct}%; width: ${earlyWidthPct}%; height: 100%; background: #10b981; border-radius: 4px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2;">
+              ส่งมอบแล้ว: ${p.actualEndDate.toLocaleDateString('th-TH')}
+            </div>
+          `;
+        } else {
+          // ตามสัญญาปกติ (สีเขียวทั้งแท่ง)
+          segmentsHtml += `
+            <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: #10b981; border-radius: 4px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; box-shadow: 0 1px 3px rgba(16,185,129,0.3);">
+              ตามสัญญา: ${p.startDate.toLocaleDateString('th-TH')} ➔ ${p.contractEndDate.toLocaleDateString('th-TH')}
+            </div>
+          `;
+        }
+
+        // เส้นขีดมาร์กแนวตั้งของ "วันสิ้นสุดตามสัญญา" (Vertical Contract End Mark)
+        let contractEndIndicator = `
+          <div style="position: absolute; left: ${contractMarkerPos}%; top: -3px; bottom: -3px; width: 3px; background: #0f172a; z-index: 4; box-shadow: 0 0 3px rgba(0,0,0,0.6);" title="📍 วันสิ้นสุดตามสัญญา: ${p.contractEndDate.toLocaleDateString('th-TH')}">
+            <div style="position: absolute; top: -11px; left: -3px; width: 9px; height: 8px; background: #0f172a; clip-path: polygon(50% 100%, 0 0, 100% 0);"></div>
+          </div>
+        `;
 
         timelineHtml += `
-          <div style="margin-bottom: 12px; position: relative;" title="คลิกเพื่อดูรายละเอียดโครงการ">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; margin-bottom: 3px; gap: 8px;">
+          <div style="margin-bottom: 14px; position: relative; opacity: ${rowOpacity}; transition: opacity 0.2s;" title="คลิกเพื่อดูรายละเอียดโครงการ">
+            <div style="display: flex; justify-content: space-between; align-items: baseline; font-size: 0.82rem; margin-bottom: 4px; gap: 8px;">
               <div style="font-weight: 600; color: #0a2540; flex: 1;">
                 <span style="color: #64748b; font-weight: bold;">#${idx+1}</span> ${p.project_name} 
                 <span style="font-weight: normal; color: #64748b; font-size: 0.78rem;">[${p.dept_name}]</span>
@@ -1931,10 +2047,9 @@
                 <strong style="color: #1e40af; font-size: 0.8rem; white-space: nowrap;">฿${(p.contract_price/1000000).toFixed(2)}M</strong>
               </div>
             </div>
-            <div style="width: 100%; height: 24px; background: #f1f5f9; border-radius: 6px; position: relative; overflow: hidden; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
-              <div style="position: absolute; left: ${leftPct}%; width: ${widthPct}%; height: 100%; background: ${barColor}; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; color: white; font-size: 0.73rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 1px 3px rgba(0,0,0,0.12);">
-                ${p.startDate.toLocaleDateString('th-TH')} ➔ ${p.endDate.toLocaleDateString('th-TH')}
-              </div>
+            <div style="width: 100%; height: 26px; background: #f1f5f9; border-radius: 6px; position: relative; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
+              ${segmentsHtml}
+              ${contractEndIndicator}
             </div>
           </div>
         `;
