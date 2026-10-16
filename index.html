@@ -10,6 +10,8 @@
   
   <!-- PapaParse for CSV Parsing -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <!-- SheetJS for Excel Export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <!-- Leaflet Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -468,9 +470,14 @@
               คำนวณตาม 7 ปัจจัยเสี่ยงและค่าน้ำหนักของ สตง. (คลิกเลือกแถวหน่วยงานเพื่อไปคัดเลือกสัญญาในแบบ ปม.2)
             </p>
           </div>
-          <button class="btn btn-primary" onclick="exportPm1Report()">
-            📑 พิมพ์แบบ ปม.1 สรุปเสนอ สตง.
-          </button>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-success" onclick="exportPm1Excel()">
+              📊 ส่งออก Excel (แบบ ปม.1)
+            </button>
+            <button class="btn btn-primary" onclick="exportPm1PDF()">
+              📑 พิมพ์ / บันทึก PDF (แบบ ปม.1)
+            </button>
+          </div>
         </div>
 
         <div class="table-container">
@@ -511,12 +518,15 @@
             -
           </h2>
         </div>
-        <div style="display: flex; gap: 8px;">
+        <div style="display: flex; gap: 8px; flex-wrap: wrap;">
           <button class="btn btn-outline" onclick="switchStage(1)">
             ⬅️ กลับไปเลือกหน่วยรับตรวจอื่น
           </button>
-          <button class="btn btn-primary" onclick="exportPm2Report()">
-            📑 พิมพ์แบบ ปม.2 โครงการที่คัดเลือก
+          <button class="btn btn-success" onclick="exportPm2Excel()">
+            📊 ส่งออก Excel (แบบ ปม.2)
+          </button>
+          <button class="btn btn-primary" onclick="exportPm2PDF()">
+            📑 พิมพ์ / บันทึก PDF (แบบ ปม.2)
           </button>
         </div>
       </div>
@@ -1205,12 +1215,294 @@
       document.getElementById('auditModal').style.display = 'none';
     }
 
-    function exportPm1Report() {
-      alert("ระบบทำการประมวลผล 'แบบ ปม.1' (สรุปจัดอันดับหน่วยรับตรวจเสี่ยงสูงในเขต จ.ชัยภูมิ) พร้อมเสนอ ผู้อำนวยการกลุ่ม / ผู้สอบทาน เรียบร้อยแล้ว");
+    // ==================== EXPORT FUNCTIONS (EXCEL & PDF FOR ปม.1 & ปม.2) ====================
+
+    // 1. Export ปม.1 เป็น Excel (.xlsx) ตามโครงสร้าง 7 ปัจจัยเสี่ยง
+    function exportPm1Excel() {
+      let entityList = Object.values(entityGroups);
+      if (entityList.length === 0) {
+        alert('ยังไม่มีข้อมูลหน่วยรับตรวจให้ส่งออก');
+        return;
+      }
+      entityList.sort((a, b) => b.pm1Score - a.pm1Score);
+
+      let data = [
+        ["แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ (แบบ ปม.1)"],
+        ["สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ - สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ"],
+        [""],
+        [
+          "ลำดับ",
+          "หน่วยรับตรวจ",
+          "อำเภอ",
+          "จำนวนสัญญาในรอบปี (น้ำหนัก 0.1)",
+          "วงเงินสัญญารวม (น้ำหนัก 0.1)",
+          "สัญญาวิธีคัดเลือก/เฉพาะเจาะจงเกิน 500,000 บ. (น้ำหนัก 0.2)",
+          "ผู้รับเหมาที่ได้งานบ่อยสุด",
+          "จำนวนงานที่ผู้รับเหมารายเดิมได้ (น้ำหนัก 0.2)",
+          "โครงการเสี่ยงสูงในหน่วย",
+          "คะแนนประเมิน ปม.1 (เต็ม 100)",
+          "ระดับความเสี่ยง (Rank)",
+          "ผลการคัดเลือก"
+        ]
+      ];
+
+      entityList.forEach((e, idx) => {
+        let rank = e.pm1Score >= 65 ? "เสี่ยงสูง (Rank A)" : (e.pm1Score >= 45 ? "ปานกลาง (Rank B)" : "ปกติ (Rank C)");
+        let selected = e.pm1Score >= 65 ? "คัดเลือกเข้าแผนตรวจสอบ" : "เฝ้าระวัง";
+        data.push([
+          idx + 1,
+          e.name,
+          e.district,
+          e.totalProjects,
+          e.totalBudget,
+          e.specificOver500kCount,
+          e.topWinner,
+          e.topWinnerCount,
+          e.highRiskProjects,
+          e.pm1Score,
+          rank,
+          selected
+        ]);
+      });
+
+      let ws = XLSX.utils.aoa_to_sheet(data);
+      let wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "ปม.1-คัดเลือกหน่วยรับตรวจ");
+      XLSX.writeFile(wb, `แบบ_ปม1_คัดเลือกหน่วยรับตรวจ_ชัยภูมิ_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    function exportPm2Report() {
-      alert(`ระบบทำการพิมพ์ 'แบบ ปม.2' (บัญชีคัดเลือกสัญญา/โครงการของ ${selectedEntityName}) เรียบร้อยแล้ว`);
+    // 2. Export ปม.2 เป็น Excel (.xlsx) ตามโครงสร้าง 8 ปัจจัยเสี่ยง
+    function exportPm2Excel() {
+      if (!selectedEntityName || !entityGroups[selectedEntityName]) {
+        alert('กรุณาเลือกหน่วยรับตรวจก่อน');
+        return;
+      }
+      let projects = entityGroups[selectedEntityName].records;
+      projects.sort((a, b) => b.risk_score - a.risk_score);
+
+      let data = [
+        ["แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม (แบบ ปม.2)"],
+        [`ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.1)`],
+        ["สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ"],
+        [""],
+        [
+          "ลำดับ",
+          "เลขที่โครงการ",
+          "สัญญา/งาน/โครงการ/กิจกรรม",
+          "ประเภทงาน",
+          "วิธีการจัดหา",
+          "ราคากลาง (บาท)",
+          "วงเงินสัญญา (บาท)",
+          "ส่วนต่างราคากลาง (%)",
+          "ผู้ชนะการเสนอราคา (คู่สัญญา)",
+          "เลขประจำตัวผู้เสียภาษี (TIN)",
+          "คะแนนความเสี่ยง (ปม.2)",
+          "ระดับความเสี่ยง",
+          "ปัจจัยเสี่ยง/ความผิดปกติที่ตรวจพบ",
+          "ฐานกฎหมาย/ระเบียบ",
+          "ข้อสั่งการสุ่มตรวจภาคสนาม"
+        ]
+      ];
+
+      projects.forEach((p, idx) => {
+        data.push([
+          idx + 1,
+          p.project_id,
+          p.project_name,
+          p.project_type,
+          p.procure_method,
+          p.median_price,
+          p.contract_price,
+          p.diff_pct.toFixed(2) + "%",
+          p.winner,
+          p.winner_tin,
+          p.risk_score,
+          p.risk_level,
+          p.risk_type + " - " + p.finding,
+          p.law_ref,
+          p.checklist.join(" | ")
+        ]);
+      });
+
+      let ws = XLSX.utils.aoa_to_sheet(data);
+      let wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "ปม.2-คัดเลือกโครงการ");
+      let safeName = selectedEntityName.replace(/[\/\\?%*:|"<>]/g, '_').substring(0, 25);
+      XLSX.writeFile(wb, `แบบ_ปม2_โครงการ_${safeName}_${new Date().toISOString().slice(0,10)}.xlsx`);
+    }
+
+    // 3. Export ปม.1 เป็น PDF (แบบฟอร์มทางการ สตง.)
+    function exportPm1PDF() {
+      let entityList = Object.values(entityGroups);
+      if (entityList.length === 0) { alert('ไม่มีข้อมูล'); return; }
+      entityList.sort((a, b) => b.pm1Score - a.pm1Score);
+
+      let rowsHtml = entityList.map((e, idx) => `
+        <tr>
+          <td style="text-align: center;">${idx + 1}</td>
+          <td><strong>${e.name}</strong> (${e.district})</td>
+          <td style="text-align: right;">${e.totalProjects.toLocaleString()}</td>
+          <td style="text-align: right;">${(e.totalBudget).toLocaleString()}</td>
+          <td style="text-align: center;">${e.specificOver500kCount}</td>
+          <td>${e.topWinner} (${e.topWinnerCount} สัญญา)</td>
+          <td style="text-align: center; font-weight: bold; color: ${e.pm1Score >= 65 ? '#dc2626' : '#0a2540'};">${e.pm1Score}/100</td>
+          <td style="text-align: center;"><strong>${e.pm1Score >= 65 ? 'คัดเลือกตรวจ' : 'เฝ้าระวัง'}</strong></td>
+        </tr>
+      `).join('');
+
+      let printWin = window.open('', '_blank');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>แบบ ปม.1 - สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ</title>
+          <style>
+            body { font-family: 'Sarabun', sans-serif; font-size: 11pt; padding: 20px; }
+            h2, h3, h4 { margin: 4px 0; text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 9.5pt; }
+            th, td { border: 1px solid #000; padding: 6px 8px; }
+            th { background: #f0f0f0; text-align: center; }
+            .sign-box { margin-top: 40px; display: flex; justify-content: space-between; font-size: 10pt; }
+            @media print {
+              @page { size: landscape; margin: 10mm; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div style="text-align: right; font-size: 9pt; font-weight: bold;">แบบ ปม.1</div>
+          <h2>แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ</h2>
+          <h3>สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</h3>
+          <h4>สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4) ประจำปีงบประมาณ พ.ศ. 2568</h4>
+          <p style="font-size: 9pt; margin-top: 10px;"><strong>เกณฑ์ 7 ปัจจัยเสี่ยง:</strong> 1.วงเงินสัญญา (0.1) | 2.จำนวนสัญญา (0.1) | 3-5.ผลตรวจเดิมและแหล่งเงิน (0.2) | 6.จัดหาเฉพาะเจาะจงเกิน 5 แสน (0.2) | 7.คู่สัญญาชื่อซ้ำกัน (0.2)</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 40px;">ลำดับ</th>
+                <th>หน่วยรับตรวจ</th>
+                <th>จำนวนสัญญา</th>
+                <th>วงเงินสัญญารวม (บาท)</th>
+                <th>วิธีเฉพาะเจาะจง > 5 แสน</th>
+                <th>คู่สัญญาที่ได้งานซ้ำมากที่สุด</th>
+                <th>คะแนน ปม.1</th>
+                <th>ผลการประเมิน</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+          <div style="margin-top: 15px; font-size: 9.5pt;">
+            <strong>สรุปความเห็น:</strong> เห็นควรคัดเลือกหน่วยรับตรวจที่มีคะแนนความเสี่ยงระดับสูง (Rank A) เพื่อเข้าสู่กระบวนการคัดเลือกสัญญา/โครงการตามแบบ ปม.2 ต่อไป
+          </div>
+          <div class="sign-box">
+            <div style="text-align: center; width: 45%;">
+              ลงชื่อ................................................................. ผู้ประเมิน<br>
+              (.................................................................)<br>
+              ตำแหน่ง.................................................................<br>
+              วันที่........../........../..........
+            </div>
+            <div style="text-align: center; width: 45%;">
+              ลงชื่อ................................................................. ผู้สอบทาน<br>
+              (.................................................................)<br>
+              ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม<br>
+              วันที่........../........../..........
+            </div>
+          </div>
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
+    }
+
+    // 4. Export ปม.2 เป็น PDF (แบบฟอร์มทางการ สตง.)
+    function exportPm2PDF() {
+      if (!selectedEntityName || !entityGroups[selectedEntityName]) { alert('กรุณาเลือกหน่วยรับตรวจก่อน'); return; }
+      let projects = entityGroups[selectedEntityName].records;
+      projects.sort((a, b) => b.risk_score - a.risk_score);
+
+      let rowsHtml = projects.map((p, idx) => `
+        <tr>
+          <td style="text-align: center;">${idx + 1}</td>
+          <td><strong>${p.project_name}</strong><br><small>รหัส: ${p.project_id}</small></td>
+          <td style="text-align: right;">${(p.contract_price).toLocaleString()}</td>
+          <td style="text-align: center;">${p.procure_method}</td>
+          <td style="text-align: center; color: ${p.diff_pct < -15 || (p.diff_pct > -0.25 && p.diff_pct < 0) ? '#dc2626' : '#000'}; font-weight: bold;">
+            ${p.diff_pct.toFixed(2)}%
+          </td>
+          <td>${p.winner}</td>
+          <td style="text-align: center; font-weight: bold; color: ${p.risk_level === 'HIGH' ? '#dc2626' : '#0a2540'};">
+            ${p.risk_score}/100
+          </td>
+          <td style="font-size: 8pt;">${p.risk_type}</td>
+        </tr>
+      `).join('');
+
+      let printWin = window.open('', '_blank');
+      printWin.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>แบบ ปม.2 - ${selectedEntityName}</title>
+          <style>
+            body { font-family: 'Sarabun', sans-serif; font-size: 10pt; padding: 20px; }
+            h2, h3, h4 { margin: 3px 0; text-align: center; }
+            table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 8.5pt; }
+            th, td { border: 1px solid #000; padding: 5px 6px; }
+            th { background: #f0f0f0; text-align: center; }
+            .sign-box { margin-top: 35px; display: flex; justify-content: space-between; font-size: 9.5pt; }
+            @media print {
+              @page { size: landscape; margin: 10mm; }
+              body { padding: 0; }
+            }
+          </style>
+        </head>
+        <body>
+          <div style="text-align: right; font-size: 9pt; font-weight: bold;">แบบ ปม.2</div>
+          <h2>แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม</h2>
+          <h3>การตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</h3>
+          <h4>ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.1)</h4>
+          <p style="text-align: center; font-size: 9pt;">สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ ประจำปีงบประมาณ พ.ศ. 2568</p>
+          <table>
+            <thead>
+              <tr>
+                <th style="width: 35px;">ลำดับ</th>
+                <th>สัญญา/งาน/โครงการ/กิจกรรม</th>
+                <th>วงเงินสัญญา (บาท)</th>
+                <th>วิธีการจัดหา</th>
+                <th>ส่วนต่างราคากลาง</th>
+                <th>คู่สัญญา (ผู้รับจ้าง)</th>
+                <th>คะแนน ปม.2</th>
+                <th>ข้อบ่งชี้ความผิดปกติ (Red Flag)</th>
+              </tr>
+            </thead>
+            <tbody>${rowsHtml}</tbody>
+          </table>
+          <div style="margin-top: 12px; font-size: 9pt;">
+            <strong>สรุปความเห็น:</strong> เห็นควรคัดเลือกโครงการที่มีคะแนนความเสี่ยงสูงลำดับต้น เพื่อลงพื้นที่สุ่มตรวจทางวิศวกรรม (เจาะแกนคอนกรีต/ตรวจ BOQ) ภาคสนาม
+          </div>
+          <div class="sign-box">
+            <div style="text-align: center; width: 45%;">
+              ลงชื่อ................................................................. ผู้ประเมิน<br>
+              (.................................................................)<br>
+              ตำแหน่ง.................................................................<br>
+              วันที่........../........../..........
+            </div>
+            <div style="text-align: center; width: 45%;">
+              ลงชื่อ................................................................. ผู้สอบทาน<br>
+              (.................................................................)<br>
+              ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม<br>
+              วันที่........../........../..........
+            </div>
+          </div>
+          <script>
+            window.onload = function() { window.print(); }
+          <\/script>
+        </body>
+        </html>
+      `);
+      printWin.document.close();
     }
 
     // Direct Quick Sample Loader for Chaiyaphum
