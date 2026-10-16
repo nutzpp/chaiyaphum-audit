@@ -15,6 +15,8 @@
   <!-- Leaflet Map -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Region 4 GeoJSON Boundary Data (Chaiyaphum, Korat, Buriram, Surin) -->
+  <script src="region4_inline.js"></script>
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -400,16 +402,16 @@
   <header>
     <div>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <h1 style="font-size: 1.35rem; font-weight: 700;">ระบบประเมินความเสี่ยงหน่วยรับตรวจ</h1>
-        <span class="badge-auditor">สตง. Audit Engine 4.0 (จ.ชัยภูมิ)</span>
+        <h1 style="font-size: 1.35rem; font-weight: 700;">เครื่องมือช่วยประเมินความเสี่ยงหน่วยรับตรวจ</h1>
+        <span class="badge-auditor">สตง. Audit Engine 4.0</span>
       </div>
       <p style="font-size: 0.85rem; opacity: 0.85; margin-top: 2px;">
         ประเมินความเสี่ยงตามแบบคัดเลือกหน่วยรับตรวจ (ปม.1) ➔ เจาะลึกคัดเลือกโครงการในหน่วยรับตรวจ (ปม.2)
       </p>
     </div>
-    <div style="text-align: right; font-size: 0.8rem; opacity: 0.9;">
-      <div>ฐานระเบียบ: <strong>การจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</strong></div>
-      <div>สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตจ.ชัยภูมิ / สตภ.4)</div>
+    <div style="text-align: right; font-size: 0.85rem; opacity: 0.95;">
+      <div style="font-weight: 600;">สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตจ.ชัยภูมิ)</div>
+      <div style="font-size: 0.78rem; opacity: 0.85;">สำนักตรวจเงินแผ่นดินภูมิภาคที่ 4 (สตภ.4)</div>
     </div>
   </header>
 
@@ -437,6 +439,29 @@
 
     <!-- Dropdowns & Filters Panel -->
     <div class="filter-card">
+      <!-- 0. Filter Fiscal Year -->
+      <div class="filter-item" style="max-width: 170px;">
+        <label class="filter-label">📅 ปีงบประมาณ:</label>
+        <select id="filterFiscalYear" onchange="applyGlobalFilters()" style="border: 1.5px solid #3b82f6; font-weight: 600; color: #1e40af; background: #eff6ff;">
+          <option value="ALL">ทุกปีงบประมาณ</option>
+          <option value="2568">ปีงบประมาณ 2568</option>
+          <option value="2567" selected>ปีงบประมาณ 2567</option>
+          <option value="2566">ปีงบประมาณ 2566</option>
+          <option value="2565">ปีงบประมาณ 2565</option>
+        </select>
+      </div>
+
+      <!-- 0.1 Filter Province -->
+      <div class="filter-item" style="max-width: 200px;">
+        <label class="filter-label">🏛️ จังหวัด (เขต สตภ.4):</label>
+        <select id="filterProvince" onchange="applyGlobalFilters()" style="border: 1.5px solid #3b82f6; font-weight: 600; color: #1e40af; background: #eff6ff;">
+          <option value="ชัยภูมิ" selected>จังหวัดชัยภูมิ</option>
+          <option value="นครราชสีมา">จังหวัดนครราชสีมา</option>
+          <option value="บุรีรัมย์">จังหวัดบุรีรัมย์</option>
+          <option value="สุรินทร์">จังหวัดสุรินทร์</option>
+        </select>
+      </div>
+
       <!-- 1. Filter District -->
       <div class="filter-item">
         <label class="filter-label">📍 แยกอำเภอ:</label>
@@ -477,6 +502,41 @@
       <div class="filter-item">
         <label class="filter-label">🔎 ค้นหาข้อความอิสระ:</label>
         <input type="text" id="searchInput" placeholder="พิมพ์ชื่อโครงการ, ผู้รับเหมา, หรือ อบต..." onkeyup="applyGlobalFilters()">
+      </div>
+    </div>
+
+    <!-- Region 4 Map & Overview Card -->
+    <div class="card" style="margin-bottom: 0.5rem; padding: 1rem 1.25rem;">
+      <div style="display: flex; gap: 1.25rem; align-items: stretch; flex-wrap: wrap;">
+        <!-- Left Province Table Panel (เหมือนแบบในรูป) -->
+        <div style="width: 220px; min-width: 200px; background: #f8fafc; border: 1.5px solid #cbd5e1; border-radius: 10px; overflow: hidden; display: flex; flex-direction: column;">
+          <div style="background: #e2e8f0; padding: 8px 12px; font-weight: 700; font-size: 0.85rem; color: #334155;">
+            จังหวัด
+          </div>
+          <div style="flex: 1; display: flex; flex-direction: column; justify-content: space-between; padding: 10px 14px;">
+            <div>
+              <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 2px;">
+                <span id="reg4CurrentProvName" style="font-size: 1.15rem; font-weight: 700; color: #0f2b5c;">ชัยภูมิ</span>
+                <span id="reg4CurrentProvCount" style="font-size: 1.15rem; font-weight: 700; color: #0f2b5c;">7,240</span>
+              </div>
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">โครงการตามสัญญา</div>
+            </div>
+            <div style="margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 8px;">
+              <div style="font-size: 0.78rem; font-weight: 700; color: #1e40af;">สตภ.4 (สำนักตรวจเงินแผ่นดินภูมิภาคที่ 4)</div>
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px;">
+                ครอบคลุม 4 จังหวัด: ชัยภูมิ, นครราชสีมา, บุรีรัมย์, สุรินทร์
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Region 4 Interactive Map -->
+        <div style="flex: 1; min-width: 320px; height: 190px; border-radius: 10px; overflow: hidden; border: 1.5px solid #cbd5e1; position: relative;">
+          <div id="region4Map" style="width: 100%; height: 100%; background: #f1f5f9;"></div>
+          <div style="position: absolute; bottom: 6px; right: 8px; background: rgba(255,255,255,0.88); padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; color: #475569; z-index: 500; font-weight: 600;">
+            🗺️ แผนที่เขตอำนาจ สตภ.4 (คลิกเลือกจังหวัดได้)
+          </div>
+        </div>
       </div>
     </div>
 
@@ -764,7 +824,7 @@
               📊 แผนผังไทม์ไลน์ห้วงเวลาปฏิบัติงาน (Gantt Chart Timeline)
             </div>
             <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-              🟢 แถบสีเขียว = ระยะเวลาตามสัญญา | 🔴 แถบสีแดง = ระยะเวลาที่ผู้รับจ้างปฏิบัติงานจริง (เกินสัญญา) | 📍 เส้นขีดแนวตั้งสีดำ = วันสิ้นสุดตามสัญญา | 🟨 แถบโปร่งแสงแนวดิ่ง = ไตรมาส/เดือนที่เลือก
+              🟢 แถบสีเขียว = ระยะเวลาตามสัญญา (เริ่มต้น ถึง สิ้นสุดสัญญา) | 🟨 แถบโปร่งแสงแนวดิ่ง = เดือนที่เลือกจาก Heatmap | ⚠️ ชน = สัญญาที่มีช่วงเวลาทับซ้อนกัน
             </p>
           </div>
           <button class="btn btn-outline" onclick="exportOverlapExcel()" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
@@ -805,6 +865,12 @@
         <div><strong>เลขประจำตัวผู้เสียภาษี (TIN):</strong> <span id="modalWinnerTin">-</span></div>
         <div><strong>อำเภอ/ตำบล:</strong> <span id="modalLocation">-</span></div>
         <div><strong>สถานะโครงการ:</strong> <span id="modalStatus">-</span></div>
+        <div style="background: #f0fdf4; padding: 6px 10px; border-radius: 6px; border: 1px solid #bbf7d0;">
+          <strong>📅 วันเริ่มต้นตามสัญญา:</strong> <span id="modalContractStart" style="color: #166534; font-weight: 600;">-</span>
+        </div>
+        <div style="background: #eff6ff; padding: 6px 10px; border-radius: 6px; border: 1px solid #bfdbfe;">
+          <strong>🏁 กำหนดสิ้นสุดสัญญา:</strong> <span id="modalContractEnd" style="color: #1e40af; font-weight: 600;">-</span>
+        </div>
       </div>
 
       <div id="modalFindings"></div>
@@ -829,11 +895,134 @@
 
     let currentStage = 1; // 1 = ปม.1, 2 = ปม.2, 3 = สัญญาทับซ้อน
     let map, markers = [], entityRiskChart;
-    let overlapMap = null, overlapMarkers = [];
-    let currentTimelineMode = 'executive'; // 'executive' or 'gantt'
+    let region4Map = null;
+    let region4GeoLayer = null;
+
+    // Initialize Map for Region 4 (Chaiyaphum, Korat, Buriram, Surin)
+    function initRegion4Map() {
+      if (region4Map) return;
+      const mapEl = document.getElementById('region4Map');
+      if (!mapEl) return;
+
+      // Region 4 Center (approx Korat/Chaiyaphum area)
+      region4Map = L.map('region4Map', {
+        zoomControl: false,
+        attributionControl: false,
+        scrollWheelZoom: false,
+        doubleClickZoom: false
+      }).setView([15.2, 102.5], 7);
+
+      // Add light gray tile layer or plain canvas
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+        maxZoom: 10
+      }).addTo(region4Map);
+
+      if (typeof region4GeoData !== 'undefined' && region4GeoData.features) {
+        let currentProvSelect = document.getElementById('filterProvince')?.value || 'ชัยภูมิ';
+
+        function getProvinceStyle(feature) {
+          let name = feature.properties.name || '';
+          let isChaiyaphum = name === 'Chaiyaphum';
+          let isKorat = name === 'Nakhon Ratchasima';
+          let isBuriram = name === 'Buri Ram';
+          let isSurin = name === 'Surin';
+
+          let isCurrent = false;
+          if (currentProvSelect.includes('ชัยภูมิ') && isChaiyaphum) isCurrent = true;
+          if (currentProvSelect.includes('นครราชสีมา') && isKorat) isCurrent = true;
+          if (currentProvSelect.includes('บุรีรัมย์') && isBuriram) isCurrent = true;
+          if (currentProvSelect.includes('สุรินทร์') && isSurin) isCurrent = true;
+
+          if (isCurrent) {
+            // Selected active province (สีน้ำเงินเข้มเหมือนในรูปที่แนบ)
+            return {
+              fillColor: '#1e40af',
+              weight: 2,
+              opacity: 1,
+              color: '#0f2b5c',
+              fillOpacity: 0.92
+            };
+          } else {
+            // Other Region 4 provinces (สีเทาอ่อนโปร่งแสงเหมือนในรูป)
+            return {
+              fillColor: '#cbd5e1',
+              weight: 1.5,
+              opacity: 0.8,
+              color: '#ffffff',
+              fillOpacity: 0.55
+            };
+          }
+        }
+
+        region4GeoLayer = L.geoJSON(region4GeoData, {
+          style: getProvinceStyle,
+          onEachFeature: function(feature, layer) {
+            let pName = feature.properties.name;
+            let thName = 'ชัยภูมิ';
+            if (pName === 'Nakhon Ratchasima') thName = 'นครราชสีมา';
+            if (pName === 'Buri Ram') thName = 'บุรีรัมย์';
+            if (pName === 'Surin') thName = 'สุรินทร์';
+
+            layer.bindTooltip(`<strong>จ.${thName}</strong><br><small style="color:#64748b;">(คลิกเพื่อเลือกจังหวัด)</small>`, { sticky: true });
+
+            layer.on('click', function() {
+              const provSelect = document.getElementById('filterProvince');
+              if (provSelect) {
+                provSelect.value = thName;
+                applyGlobalFilters();
+              }
+            });
+          }
+        }).addTo(region4Map);
+
+        // Fit bounds to the 4 provinces
+        try {
+          region4Map.fitBounds(region4GeoLayer.getBounds(), { padding: [10, 10] });
+        } catch(e) {}
+      }
+    }
+
+    function updateRegion4MapHighlight(selectedProvince) {
+      if (!region4GeoLayer) return;
+      region4GeoLayer.eachLayer(layer => {
+        let name = layer.feature.properties.name || '';
+        let isChaiyaphum = name === 'Chaiyaphum';
+        let isKorat = name === 'Nakhon Ratchasima';
+        let isBuriram = name === 'Buri Ram';
+        let isSurin = name === 'Surin';
+
+        let isCurrent = false;
+        if (selectedProvince.includes('ชัยภูมิ') && isChaiyaphum) isCurrent = true;
+        if (selectedProvince.includes('นครราชสีมา') && isKorat) isCurrent = true;
+        if (selectedProvince.includes('บุรีรัมย์') && isBuriram) isCurrent = true;
+        if (selectedProvince.includes('สุรินทร์') && isSurin) isCurrent = true;
+
+        if (isCurrent) {
+          layer.setStyle({
+            fillColor: '#1e40af',
+            weight: 2,
+            opacity: 1,
+            color: '#0f2b5c',
+            fillOpacity: 0.92
+          });
+          layer.bringToFront();
+        } else {
+          layer.setStyle({
+            fillColor: '#cbd5e1',
+            weight: 1.5,
+            opacity: 0.8,
+            color: '#ffffff',
+            fillOpacity: 0.55
+          });
+        }
+      });
+    }
 
     // Initialize Map for Stage 2 (Entity Projects)
     function initMap() {
+      if (map) return;
+      const el = document.getElementById('map');
+      if (!el) return;
       map = L.map('map').setView([15.95, 101.95], 9);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors | GovSpending Inspector'
@@ -843,6 +1032,8 @@
     // Initialize Map for Stage 3 (Contractor Overlap Projects)
     function initOverlapMap() {
       if (overlapMap) return;
+      const el = document.getElementById('overlapMap');
+      if (!el) return;
       overlapMap = L.map('overlapMap').setView([15.95, 101.95], 9);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors | Contractor Overlap Audit'
@@ -1095,14 +1286,38 @@
       applyGlobalFilters();
     }
 
-    // Apply Global Filters (District, Project Type, Project Name Keyword, Text Search)
+    // Apply Global Filters (Fiscal Year, Province, District, Project Type, Project Name Keyword, Text Search)
     function applyGlobalFilters() {
+      const fy = document.getElementById('filterFiscalYear')?.value || 'ALL';
+      const prov = document.getElementById('filterProvince')?.value || 'ชัยภูมิ';
       const dist = document.getElementById('filterDistrict').value;
       const type = document.getElementById('filterProjectType').value;
       const nameKey = document.getElementById('filterNameKeyword').value;
       const query = document.getElementById('searchInput').value.toLowerCase().trim();
 
+      // อัปเดตการ์ดแผนที่และตารางจังหวัดภาค 4
+      const reg4ProvNameEl = document.getElementById('reg4CurrentProvName');
+      const reg4ProvCountEl = document.getElementById('reg4CurrentProvCount');
+      if (reg4ProvNameEl) reg4ProvNameEl.textContent = prov;
+
       filteredRecords = rawCSVRecords.filter(p => {
+        // กรองปีงบประมาณจากวันเริ่มสัญญา (ถ้ามี)
+        let matchFy = true;
+        if (fy !== 'ALL') {
+          let sDate = parseThaiDate(p.raw_contract_date);
+          if (sDate) {
+            // ปีงบประมาณไทย: ต.ค. (เดือน 9) เป็นต้นไปนับเป็นปีงบถัดไป
+            let fiscalYearNum = sDate.getMonth() >= 9 ? sDate.getFullYear() + 544 : sDate.getFullYear() + 543;
+            matchFy = fiscalYearNum.toString() === fy;
+          }
+        }
+
+        // กรองจังหวัด (หากไฟล์มีระบุจังหวัด หรือถ้าเป็นไฟล์ชัยภูมิ ให้สัมพันธ์กับจังหวัดที่เลือก)
+        let matchProv = true;
+        if (prov && p.province) {
+          matchProv = p.province.includes(prov);
+        }
+
         const matchDist = dist === 'ALL' || p.district === dist;
         const matchType = type === 'ALL' || p.project_type === type;
         const matchNameKey = nameKey === 'ALL' || p.project_name.includes(nameKey);
@@ -1111,8 +1326,14 @@
           p.winner.toLowerCase().includes(query) ||
           p.dept_name.toLowerCase().includes(query);
 
-        return matchDist && matchType && matchNameKey && matchQuery;
+        return matchFy && matchProv && matchDist && matchType && matchNameKey && matchQuery;
       });
+
+      if (reg4ProvCountEl) {
+        reg4ProvCountEl.textContent = filteredRecords.length.toLocaleString();
+      }
+
+      updateRegion4MapHighlight(prov);
 
       computePm1Entities(filteredRecords);
       updateTopKPIs(filteredRecords);
@@ -1501,28 +1722,11 @@
           start.setDate(start.getDate() - 120);
         }
 
-        // หาวันที่สิ้นสุดการปฏิบัติงานจริงของผู้รับจ้าง (actualEndDate)
-        let actualEnd = actualDelivery ? new Date(actualDelivery) : new Date(contractEnd);
-        let isDelivered = (p.status === 'สิ้นสุดสัญญา' || !!actualDelivery);
-        
-        // ถ้าสถานะยังไม่สิ้นสุดสัญญา และเลยวันสิ้นสุดสัญญามาแล้ว ให้ใช้วันปัจจุบัน
-        let today = new Date();
-        if (!isDelivered && today > contractEnd) {
-          actualEnd = today;
-        }
-
-        let isOverdue = actualEnd > contractEnd;
-        let isEarly = actualEnd < contractEnd;
-
         return {
           ...p,
           startDate: start,
           contractEndDate: contractEnd,
-          actualEndDate: actualEnd,
-          isOverdue: isOverdue,
-          isEarly: isEarly,
-          isDelivered: isDelivered,
-          endDate: actualEnd > contractEnd ? actualEnd : contractEnd, // ใช้สำหรับคำนวณห้วงเวลาทับซ้อนรวม
+          endDate: contractEnd, // ระยะเวลาตามสัญญาจริง (เริ่มต้น ถึง สิ้นสุดสัญญา)
           overlapsWith: []
         };
       }).filter(p => p.startDate && p.contractEndDate);
@@ -1834,7 +2038,7 @@
 
       // หาจุดเริ่มต้นและสิ้นสุดของ Timeline รวมทั้งหมด
       let minDate = new Date(Math.min(...parsedList.map(p => p.startDate)));
-      let maxDate = new Date(Math.max(...parsedList.map(p => Math.max(p.contractEndDate, p.actualEndDate))));
+      let maxDate = new Date(Math.max(...parsedList.map(p => p.contractEndDate)));
       
       // ขยายกรอบให้ครอบคลุม activeWindow ด้วย (ถ้ามี)
       if (activeWindow) {
@@ -1866,9 +2070,9 @@
         <div style="min-width: 850px; position: relative; padding: 15px 0;">
           <!-- Header Month Guides -->
           <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); border-bottom: 2px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 12px; font-weight: 600;">
-            <span>จุดเริ่มต้น: ${minDate.toLocaleDateString('th-TH')}</span>
-            <span>ห้วงเวลาปฏิบัติงานรวม ${totalDays} วัน (${parsedList.length} โครงการ)</span>
-            <span>สิ้นสุด: ${maxDate.toLocaleDateString('th-TH')}</span>
+            <span>จุดเริ่มต้นสัญญาแรก: ${minDate.toLocaleDateString('th-TH')}</span>
+            <span>ห้วงเวลาตามสัญญารวม ${totalDays} วัน (${parsedList.length} โครงการ)</span>
+            <span>สิ้นสุดสัญญาสุดท้าย: ${maxDate.toLocaleDateString('th-TH')}</span>
           </div>
 
           ${overlayHtml}
@@ -1878,69 +2082,28 @@
         let isHighlighted = !highlightIds || highlightIds.has(p.project_id);
         let rowOpacity = isHighlighted ? '1' : '0.35';
 
-        // คำนวณช่วงเวลาตามสัญญา (Contract Range)
+        // คำนวณช่วงเวลาตามสัญญาจริง (Contract Range)
         let cStartPct = ((p.startDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
         let cEndPct = ((p.contractEndDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
-        let cWidthPct = Math.max(1.5, cEndPct - cStartPct);
+        let cWidthPct = Math.max(2, cEndPct - cStartPct);
+        let durationDays = Math.round((p.contractEndDate - p.startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-        // คำนวณช่วงเวลาการปฏิบัติงานจริง (Actual Range)
-        let aEndPct = ((p.actualEndDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
-
-        let isOverdue = p.isOverdue;
-        let isEarly = p.isEarly && p.isDelivered;
-
-        // ป้ายแสดงสถานะสั้นๆ
+        // ป้ายแสดงสถานะการทับซ้อน
+        let overlapCount = p.overlapsWith ? p.overlapsWith.length : 0;
         let badgeHtml = '';
-        if (isOverdue) {
-          let overdueDays = Math.round((p.actualEndDate - p.contractEndDate) / (1000 * 60 * 60 * 24));
-          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🔴 เกินสัญญา +${overdueDays} วัน</span>`;
-        } else if (isEarly) {
-          let earlyDays = Math.round((p.contractEndDate - p.actualEndDate) / (1000 * 60 * 60 * 24));
-          badgeHtml = `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🟢 ส่งมอบก่อน ${earlyDays} วัน</span>`;
+        if (overlapCount > 0) {
+          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">⚠️ ชน ${overlapCount} สัญญา</span>`;
         } else {
-          badgeHtml = `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">🟢 ตามสัญญา</span>`;
+          badgeHtml = `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 500; white-space: nowrap;">ไม่ทับซ้อน</span>`;
         }
 
-        // สร้างแถบสีใน Track เดียวกัน:
-        let segmentsHtml = '';
-        let contractMarkerPos = cEndPct; // ตำแหน่งขีดวันสิ้นสุดสัญญา
-
-        if (isOverdue) {
-          // ช่วงสัญญาปกติ (สีเขียว)
-          segmentsHtml += `
-            <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: #10b981; border-top-left-radius: 4px; border-bottom-left-radius: 4px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2;">
-              สัญญา: ${p.startDate.toLocaleDateString('th-TH')} - ${p.contractEndDate.toLocaleDateString('th-TH')}
-            </div>
-          `;
-          // ช่วงที่ทำเกินสัญญา (สีแดง)
-          let redStartPct = cEndPct;
-          let redWidthPct = Math.max(1.5, aEndPct - cEndPct);
-          segmentsHtml += `
-            <div style="position: absolute; left: ${redStartPct}%; width: ${redWidthPct}%; height: 100%; background: #ef4444; border-top-right-radius: 4px; border-bottom-right-radius: 4px; display: flex; align-items: center; padding: 0 4px; color: white; font-size: 0.7rem; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; box-shadow: 0 1px 3px rgba(239,68,68,0.4);" title="เกินกำหนดสัญญา: สิ้นสุดจริง ${p.actualEndDate.toLocaleDateString('th-TH')}">
-              ➔ ปฏิบัติงานจริงถึง ${p.actualEndDate.toLocaleDateString('th-TH')}
-            </div>
-          `;
-        } else if (isEarly) {
-          // ส่งมอบก่อน: แถบเขียวถึงวันส่งมอบจริง
-          let earlyWidthPct = Math.max(1.5, aEndPct - cStartPct);
-          segmentsHtml += `
-            <div style="position: absolute; left: ${cStartPct}%; width: ${earlyWidthPct}%; height: 100%; background: #10b981; border-radius: 4px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2;">
-              ส่งมอบแล้ว: ${p.actualEndDate.toLocaleDateString('th-TH')}
-            </div>
-          `;
-        } else {
-          // ตามสัญญาปกติ (สีเขียวทั้งแท่ง)
-          segmentsHtml += `
-            <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: #10b981; border-radius: 4px; display: flex; align-items: center; padding: 0 6px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; box-shadow: 0 1px 3px rgba(16,185,129,0.3);">
-              ตามสัญญา: ${p.startDate.toLocaleDateString('th-TH')} ➔ ${p.contractEndDate.toLocaleDateString('th-TH')}
-            </div>
-          `;
-        }
-
-        // เส้นขีดมาร์กแนวตั้งของ "วันสิ้นสุดตามสัญญา" (Vertical Contract End Mark)
-        let contractEndIndicator = `
-          <div style="position: absolute; left: ${contractMarkerPos}%; top: -3px; bottom: -3px; width: 3px; background: #0f172a; z-index: 4; box-shadow: 0 0 3px rgba(0,0,0,0.6);" title="📍 วันสิ้นสุดตามสัญญา: ${p.contractEndDate.toLocaleDateString('th-TH')}">
-            <div style="position: absolute; top: -11px; left: -3px; width: 9px; height: 8px; background: #0f172a; clip-path: polygon(50% 100%, 0 0, 100% 0);"></div>
+        // แถบสีเขียวแสดงระยะเวลาสัญญา (เริ่มต้น ถึง สิ้นสุด)
+        let barColor = overlapCount > 0 ? '#10b981' : '#059669';
+        let segmentsHtml = `
+          <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: ${barColor}; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; box-shadow: 0 1px 3px rgba(16,185,129,0.35);" title="สัญญา: ${p.startDate.toLocaleDateString('th-TH')} ถึง ${p.contractEndDate.toLocaleDateString('th-TH')} (${durationDays} วัน)">
+            <span>เริ่ม: ${p.startDate.toLocaleDateString('th-TH')}</span>
+            <span style="opacity: 0.9;">(${durationDays} วัน)</span>
+            <span>สิ้นสุด: ${p.contractEndDate.toLocaleDateString('th-TH')}</span>
           </div>
         `;
 
@@ -1958,7 +2121,6 @@
             </div>
             <div style="width: 100%; height: 26px; background: #f1f5f9; border-radius: 6px; position: relative; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
               ${segmentsHtml}
-              ${contractEndIndicator}
             </div>
           </div>
         `;
@@ -2139,6 +2301,11 @@
       document.getElementById('modalWinnerTin').textContent = p.winner_tin;
       document.getElementById('modalLocation').textContent = `อ.${p.district} ต.${p.subdistrict || '-'}`;
       document.getElementById('modalStatus').textContent = p.status;
+      
+      let cStartText = p.raw_contract_date ? p.raw_contract_date : 'ไม่ระบุ';
+      let cEndText = p.raw_contract_finish_date ? p.raw_contract_finish_date : 'ไม่ระบุ';
+      document.getElementById('modalContractStart').textContent = cStartText;
+      document.getElementById('modalContractEnd').textContent = cEndText;
 
       const findingsDiv = document.getElementById('modalFindings');
       findingsDiv.innerHTML = `
@@ -2592,6 +2759,7 @@
     }
 
     window.addEventListener('DOMContentLoaded', () => {
+      initRegion4Map();
       initMap();
       initChart();
       tryAutoLoadSample();
