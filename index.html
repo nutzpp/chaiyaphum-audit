@@ -707,7 +707,7 @@
           <div style="background: #fffbeb; padding: 1rem; border-radius: 8px; border: 1px solid #fde68a;">
             <div style="font-size: 0.8rem; color: #92400e; font-weight: 600;">จุดสูงสุดที่ต้องสร้างพร้อมกัน (Peak Overlap)</div>
             <div style="font-size: 1.6rem; font-weight: 700; color: #b45309;" id="overlapMaxConcurrent">0 โครงการพร้อมกัน</div>
-            <div style="font-size: 0.75rem; color: var(--muted);">ในช่วงเดือนที่งานชนกันสูงสุด</div>
+            <div style="font-size: 0.75rem; color: var(--muted);" id="overlapPeakMonthText">ในช่วงเดือนที่งานชนกันสูงสุด</div>
           </div>
           <div style="background: #f8fafc; padding: 1rem; border-radius: 8px; border: 1px solid var(--border);">
             <div style="font-size: 0.8rem; color: var(--muted);">มูลค่าสัญญาในห้วงเวลาทับซ้อน</div>
@@ -717,15 +717,53 @@
         </div>
       </div>
 
-      <!-- 1. MAP OF CONTRACTOR PROJECTS -->
+      <!-- 1. MONTHLY PEAK HEATMAP CARD (มิติที่ 1: สแกนภาระงานรายเดือนทั้งปี) -->
       <div class="card" style="margin-bottom: 1.25rem;">
         <div class="card-header">
           <div>
             <div class="card-title">
-              📍 แผนที่แสดงพิกัดโครงการทั้งหมดของผู้รับจ้าง (Contractor Site Map)
+              🔥 ระดับภาระงานก่อสร้างรายเดือน (Monthly Concurrent Workload Heatmap)
             </div>
             <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-              หมุดสีแดง = โครงการที่มีช่วงเวลาทับซ้อน (ตามเกณฑ์วันที่ระบุ) | หมุดสีเขียว = โครงการปกติ
+              สแกนจำนวนโครงการที่กำลังเปิดหน้างานพร้อมกันในแต่ละเดือน เพื่อชี้เป้าเดือนที่เกิดความเสี่ยงวิกฤตสูงสุด (คลิกที่เดือนเพื่อกรองดูได้)
+            </p>
+          </div>
+          <button class="btn btn-outline" onclick="selectTimeWindow('all')" style="font-size: 0.75rem; padding: 0.3rem 0.7rem;">
+            🔄 รีเซ็ตดูทุกเดือน
+          </button>
+        </div>
+        <div id="monthlyHeatmapContainer" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(85px, 1fr)); gap: 8px; padding: 0.5rem 0;">
+          <!-- Dynamically populated monthly cards -->
+        </div>
+      </div>
+
+      <!-- 2. TIME WINDOW CLUSTERS (มิติที่ 2: แยกเป็นชุดก้อนห้วงเวลาที่ทับซ้อนกันจริง) -->
+      <div class="card" style="margin-bottom: 1.25rem;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              🗂️ การจัดกลุ่มห้วงเวลาทับซ้อน (Overlap Time Window Clusters)
+            </div>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
+              แยกโครงการที่คาบเกี่ยวกันจริงตามไทม์ไลน์เป็นกลุ่มๆ ไม่นำโครงการที่จบไปแล้วมานับปนกับโครงการใหม่ (คลิกเลือกดูทีละกลุ่ม)
+            </p>
+          </div>
+          <span style="font-size: 0.8rem; color: var(--muted);" id="clusterCountBadge">พบ 0 กลุ่มเวลา</span>
+        </div>
+        <div id="clusterPillsContainer" style="display: flex; gap: 8px; flex-wrap: wrap; padding: 0.5rem 0;">
+          <!-- Dynamically populated cluster buttons -->
+        </div>
+      </div>
+
+      <!-- 3. MAP OF CONTRACTOR PROJECTS -->
+      <div class="card" style="margin-bottom: 1.25rem;">
+        <div class="card-header">
+          <div>
+            <div class="card-title" id="overlapMapTitle">
+              📍 แผนที่แสดงพิกัดโครงการของผู้รับจ้าง (Contractor Site Map)
+            </div>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
+              หมุดสีแดง = โครงการที่มีช่วงเวลาทับซ้อน | หมุดสีเขียว = โครงการปกติ | หมุดสีเทา = โครงการนอกกลุ่มเวลาที่เลือก
             </p>
           </div>
           <span style="font-size: 0.8rem; color: var(--muted);" id="overlapMapCount">0 จุดพิกัด</span>
@@ -1520,6 +1558,14 @@
 
       currentOverlapData = parsedList;
 
+      // คำนวณ Monthly Concurrent Workload Heatmap (ภาระงานรายเดือน)
+      const monthlyStats = computeMonthlyWorkload(parsedList);
+      renderMonthlyHeatmap(monthlyStats);
+
+      // คำนวณ Time Window Clusters (จัดกลุ่มก้อนสัญญาที่ทับซ้อนกันจริง)
+      const clusters = computeTimeWindowClusters(parsedList, minOverlapDays);
+      renderClusterPills(clusters);
+
       // อัปเดต KPI Cards
       let totalMoney = parsedList.reduce((acc, p) => acc + p.contract_price, 0);
       let overlapMoney = parsedList.filter(p => overlappingContractIds.has(p.project_id)).reduce((acc, p) => acc + p.contract_price, 0);
@@ -1531,13 +1577,10 @@
       document.getElementById('overlapPctContracts').textContent = `คิดเป็น ${pct}% ของงานทั้งหมดที่ได้รับ`;
       document.getElementById('overlapTotalMoney').textContent = `฿${(overlapMoney / 1000000).toFixed(1)} ล้าน`;
 
-      // คำนวณ Peak Concurrent Projects (จุดสูงสุดที่สร้างพร้อมกัน)
-      let maxConcurrent = 1;
-      parsedList.forEach(item => {
-        let concurrent = 1 + item.overlapsWith.length;
-        if (concurrent > maxConcurrent) maxConcurrent = concurrent;
-      });
-      document.getElementById('overlapMaxConcurrent').textContent = `${maxConcurrent} โครงการพร้อมกัน`;
+      // จุดสูงสุดที่ต้องสร้างพร้อมกัน (Peak Overlap จากการสแกนวันจริง)
+      let peakData = findPeakConcurrentDay(parsedList);
+      document.getElementById('overlapMaxConcurrent').textContent = `${peakData.maxCount} โครงการพร้อมกัน`;
+      document.getElementById('overlapPeakMonthText').textContent = peakData.peakDateText ? `สูงสุด ณ ${peakData.peakDateText}` : 'ในช่วงเดือนที่งานชนกันสูงสุด';
 
       // 1. วาดจุดพิกัดโครงการของผู้รับจ้างลงบนแผนที่ Stage 3
       renderContractorMapMarkers(parsedList, overlappingContractIds);
@@ -1546,18 +1589,280 @@
       renderGanttChart(parsedList, overlappingContractIds);
     }
 
-    // วาดหมุดโครงการของผู้รับจ้างบนแผนที่ (Contractor Map Markers)
-    function renderContractorMapMarkers(parsedList, overlappingIds = new Set()) {
+    // คำนวณจำนวนโครงการที่เปิดหน้างานพร้อมกันในแต่ละเดือน
+    function computeMonthlyWorkload(parsedList) {
+      if (parsedList.length === 0) return [];
+      let minDate = new Date(Math.min(...parsedList.map(p => p.startDate)));
+      let maxDate = new Date(Math.max(...parsedList.map(p => p.endDate)));
+
+      let startYear = minDate.getFullYear();
+      let startMonth = minDate.getMonth();
+      let endYear = maxDate.getFullYear();
+      let endMonth = maxDate.getMonth();
+
+      let months = [];
+      let curr = new Date(startYear, startMonth, 1);
+      let end = new Date(endYear, endMonth, 1);
+
+      const thaiShortMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
+
+      while (curr <= end) {
+        let y = curr.getFullYear();
+        let m = curr.getMonth();
+        let mStart = new Date(y, m, 1);
+        let mEnd = new Date(y, m + 1, 0, 23, 59, 59);
+
+        // หาว่ามีโครงการไหนคาบเกี่ยวกับเดือนนี้บ้าง
+        let activeProjects = parsedList.filter(p => p.startDate <= mEnd && p.endDate >= mStart);
+
+        months.push({
+          year: y,
+          month: m,
+          label: `${thaiShortMonths[m]} ${(y + 543).toString().slice(-2)}`,
+          count: activeProjects.length,
+          projectIds: activeProjects.map(p => p.project_id)
+        });
+
+        curr.setMonth(curr.getMonth() + 1);
+      }
+      return months;
+    }
+
+    // เรนเดอร์การ์ด Monthly Heatmap
+    function renderMonthlyHeatmap(monthlyStats) {
+      const container = document.getElementById('monthlyHeatmapContainer');
+      container.innerHTML = '';
+
+      if (monthlyStats.length === 0) {
+        container.innerHTML = '<div style="color: var(--muted); font-size: 0.85rem; padding: 1rem;">ไม่พบข้อมูล</div>';
+        return;
+      }
+
+      let maxCount = Math.max(...monthlyStats.map(m => m.count), 1);
+
+      monthlyStats.forEach(m => {
+        let isHigh = m.count >= 4;
+        let isMedium = m.count >= 2 && m.count < 4;
+        let bg = isHigh ? '#fee2e2' : (isMedium ? '#fef3c7' : '#f1f5f9');
+        let border = isHigh ? '#fca5a5' : (isMedium ? '#fde68a' : '#e2e8f0');
+        let textCol = isHigh ? '#991b1b' : (isMedium ? '#92400e' : '#475569');
+
+        let card = document.createElement('div');
+        card.style.cssText = `background: ${bg}; border: 1px solid ${border}; border-radius: 8px; padding: 8px 6px; text-align: center; cursor: pointer; transition: all 0.15s ease;`;
+        card.title = `คลิกเพื่อกรองเฉพาะเดือน ${m.label} (มี ${m.count} โครงการ)`;
+        card.innerHTML = `
+          <div style="font-size: 0.72rem; color: #64748b; font-weight: 600;">${m.label}</div>
+          <div style="font-size: 1.15rem; font-weight: 800; color: ${textCol}; margin: 2px 0;">${m.count}</div>
+          <div style="font-size: 0.65rem; color: ${textCol}; font-weight: 500;">โครงการ</div>
+        `;
+        card.onclick = () => filterByMonth(m);
+        container.appendChild(card);
+      });
+    }
+
+    // คำนวณวันที่มีจำนวนโครงการชนกันสูงสุด (True Peak Concurrent Day)
+    function findPeakConcurrentDay(parsedList) {
+      if (parsedList.length === 0) return { maxCount: 0, peakDateText: '' };
+      
+      let events = [];
+      parsedList.forEach(p => {
+        events.push({ time: p.startDate.getTime(), type: 1 });
+        events.push({ time: p.endDate.getTime() + 86400000, type: -1 });
+      });
+      events.sort((a, b) => a.time - b.time || a.type - b.type);
+
+      let current = 0;
+      let maxCount = 0;
+      let peakTime = null;
+
+      events.forEach(e => {
+        current += e.type;
+        if (current > maxCount) {
+          maxCount = current;
+          peakTime = new Date(e.time);
+        }
+      });
+
+      return {
+        maxCount: maxCount,
+        peakDateText: peakTime ? peakTime.toLocaleDateString('th-TH') : ''
+      };
+    }
+
+    // คำนวณ Time Window Clusters (จัดกลุ่มสัญญาทับซ้อนที่เกี่ยวเนื่องกันเป็นทอดๆ ในห้วงเวลาเดียวกัน)
+    function computeTimeWindowClusters(parsedList, minOverlapDays) {
+      if (parsedList.length === 0) return [];
+
+      let clusters = [];
+      let visited = new Set();
+
+      // สร้าง Adjacent Graph จากสัญญาที่ทับซ้อนกันจริง >= minOverlapDays
+      let adj = {};
+      parsedList.forEach(p => adj[p.project_id] = []);
+
+      for (let i = 0; i < parsedList.length; i++) {
+        for (let j = i + 1; j < parsedList.length; j++) {
+          let a = parsedList[i];
+          let b = parsedList[j];
+          let overlapStart = new Date(Math.max(a.startDate, b.startDate));
+          let overlapEnd = new Date(Math.min(a.endDate, b.endDate));
+          if (overlapStart <= overlapEnd) {
+            let days = Math.round((overlapEnd - overlapStart) / (1000 * 60 * 60 * 24)) + 1;
+            if (days >= minOverlapDays) {
+              adj[a.project_id].push(b.project_id);
+              adj[b.project_id].push(a.project_id);
+            }
+          }
+        }
+      }
+
+      // หา Connected Components (แต่ละ Component คือ 1 ห้วงเวลา Cluster)
+      parsedList.forEach(p => {
+        if (!visited.has(p.project_id)) {
+          let componentIds = [];
+          let q = [p.project_id];
+          visited.add(p.project_id);
+
+          while (q.length > 0) {
+            let curr = q.shift();
+            componentIds.push(curr);
+            (adj[curr] || []).forEach(nextId => {
+              if (!visited.has(nextId)) {
+                visited.add(nextId);
+                q.push(nextId);
+              }
+            });
+          }
+
+          let compProjects = parsedList.filter(item => componentIds.includes(item.project_id));
+          let clusterStart = new Date(Math.min(...compProjects.map(item => item.startDate)));
+          let clusterEnd = new Date(Math.max(...compProjects.map(item => item.endDate)));
+
+          clusters.push({
+            id: clusters.length + 1,
+            projects: compProjects,
+            count: compProjects.length,
+            isOverlapping: compProjects.length > 1,
+            startDate: clusterStart,
+            endDate: clusterEnd,
+            totalMoney: compProjects.reduce((sum, item) => sum + item.contract_price, 0)
+          });
+        }
+      });
+
+      // จัดเรียงตามวันเริ่มต้น
+      clusters.sort((a, b) => a.startDate - b.startDate);
+      return clusters;
+    }
+
+    // แสดงปุ่มเลือกกลุ่มห้วงเวลา (Cluster Pills)
+    function renderClusterPills(clusters) {
+      const container = document.getElementById('clusterPillsContainer');
+      const badge = document.getElementById('clusterCountBadge');
+      container.innerHTML = '';
+
+      let overlapClusters = clusters.filter(c => c.isOverlapping);
+      badge.textContent = `พบ ${overlapClusters.length} กลุ่มห้วงเวลาทับซ้อน (จากทั้งหมด ${clusters.length} ช่วง)`;
+
+      // ปุ่มแสดงทุกโครงการ
+      let allBtn = document.createElement('button');
+      allBtn.className = 'view-pill-btn active';
+      allBtn.id = 'clusterBtn_all';
+      allBtn.innerHTML = `🌐 แสดงทั้งหมด (${currentOverlapData.length} สัญญา)`;
+      allBtn.onclick = () => selectCluster(null, allBtn);
+      container.appendChild(allBtn);
+
+      clusters.forEach((c, idx) => {
+        let btn = document.createElement('button');
+        btn.className = 'view-pill-btn';
+        btn.id = `clusterBtn_${c.id}`;
+
+        let icon = c.isOverlapping ? '⚠️' : '🟢';
+        let style = c.isOverlapping ? 'border: 1px solid #fca5a5;' : '';
+        btn.setAttribute('style', style);
+
+        let dateRange = `${c.startDate.toLocaleDateString('th-TH', {month:'short', year:'2-digit'})} - ${c.endDate.toLocaleDateString('th-TH', {month:'short', year:'2-digit'})}`;
+        btn.innerHTML = `${icon} กลุ่มที่ ${idx+1} [${dateRange}]: ชนกัน ${c.count} โครงการ (฿${(c.totalMoney/1000000).toFixed(1)}M)`;
+        btn.onclick = () => selectCluster(c, btn);
+        container.appendChild(btn);
+      });
+    }
+
+    // กรองการแสดงผลตาม Cluster ที่เลือก
+    function selectCluster(cluster, btnElement) {
+      document.querySelectorAll('#clusterPillsContainer .view-pill-btn').forEach(b => b.classList.remove('active'));
+      if (btnElement) btnElement.classList.add('active');
+
+      if (!cluster) {
+        // แสดงทั้งหมด
+        document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดโครงการของผู้รับจ้าง (แสดงทั้งหมด ${currentOverlapData.length} โครงการ)`;
+        let overlappingContractIds = new Set(currentOverlapData.filter(p => p.overlapsWith.length > 0).map(p => p.project_id));
+        renderContractorMapMarkers(currentOverlapData, overlappingContractIds);
+        renderGanttChart(currentOverlapData, overlappingContractIds);
+      } else {
+        // แสดงเฉพาะ Cluster ที่เลือก
+        document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดเฉพาะ กลุ่มที่ ${cluster.id} [${cluster.count} โครงการ] ช่วง ${cluster.startDate.toLocaleDateString('th-TH')} - ${cluster.endDate.toLocaleDateString('th-TH')}`;
+        let clusterIds = new Set(cluster.projects.map(p => p.project_id));
+        renderContractorMapMarkers(cluster.projects, clusterIds, currentOverlapData);
+        renderGanttChart(cluster.projects, clusterIds);
+      }
+    }
+
+    // กรองการแสดงผลตามเดือนที่เลือกจาก Heatmap
+    function filterByMonth(monthObj) {
+      let filtered = currentOverlapData.filter(p => monthObj.projectIds.includes(p.project_id));
+      document.getElementById('overlapMapTitle').textContent = `📍 แผนที่แสดงพิกัดโครงการที่เปิดหน้างานในเดือน ${monthObj.label} (${filtered.length} โครงการ)`;
+      let filteredIds = new Set(filtered.map(p => p.project_id));
+      renderContractorMapMarkers(filtered, filteredIds, currentOverlapData);
+      renderGanttChart(filtered, filteredIds);
+    }
+
+    function selectTimeWindow(mode) {
+      if (mode === 'all') {
+        selectCluster(null, document.getElementById('clusterBtn_all'));
+      }
+    }
+
+    // วาดหมุดโครงการของผู้รับจ้างบนแผนที่ (Contractor Map Markers) รองรับการแสดงหมุดจางสำหรับโครงการนอกกลุ่ม
+    function renderContractorMapMarkers(activeList, overlappingIds = new Set(), fullList = null) {
       if (!overlapMap) initOverlapMap();
       if (!overlapMap) return;
 
       overlapMarkers.forEach(m => overlapMap.removeLayer(m));
       overlapMarkers = [];
 
-      document.getElementById('overlapMapCount').textContent = `แสดง ${parsedList.length} จุดพิกัดหน้างาน`;
+      document.getElementById('overlapMapCount').textContent = `แสดง ${activeList.length} จุดพิกัดหน้างาน`;
 
       let bounds = [];
-      parsedList.forEach(p => {
+      let activeIds = new Set(activeList.map(p => p.project_id));
+
+      // วาดหมุดสีเทาสำหรับโครงการนอกกลุ่ม (ถ้ามีการเลือกกลุ่มย่อย)
+      if (fullList && fullList.length > activeList.length) {
+        fullList.forEach(p => {
+          if (!activeIds.has(p.project_id)) {
+            let fadedMarker = L.circleMarker([p.lat, p.lng], {
+              radius: 4,
+              fillColor: '#94a3b8',
+              color: '#cbd5e1',
+              weight: 1,
+              opacity: 0.5,
+              fillOpacity: 0.35
+            }).addTo(overlapMap);
+
+            fadedMarker.bindPopup(`
+              <div style="font-family: 'Sarabun'; font-size: 0.8rem; color: #64748b;">
+                <strong>[อยู่นอกกลุ่มห้วงเวลานี้]</strong><br>
+                ${p.project_name}<br>
+                ระยะเวลา: ${p.startDate.toLocaleDateString('th-TH')} - ${p.endDate.toLocaleDateString('th-TH')}
+              </div>
+            `);
+            overlapMarkers.push(fadedMarker);
+          }
+        });
+      }
+
+      // วาดหมุดโครงการในกลุ่มที่เลือก
+      activeList.forEach(p => {
         let isOverlap = overlappingIds.has(p.project_id);
         let color = isOverlap ? '#dc2626' : '#16a34a';
 
@@ -1567,7 +1872,7 @@
           color: '#ffffff',
           weight: 2,
           opacity: 1,
-          fillOpacity: 0.88
+          fillOpacity: 0.9
         }).addTo(overlapMap);
 
         let overlapWarning = isOverlap ? 
@@ -1601,7 +1906,7 @@
       container.innerHTML = '';
 
       if (parsedList.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 2rem;">ไม่พบข้อมูลวันที่ลงนามสัญญาและส่งมอบของผู้รับจ้างรายนี้</div>';
+        container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 2rem;">ไม่พบข้อมูลวันที่ลงนามสัญญาและส่งมอบ</div>';
         return;
       }
 
@@ -1615,7 +1920,7 @@
           <!-- Header Month Guides -->
           <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); border-bottom: 2px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 12px; font-weight: 600;">
             <span>จุดเริ่มต้น: ${minDate.toLocaleDateString('th-TH')}</span>
-            <span>ห้วงเวลาปฏิบัติงานรวม ${totalDays} วัน</span>
+            <span>ห้วงเวลาปฏิบัติงานรวม ${totalDays} วัน (${parsedList.length} โครงการ)</span>
             <span>สิ้นสุด: ${maxDate.toLocaleDateString('th-TH')}</span>
           </div>
       `;
