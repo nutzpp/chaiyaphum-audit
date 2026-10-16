@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ระบบคัดเลือกหน่วยรับตรวจและโครงการตามแบบ ปม.1 และ ปม.2 - สตง. ชัยภูมิ</title>
+  <title>ระบบประเมินความเสี่ยงหน่วยรับตรวจ - สตง. ชัยภูมิ</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
@@ -89,34 +89,64 @@
     .stage-steps {
       display: flex;
       align-items: center;
-      gap: 1.25rem;
+      gap: 0.85rem;
+      flex-wrap: wrap;
     }
     .stage-step {
       display: flex;
       align-items: center;
       gap: 8px;
       font-weight: 600;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       color: var(--muted);
       cursor: pointer;
+      padding: 6px 12px;
+      border-radius: 8px;
+      transition: all 0.2s;
+    }
+    .stage-step:hover {
+      background: #f1f5f9;
     }
     .stage-step.active {
       color: var(--primary-light);
+      background: #eff6ff;
     }
     .step-circle {
-      width: 28px;
-      height: 28px;
+      width: 26px;
+      height: 26px;
       border-radius: 50%;
       background: #e2e8f0;
       color: #475569;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 0.85rem;
+      font-size: 0.8rem;
     }
     .stage-step.active .step-circle {
       background: var(--primary-light);
       color: white;
+    }
+    .nav-btn-overlap {
+      background: #fffbeb;
+      border: 1.5px solid #f59e0b;
+      color: #b45309;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+    .nav-btn-overlap:hover {
+      background: #fef3c7;
+    }
+    .nav-btn-overlap.active {
+      background: #f59e0b;
+      color: white;
+      border-color: #d97706;
+      box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
     }
 
     /* Upload Panel */
@@ -281,6 +311,27 @@
     }
 
     #map { height: 380px; border-radius: 8px; z-index: 10; }
+    #overlapMap { height: 420px; border-radius: 8px; z-index: 10; border: 1px solid var(--border); }
+    .view-pill-btn {
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: white;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--muted);
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.2s;
+    }
+    .view-pill-btn:hover { background: #f8fafc; }
+    .view-pill-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
 
     /* Modal */
     .modal-backdrop {
@@ -337,7 +388,7 @@
   <header>
     <div>
       <div style="display: flex; align-items: center; gap: 10px;">
-        <h1 style="font-size: 1.35rem; font-weight: 700;">ระบบวิเคราะห์และคัดเลือกหน่วยรับตรวจ / สัญญาโครงการ (แบบ ปม.1 & ปม.2)</h1>
+        <h1 style="font-size: 1.35rem; font-weight: 700;">ระบบประเมินความเสี่ยงหน่วยรับตรวจ</h1>
         <span class="badge-auditor">สตง. Audit Engine 4.0 (จ.ชัยภูมิ)</span>
       </div>
       <p style="font-size: 0.85rem; opacity: 0.85; margin-top: 2px;">
@@ -424,16 +475,16 @@
           <span class="step-circle">1</span>
           <span>แบบ ปม.1: คัดเลือกหน่วยรับตรวจ</span>
         </div>
-        <span style="color: #cbd5e1;">➔</span>
+        <span style="color: #cbd5e1; font-weight: bold;">➔</span>
         <div class="stage-step" id="step2Tab" onclick="switchStage(2)">
           <span class="step-circle">2</span>
           <span>แบบ ปม.2: คัดเลือกโครงการในหน่วย</span>
         </div>
-        <span style="color: #cbd5e1;">➔</span>
-        <div class="stage-step" id="step3Tab" onclick="switchStage(3)">
-          <span class="step-circle" style="background: #f59e0b; color: white;">3</span>
-          <span style="color: #b45309;">⏱️ วิเคราะห์สัญญาทับซ้อนของผู้รับจ้าง (Overlapping Audit)</span>
-        </div>
+        <div style="border-left: 1px solid #cbd5e1; height: 24px; margin: 0 4px;"></div>
+        <button class="nav-btn-overlap" id="step3Tab" onclick="switchStage(3)">
+          <span>⏱️</span>
+          <span>วิเคราะห์สัญญาทับซ้อนของผู้รับจ้าง (Overlapping Audit)</span>
+        </button>
       </div>
       <div>
         <span style="font-size: 0.85rem; color: var(--muted);" id="currentFocusEntityText">
@@ -657,30 +708,61 @@
         </div>
       </div>
 
-      <!-- Gantt Timeline Card -->
+      <!-- 1. MAP OF CONTRACTOR PROJECTS (ย้ายแผนที่ขึ้นมาอยู่ด้านบนของผังไทม์ไลน์) -->
       <div class="card" style="margin-bottom: 1.25rem;">
         <div class="card-header">
-          <div class="card-title">
-            📅 แผนผังไทม์ไลน์ระยะเวลาสัญญา (Gantt Chart Timeline Bar)
+          <div>
+            <div class="card-title">
+              📍 แผนที่แสดงพิกัดโครงการทั้งหมดของผู้รับจ้าง (Contractor Site Map)
+            </div>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
+              หมุดสีแดง = โครงการที่มีช่วงเวลาทับซ้อน (ต้องระดมช่าง/เครื่องจักรชนกัน) | หมุดสีเขียว = โครงการปกติ
+            </p>
           </div>
-          <div style="display: flex; gap: 15px; font-size: 0.8rem;">
-            <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; border-radius: 3px; background: #dc2626; display: inline-block;"></span> <strong>สีแดง:</strong> สัญญาที่มีห้วงเวลาทับซ้อนกับโครงการอื่น</span>
-            <span style="display: flex; align-items: center; gap: 5px;"><span style="width: 12px; height: 12px; border-radius: 3px; background: #16a34a; display: inline-block;"></span> <strong>สีเขียว:</strong> สัญญาเดี่ยว ดำเนินการแยกต่างหาก</span>
+          <span style="font-size: 0.8rem; color: var(--muted);" id="overlapMapCount">0 จุดพิกัด</span>
+        </div>
+        <div id="overlapMap"></div>
+      </div>
+
+      <!-- 2. TIMELINE CARD (พร้อมปุ่มสลับมุมมอง: ผังไทม์ไลน์ภาพรวมผู้บริหาร vs แผนผัง Gantt Chart เดิม) -->
+      <div class="card" style="margin-bottom: 1.25rem;">
+        <div class="card-header">
+          <div>
+            <div class="card-title">
+              ⏱️ แผนผังห้วงเวลาปฏิบัติงานและส่งมอบ (Project Timeline & Execution Flow)
+            </div>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
+              เลือกรูปแบบการแสดงผล: ผังไทม์ไลน์ภาพรวมผู้บริหาร (อ่านเข้าใจง่าย โหลดเร็ว) หรือ แผนผังแถบ Gantt Chart
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+            <div style="display: flex; gap: 4px; background: #f1f5f9; padding: 3px; border-radius: 8px;">
+              <button class="view-pill-btn active" id="btnViewExecutive" onclick="switchTimelineMode('executive')">
+                👔 ผังไทม์ไลน์ภาพรวมผู้บริหาร (แนะนำ)
+              </button>
+              <button class="view-pill-btn" id="btnViewGantt" onclick="switchTimelineMode('gantt')">
+                📊 ผัง Gantt Chart
+              </button>
+            </div>
           </div>
         </div>
-        <p style="font-size: 0.8rem; color: var(--muted); margin-bottom: 12px;">
-          * แท่งแนวนอนแสดงตั้งแต่วันที่ลงนามสัญญา (contract_date) ถึงวันสิ้นสุดสัญญา (contract_finish_date) หากมีแถบเวลาคร่อมกัน ถือเป็นสัญญาที่ต้องดำเนินงานก่อสร้างในเวลาเดียวกัน
-        </p>
+
+        <!-- Executive Milestone Timeline Container (โหลดเร็ว ดูง่าย ชัดเจนสำหรับผู้บริหาร) -->
+        <div id="executiveTimelineContainer" style="padding: 0.5rem 0;">
+          <div style="text-align: center; color: var(--muted); padding: 2rem;">
+            กรุณาเลือกผู้รับจ้างจาก Dropdown ด้านบนเพื่อแสดงผังไทม์ไลน์
+          </div>
+        </div>
 
         <!-- Gantt Bars Container -->
-        <div id="ganttTimelineContainer" style="overflow-x: auto; padding-bottom: 1rem;">
-          <div style="text-align: center; color: var(--muted); padding: 2.5rem;">
-            กรุณาเลือกผู้รับจ้างจาก Dropdown ด้านบนเพื่อวาดแผนผังไทม์ไลน์
+        <div id="ganttTimelineContainer" style="overflow-x: auto; padding-bottom: 1rem; display: none;">
+          <div style="text-align: center; color: var(--muted); padding: 2rem;">
+            กรุณาเลือกผู้รับจ้างจาก Dropdown ด้านบนเพื่อวาดแผนผัง Gantt Chart
           </div>
         </div>
       </div>
 
-      <!-- Overlap Details Table -->
+      <!-- 3. Overlap Details Table -->
       <div class="card">
         <div class="card-header">
           <div class="card-title">
@@ -764,15 +846,26 @@
     let entityGroups = {}; // dept_name -> list of records
     let selectedEntityName = null;
 
-    let currentStage = 1; // 1 = ปม.1, 2 = ปม.2
+    let currentStage = 1; // 1 = ปม.1, 2 = ปม.2, 3 = สัญญาทับซ้อน
     let map, markers = [], entityRiskChart;
+    let overlapMap = null, overlapMarkers = [];
+    let currentTimelineMode = 'executive'; // 'executive' or 'gantt'
 
-    // Initialize Map
+    // Initialize Map for Stage 2 (Entity Projects)
     function initMap() {
       map = L.map('map').setView([15.95, 101.95], 9);
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors | GovSpending Inspector'
       }).addTo(map);
+    }
+
+    // Initialize Map for Stage 3 (Contractor Overlap Projects)
+    function initOverlapMap() {
+      if (overlapMap) return;
+      overlapMap = L.map('overlapMap').setView([15.95, 101.95], 9);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors | Contractor Overlap Audit'
+      }).addTo(overlapMap);
     }
 
     // Initialize Chart
@@ -1044,6 +1137,11 @@
 
       if (currentStage === 2 && selectedEntityName) {
         renderPm2View(selectedEntityName);
+      } else if (currentStage === 3) {
+        populateContractorsDropdownForOverlap();
+      } else {
+        // Also update contractors dropdown silently so it's ready when clicked
+        populateContractorsDropdownForOverlap();
       }
     }
 
@@ -1307,6 +1405,8 @@
       } else if (stageNum === 3) {
         document.getElementById('stage3Section').style.display = 'block';
         document.getElementById('step3Tab').classList.add('active');
+        initOverlapMap();
+        setTimeout(() => { if (overlapMap) overlapMap.invalidateSize(); }, 200);
         populateContractorsDropdownForOverlap();
       }
     }
@@ -1341,33 +1441,77 @@
 
     let currentOverlapData = [];
 
-    // เติมรายชื่อผู้รับจ้างลงใน Dropdown พร้อมบอกจำนวนสัญญาทับซ้อนเบื้องต้น
+    // เติมรายชื่อผู้รับจ้างลงใน Dropdown โดยดึงจากข้อมูลที่ผ่านตัวกรองด้านบน (filteredRecords)
+    // หากเลือกประเภทโครงการ เช่น "จ้างก่อสร้าง" รายชื่อผู้รับจ้างจะลดลงตามจริงทันที
     function populateContractorsDropdownForOverlap() {
       const select = document.getElementById('overlapContractorSelect');
+      if (!select) return;
+      
+      const currentSelectedVal = select.value;
       select.innerHTML = '<option value="">-- กรุณาเลือกผู้รับจ้างที่ต้องการตรวจสอบ --</option>';
 
-      // รวบรวมสัญญาแยกตามผู้รับจ้างจากฐานข้อมูลทั้งหมด
+      // ใช้ filteredRecords เพื่อให้ตัวเลือกสอดคล้องกับแถบตัวกรองด้านบน
+      const dataSource = (filteredRecords && filteredRecords.length > 0) ? filteredRecords : rawCSVRecords;
+
       let contractorContracts = {};
-      rawCSVRecords.forEach(p => {
+      dataSource.forEach(p => {
         if (!p.winner || p.winner === 'ไม่ระบุ') return;
         if (!contractorContracts[p.winner]) contractorContracts[p.winner] = [];
         contractorContracts[p.winner].push(p);
       });
 
-      // เรียงตามจำนวนสัญญาสูงสุด
+      // เรียงตามจำนวนสัญญาที่ได้รับมากที่สุด
       let sortedContractors = Object.keys(contractorContracts).sort((a,b) => contractorContracts[b].length - contractorContracts[a].length);
 
+      let foundPrevious = false;
       sortedContractors.forEach(name => {
         let total = contractorContracts[name].length;
-        if (total >= 2) { // แสดงเฉพาะผู้รับจ้างที่มีอย่างน้อย 2 สัญญาขึ้นไป
-          select.innerHTML += `<option value="${name}">${name} (ทั้งหมด ${total} สัญญา)</option>`;
+        if (total >= 1) { // แสดงผู้รับจ้างที่มีโครงการ
+          let isSel = (name === currentSelectedVal) ? 'selected' : '';
+          if (isSel) foundPrevious = true;
+          select.innerHTML += `<option value="${name}" ${isSel}>${name} (พบ ${total} สัญญา)</option>`;
         }
       });
 
-      // ถ้ายังไม่ได้เลือก ให้เลือกตัวแรกที่สัญญาสูงสุดโดยอัตโนมัติ
-      if (sortedContractors.length > 0 && !select.value) {
-        select.value = sortedContractors[0];
-        renderContractorOverlapAnalysis(sortedContractors[0]);
+      if (sortedContractors.length > 0) {
+        if (!foundPrevious || !select.value) {
+          select.value = sortedContractors[0];
+          renderContractorOverlapAnalysis(sortedContractors[0]);
+        } else {
+          renderContractorOverlapAnalysis(select.value);
+        }
+      } else {
+        // กรณีตัวกรองไม่พบผู้รับจ้าง
+        document.getElementById('overlapTotalContracts').textContent = '0 สัญญา';
+        document.getElementById('overlapCountContracts').textContent = '0 สัญญา';
+        document.getElementById('overlapPctContracts').textContent = 'คิดเป็น 0% ของงานทั้งหมด';
+        document.getElementById('overlapTotalMoney').textContent = '฿0.0 ล้าน';
+        document.getElementById('overlapMaxConcurrent').textContent = '0 โครงการ';
+        document.getElementById('executiveTimelineContainer').innerHTML = '<div style="text-align: center; color: var(--muted); padding: 2.5rem;">ไม่พบข้อมูลสัญญาของผู้รับจ้างตามเงื่อนไขตัวกรองด้านบน</div>';
+        document.getElementById('ganttTimelineContainer').innerHTML = '<div style="text-align: center; color: var(--muted); padding: 2.5rem;">ไม่พบข้อมูลสัญญาของผู้รับจ้างตามเงื่อนไขตัวกรองด้านบน</div>';
+        document.getElementById('overlapTableBody').innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--muted); padding: 2.5rem;">ไม่พบข้อมูลตามเงื่อนไขตัวกรอง</td></tr>';
+        renderContractorMapMarkers([]);
+      }
+    }
+
+    // สลับโหมดการแสดงผลไทม์ไลน์ (Executive Timeline vs Gantt Timeline)
+    function switchTimelineMode(mode) {
+      currentTimelineMode = mode;
+      const btnExec = document.getElementById('btnViewExecutive');
+      const btnGantt = document.getElementById('btnViewGantt');
+      const execBox = document.getElementById('executiveTimelineContainer');
+      const ganttBox = document.getElementById('ganttTimelineContainer');
+
+      if (mode === 'executive') {
+        btnExec.classList.add('active');
+        btnGantt.classList.remove('active');
+        execBox.style.display = 'block';
+        ganttBox.style.display = 'none';
+      } else {
+        btnGantt.classList.add('active');
+        btnExec.classList.remove('active');
+        execBox.style.display = 'none';
+        ganttBox.style.display = 'block';
       }
     }
 
@@ -1375,7 +1519,9 @@
     function renderContractorOverlapAnalysis(contractorName) {
       if (!contractorName) return;
 
-      let contracts = rawCSVRecords.filter(p => p.winner === contractorName);
+      // ดึงสัญญาของผู้รับจ้างรายนี้จากข้อมูลที่ผ่านตัวกรองด้านบน
+      const dataSource = (filteredRecords && filteredRecords.length > 0) ? filteredRecords : rawCSVRecords;
+      let contracts = dataSource.filter(p => p.winner === contractorName);
       if (contracts.length === 0) return;
 
       // ค้นหาช่วงวันที่เริ่มและสิ้นสุดของแต่ละสัญญา
@@ -1405,7 +1551,6 @@
 
       // ตรวจสอบการทับซ้อน (Overlap Algorithm: startA <= endB && startB <= endA)
       let overlappingContractIds = new Set();
-      let totalOverlapDaysMap = {};
 
       for (let i = 0; i < parsedList.length; i++) {
         for (let j = 0; j < parsedList.length; j++) {
@@ -1455,11 +1600,149 @@
       });
       document.getElementById('overlapMaxConcurrent').textContent = `${maxConcurrent} โครงการพร้อมกัน`;
 
-      // วาด Gantt Timeline Bars
+      // 1. วาดจุดพิกัดโครงการของผู้รับจ้างลงบนแผนที่ Stage 3
+      renderContractorMapMarkers(parsedList, overlappingContractIds);
+
+      // 2. วาด Executive Milestone Timeline (อ่านง่าย โหลดเร็วสำหรับผู้บริหาร)
+      renderExecutiveTimeline(parsedList, overlappingContractIds);
+
+      // 3. วาด Gantt Timeline Bars (แบบดั้งเดิม)
       renderGanttChart(parsedList, overlappingContractIds);
 
-      // วาด Overlap Table Matrix
+      // 4. วาด Overlap Table Matrix ด้านล่าง
       renderOverlapTable(parsedList, overlappingContractIds);
+    }
+
+    // วาดหมุดโครงการของผู้รับจ้างบนแผนที่ (Contractor Map Markers)
+    function renderContractorMapMarkers(parsedList, overlappingIds = new Set()) {
+      if (!overlapMap) initOverlapMap();
+      if (!overlapMap) return;
+
+      overlapMarkers.forEach(m => overlapMap.removeLayer(m));
+      overlapMarkers = [];
+
+      document.getElementById('overlapMapCount').textContent = `แสดง ${parsedList.length} จุดพิกัดหน้างาน`;
+
+      let bounds = [];
+      parsedList.forEach(p => {
+        let isOverlap = overlappingIds.has(p.project_id);
+        let color = isOverlap ? '#dc2626' : '#16a34a';
+
+        let marker = L.circleMarker([p.lat, p.lng], {
+          radius: isOverlap ? 9 : 6,
+          fillColor: color,
+          color: '#ffffff',
+          weight: 2,
+          opacity: 1,
+          fillOpacity: 0.88
+        }).addTo(overlapMap);
+
+        let overlapWarning = isOverlap ? 
+          `<div style="color: #dc2626; font-weight: bold; margin-top: 4px;">⚠️ มีห้วงเวลาทับซ้อนกับอีก ${p.overlapsWith.length} โครงการ</div>` : 
+          `<div style="color: #16a34a; font-weight: bold; margin-top: 4px;">✅ ไม่พบช่วงเวลาทับซ้อน</div>`;
+
+        marker.bindPopup(`
+          <div style="font-family: 'Sarabun'; min-width: 200px;">
+            <strong style="color: ${color};">[${isOverlap ? 'ทับซ้อน' : 'ปกติ'}] ${p.project_id}</strong><br>
+            <strong style="font-size: 0.85rem;">${p.project_name.substring(0, 60)}...</strong><br>
+            <div style="font-size: 0.8rem; color: #475569; margin-top: 2px;">หน่วยงาน: ${p.dept_name} (${p.district})</div>
+            <div style="font-size: 0.8rem; color: #0a2540; font-weight: bold;">วงเงิน: ฿${p.contract_price.toLocaleString()}</div>
+            <div style="font-size: 0.75rem; color: #64748b;">ระยะเวลา: ${p.startDate.toLocaleDateString('th-TH')} - ${p.endDate.toLocaleDateString('th-TH')}</div>
+            ${overlapWarning}
+            <button onclick="openModal('${p.project_id}')" style="margin-top: 6px; padding: 4px 10px; font-size: 0.75rem; background: #1e40af; color: white; border: none; border-radius: 4px; cursor: pointer; width: 100%;">🔍 เปิดตรวจแฟ้มโครงการ</button>
+          </div>
+        `);
+
+        overlapMarkers.push(marker);
+        bounds.push([p.lat, p.lng]);
+      });
+
+      if (bounds.length > 0) {
+        overlapMap.fitBounds(bounds, { maxZoom: 13, padding: [25, 25] });
+      }
+    }
+
+    // วาดผังไทม์ไลน์ภาพรวมผู้บริหาร (Executive Milestone & Flow Timeline)
+    // ออกแบบให้อ่านง่าย กราฟฟิกเบา โหลดฉับไว สรุปความขัดแย้งของสัญญาชัดเจน
+    function renderExecutiveTimeline(parsedList, overlappingIds) {
+      const container = document.getElementById('executiveTimelineContainer');
+      container.innerHTML = '';
+
+      if (parsedList.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: var(--muted); padding: 2rem;">ไม่พบข้อมูลวันที่ลงนามสัญญาและส่งมอบของผู้รับจ้างรายนี้</div>';
+        return;
+      }
+
+      let html = `
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 6px;">
+      `;
+
+      parsedList.forEach((p, idx) => {
+        let isOverlap = overlappingIds.has(p.project_id);
+        let borderClass = isOverlap ? 'border-left: 5px solid #dc2626; background: #fffaf0;' : 'border-left: 5px solid #16a34a; background: #f8fafc;';
+        let badgeHeader = isOverlap ? 
+          `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">⚠️ ทับซ้อนกับ ${p.overlapsWith.length} สัญญา</span>` : 
+          `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #a7f3d0; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: bold;">🟢 งานเดี่ยวต่อเนื่อง</span>`;
+
+        let daysSpan = Math.round((p.endDate - p.startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+        let conflictBadges = '';
+        if (isOverlap && p.overlapsWith.length > 0) {
+          conflictBadges = `
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px dashed #fed7aa; display: flex; flex-wrap: wrap; gap: 6px; align-items: center;">
+              <span style="font-size: 0.75rem; font-weight: bold; color: #c2410c;">ชนกับสัญญา:</span>
+              ${p.overlapsWith.map(t => `
+                <span style="background: #fee2e2; color: #991b1b; padding: 2px 6px; border-radius: 4px; font-size: 0.72rem; border: 1px solid #fecaca;" title="${t.targetName}">
+                  ⚡ ${t.targetDept} (คาบเกี่ยว ${t.overlapDays} วัน)
+                </span>
+              `).join('')}
+            </div>
+          `;
+        }
+
+        html += `
+          <div style="${borderClass} padding: 12px 16px; border-radius: 8px; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.03);">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 8px;">
+              <div style="flex: 1; min-width: 280px;">
+                <div style="font-weight: 700; color: #0a2540; font-size: 0.95rem;">
+                  <span style="color: #64748b; font-weight: 600;">#${idx+1}</span> ${p.project_name}
+                </div>
+                <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                  หน่วยงาน: <strong style="color: #334155;">${p.dept_name}</strong> | อ.${p.district} | รหัส: ${p.project_id}
+                </div>
+              </div>
+              <div style="text-align: right; min-width: 170px;">
+                <div style="font-size: 1.05rem; font-weight: 700; color: #1e40af;">
+                  ฿${p.contract_price.toLocaleString()}
+                </div>
+                <div style="margin-top: 3px;">${badgeHeader}</div>
+              </div>
+            </div>
+
+            <!-- Milestone Progress Flow -->
+            <div style="margin-top: 10px; display: flex; align-items: center; gap: 10px; font-size: 0.8rem; background: white; padding: 8px 12px; border-radius: 6px; border: 1px solid #e2e8f0;">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="background: #e0e7ff; color: #3730a3; padding: 2px 6px; border-radius: 4px; font-weight: 600;">เริ่มสัญญา</span>
+                <strong style="color: #1e293b;">${p.startDate.toLocaleDateString('th-TH')}</strong>
+              </div>
+              <div style="flex: 1; height: 3px; background: ${isOverlap ? '#f87171' : '#86efac'}; position: relative;">
+                <span style="position: absolute; top: -16px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: #64748b; font-weight: 600; white-space: nowrap;">
+                  ระยะเวลาตามสัญญา ${daysSpan} วัน
+                </span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <span style="background: #fef3c7; color: #92400e; padding: 2px 6px; border-radius: 4px; font-weight: 600;">กำหนดส่งมอบ</span>
+                <strong style="color: #1e293b;">${p.endDate.toLocaleDateString('th-TH')}</strong>
+              </div>
+            </div>
+
+            ${conflictBadges}
+          </div>
+        `;
+      });
+
+      html += '</div>';
+      container.innerHTML = html;
     }
 
     // วาดแผนผังไทม์ไลน์แบบ Gantt Chart Bars
@@ -1493,7 +1776,6 @@
         let widthPct = Math.max(2, ((p.endDate - p.startDate) / (maxDate - minDate)) * 100);
 
         let barColor = isOverlap ? '#ef4444' : '#10b981';
-        let barBg = isOverlap ? '#fef2f2' : '#f0fdf4';
         let badgeOverlapText = isOverlap ? `⚠️ ชนกับ ${p.overlapsWith.length} สัญญา` : 'ปกติ';
 
         timelineHtml += `
