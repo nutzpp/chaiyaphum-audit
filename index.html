@@ -376,26 +376,29 @@
     <div class="filter-card">
       <!-- 1. Filter District -->
       <div class="filter-item">
-        <label class="filter-label">📍 แยกอำเภอ (District):</label>
+        <label class="filter-label">📍 แยกอำเภอ:</label>
         <select id="filterDistrict" onchange="applyGlobalFilters()">
           <option value="ALL">ทุุกอำเภอใน จ.ชัยภูมิ (ทั้งหมด)</option>
         </select>
       </div>
 
-      <!-- 2. Filter project_type_name -->
+      <!-- 2. Filter project_type_name (ครบทั้ง 6 ประเภทตามไฟล์จริง) -->
       <div class="filter-item">
-        <label class="filter-label">🏷️ แยกประเภทโครงการ (project_type_name):</label>
+        <label class="filter-label">🏷️ แยกประเภทโครงการ:</label>
         <select id="filterProjectType" onchange="applyGlobalFilters()">
           <option value="ALL">ทุกประเภทโครงการ (ทั้งหมด)</option>
           <option value="จ้างก่อสร้าง" selected>จ้างก่อสร้าง</option>
           <option value="ซื้อ">ซื้อ</option>
           <option value="จ้างทำของ/จ้างเหมาบริการ">จ้างทำของ / จ้างเหมาบริการ</option>
+          <option value="เช่า">เช่า</option>
+          <option value="จ้างออกแบบ">จ้างออกแบบ</option>
+          <option value="จ้างที่ปรึกษา">จ้างที่ปรึกษา</option>
         </select>
       </div>
 
       <!-- 3. Filter project_name category -->
       <div class="filter-item">
-        <label class="filter-label">🔍 จำแนกลักษณะงาน (project_name category):</label>
+        <label class="filter-label">🔍 จำแนกลักษณะงาน:</label>
         <select id="filterNameKeyword" onchange="applyGlobalFilters()">
           <option value="ALL">ทุกลักษณะงาน (ทั้งหมด)</option>
           <option value="ถนน">งานถนน / ผิวทาง / ลาดยาง / คสล.</option>
@@ -471,6 +474,12 @@
             </p>
           </div>
           <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="btn btn-outline" onclick="toggleSelectAllEntities(true)">
+              ☑️ เลือกทุกหน่วย
+            </button>
+            <button class="btn btn-outline" onclick="toggleSelectAllEntities(false)">
+              ◻️ ล้างการเลือก
+            </button>
             <button class="btn btn-success" onclick="exportPm1Excel()">
               📊 ส่งออก Excel (แบบ ปม.1)
             </button>
@@ -484,20 +493,21 @@
           <table>
             <thead>
               <tr>
-                <th style="width: 60px; text-align: center;">อันดับ</th>
-                <th>หน่วยรับตรวจ (อปท. / ส่วนราชการใน จ.ชัยภูมิ)</th>
+                <th style="width: 45px; text-align: center;">เลือก</th>
+                <th style="width: 50px; text-align: center;">ลำดับ</th>
+                <th>หน่วยรับตรวจ</th>
                 <th>อำเภอ</th>
                 <th style="text-align: right;">จำนวนสัญญา</th>
                 <th style="text-align: right;">วงเงินสัญญารวม</th>
                 <th>สัญญาวิธีเฉพาะเจาะจง/คัดเลือก</th>
-                <th>ผู้รับเหมาขาใหญ่ (ซ้ำบ่อยสุด)</th>
+                <th>ผู้รับเหมาที่ได้งานซ้ำบ่อยสุด</th>
                 <th style="text-align: center;">คะแนน ปม.1</th>
                 <th style="width: 100px; text-align: center;">การดำเนินการ</th>
               </tr>
             </thead>
             <tbody id="pm1TableBody">
               <tr>
-                <td colspan="9" style="text-align: center; color: var(--muted); padding: 3rem;">
+                <td colspan="10" style="text-align: center; color: var(--muted); padding: 3rem;">
                   กรุณาอัพโหลดไฟล์ CSV <code>20261016093506_export_egp.csv</code> เพื่อประมวลผลแบบ ปม.1
                 </td>
               </tr>
@@ -554,18 +564,29 @@
       <!-- Table of Projects in Selected Entity -->
       <div class="card">
         <div class="card-header">
-          <div class="card-title">
-            📋 รายการสัญญา/โครงการในหน่วยรับตรวจ (เรียงตามคะแนนความเสี่ยง ปม.2)
+          <div>
+            <div class="card-title">
+              📋 รายการสัญญา/โครงการในหน่วยรับตรวจ (เรียงตามคะแนนความเสี่ยง ปม.2)
+            </div>
+            <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
+              คำนวณตาม 8 ปัจจัยเสี่ยงของแบบ ปม.2 (สามารถติ๊กเลือกเฉพาะโครงการที่ต้องการบรรจุในรายงาน ปม.2 ได้)
+            </p>
           </div>
-          <span style="font-size: 0.8rem; color: var(--muted);">
-            คำนวณตาม 8 ปัจจัยเสี่ยงของแบบ ปม.2
-          </span>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn btn-outline" onclick="toggleSelectAllProjects(true)">
+              ☑️ เลือกทุกโครงการ
+            </button>
+            <button class="btn btn-outline" onclick="toggleSelectAllProjects(false)">
+              ◻️ ล้างการเลือก
+            </button>
+          </div>
         </div>
 
         <div class="table-container">
           <table>
             <thead>
               <tr>
+                <th style="width: 45px; text-align: center;">เลือก</th>
                 <th style="width: 105px;">ระดับความเสี่ยง</th>
                 <th>ชื่อสัญญา / โครงการ</th>
                 <th>ประเภทจัดจ้าง</th>
@@ -761,68 +782,78 @@
         let projectType = (row.project_type_name || 'จ้างก่อสร้าง').trim();
         let dept = (row.dept_name || row.dept_sub_name || 'ไม่ระบุหน่วยงาน').trim();
 
-        // Evaluate Project Risk according to ปม.2 factors
-        let riskScore = 20; // base score
-        let riskLevel = 'LOW';
+        // Evaluate Project Risk according to แบบ ปม.2 เกณฑ์ทางการ สตง. (8 ปัจจัยเสี่ยง)
+        // ข้อ 1: แหล่งที่มาของเงิน (งบประมาณ = 1, เงินกู้/งบนอก = 3-5)
+        let f1_val = 0.20;
+        let f1_lvl = "ต่ำ";
+
+        // ข้อ 2: วงเงินในการดำเนินการ (< 10 ล้าน = 0.15 ต่ำ, 10-50 ล้าน = 0.50 กลาง, > 50 ล้าน = 0.85 สูง)
+        let f2_val = 0.15;
+        let f2_lvl = "ต่ำ";
+        if (contractPrice > 50000000) { f2_val = 0.85; f2_lvl = "สูง"; }
+        else if (contractPrice >= 10000000) { f2_val = 0.50; f2_lvl = "ปานกลาง"; }
+
+        // ข้อ 3: ที่มาของโครงการ (ตามแผน = ต่ำ 0.20, นโยบายรัฐบาล/การเมือง = สูง 0.80)
+        let f3_val = 0.20;
+        let f3_lvl = "ต่ำ";
+
+        // ข้อ 4: วิธีการจัดหา (e-bidding/คัดเลือก/เฉพาะเจาะจง < 5แสน = ต่ำ 0.20, เฉพาะเจาะจง > 5แสน = กลาง 0.50, ดำเนินการเอง = สูง 0.80)
+        let f4_val = 0.20;
+        let f4_lvl = "ต่ำ";
+        if (contractPrice > 500000 && method.includes('เฉพาะเจาะจง')) {
+          f4_val = 0.60;
+          f4_lvl = "ปานกลาง";
+        }
+
+        // ข้อ 5: ลักษณะการดำเนินงาน (เคยทำ = ต่ำ 0.20, ไม่เคยทำมาก่อน = สูง 0.80)
+        let f5_val = 0.20;
+        let f5_lvl = "ต่ำ";
+
+        // ข้อ 6: ผลกระทบสิ่งแวดล้อม (ไม่มี = ต่ำ 0.20)
+        let f6_val = 0.20;
+        let f6_lvl = "ต่ำ";
+
+        // ข้อ 7: ความผิดปกติของการดำเนินงาน (ผลต่างราคาเฉียดฉิว / ตัดราคาผิดปกติ / ซอยสัญญา)
+        let f7_val = 0.20;
+        let f7_lvl = "ต่ำ";
+        let finding = 'การแข่งขันเสนอราคาเป็นไปตามเกณฑ์ปกติ';
         let riskType = 'การประมูลแข่งขันตามปกติ';
         let lawRef = 'ระเบียบกระทรวงการคลังฯ พ.ศ. 2560';
-        let finding = 'การแข่งขันเสนอราคาเป็นไปตามกลไกตลาด';
-        let checklist = [
-          'สุ่มตรวจเอกสารเบิกจ่ายและหลักฐานการส่งมอบงาน',
-          'ตรวจสอบรายงานผลการตรวจรับพัสดุ'
-        ];
 
-        // Factor 7 & 8: Bid Rigging / Price diff near 0%
         if (method.includes('e-bidding') && diffPct < 0 && diffPct >= -0.25 && contractPrice > 3000000) {
-          riskScore = 90;
-          riskLevel = 'HIGH';
-          riskType = 'สงสัยสมยอมราคา (ผลต่างราคาชนะประมูลเฉียดฉิว < 0.25%)';
+          f7_val = 0.90;
+          f7_lvl = "สูง";
+          riskType = 'สงสัยสมยอมราคา (เสนอราคาเฉียดฉิว < 0.25%)';
           lawRef = 'พ.ร.บ. ว่าด้วยความผิดเกี่ยวกับการเสนอราคาต่อหน่วยงานของรัฐ พ.ศ. 2542';
-          finding = `ผลต่างระหว่างราคาตกลงจ้างกับราคากลางห่างกันเพียง ${Math.abs(diffPct).toFixed(2)}% ส่อพฤติกรรมรู้ราคากลางหรือสมยอมราคา`;
-          checklist = [
-            'เรียกดูบันทึก Log IP Address และเวลาการยื่นซอง e-bidding ของคู่เทียบ',
-            'สุ่มเจาะตรวจสอบความหนาผิวทางหรือโครงสร้างคอนกรีต (Coring Test)',
-            'ตรวจความสัมพันธ์ของผู้ถือหุ้นและที่ตั้งสำนักงานของคู่เทียบ'
-          ];
-        }
-        // Factor 4: Specific contract splitting (< 500,000 บาท)
-        else if (contractPrice >= 450000 && contractPrice <= 500000 && method.includes('เฉพาะเจาะจง')) {
-          riskScore = 85;
-          riskLevel = 'HIGH';
-          riskType = 'ความเสี่ยงแบ่งซื้อแบ่งจ้าง (สัญญาเฉพาะเจาะจงปริ่ม 5 แสน)';
-          lawRef = 'มาตรา 21 แห่ง พ.ร.บ. การจัดซื้อจัดจ้างและการบริหารพัสดุภาครัฐ พ.ศ. 2560';
-          finding = `วงเงินสัญญาอยู่ที่ ฿${contractPrice.toLocaleString()} บาท ปริ่มเพดาน 500,000 บาท เสี่ยงต่อการซอยโครงการเพื่อเลี่ยง e-Bidding`;
-          checklist = [
-            'ตรวจสอบแผนการจัดซื้อจัดจ้างประจำปีของ อปท. ว่ามีโครงการบริเวณใกล้เคียงกันหรือไม่',
-            'ตรวจรายงานการควบคุมงานรายวัน (Daily Inspector Log)',
-            'สุ่มวัดขนาดมิติกว้างxยาวxลึก ของงานก่อสร้างหน้างานจริง'
-          ];
-        }
-        // Factor 5: Abnormally Low Bid (> 25% drop)
-        else if (diffPct <= -25 && projectType.includes('ก่อสร้าง')) {
-          riskScore = 80;
-          riskLevel = 'HIGH';
+          finding = `ผลต่างราคาห่างจากราคากลางเพียง ${Math.abs(diffPct).toFixed(2)}% ส่อพฤติกรรมรู้ราคากันล่วงหน้า`;
+        } else if (contractPrice >= 450000 && contractPrice <= 500000 && method.includes('เฉพาะเจาะจง')) {
+          f7_val = 0.85;
+          f7_lvl = "สูง";
+          riskType = 'พฤติกรรมแบ่งซื้อแบ่งจ้าง (เฉพาะเจาะจงปริ่ม 5 แสน)';
+          lawRef = 'มาตรา 21 แห่ง พ.ร.บ. จัดซื้อจัดจ้างฯ พ.ศ. 2560';
+          finding = `วงเงินสัญญา ฿${contractPrice.toLocaleString()} ปริ่มเพดาน 500,000 บาท เสี่ยงต่อการซอยโครงการ`;
+        } else if (diffPct <= -25 && projectType.includes('ก่อสร้าง')) {
+          f7_val = 0.80;
+          f7_lvl = "สูง";
           riskType = 'ราคาต่ำกว่าพิกัดวิศวกรรมผิดปกติ (เสี่ยงทิ้งงาน/ลดสเปก)';
-          lawRef = 'ระเบียบกระทรวงการคลังฯ ข้อ 58 (สงสัยว่าไม่สามารถปฏิบัติตามมาตรฐานช่างได้)';
-          finding = `ผู้รับจ้างเคาะราคาต่ำกว่าราคากลางถึง ${Math.abs(diffPct).toFixed(1)}% ทางวิศวกรรมเสี่ยงต่อการขาดทุน ทิ้งงาน หรือลักไก่ลดคุณภาพวัสดุ`;
-          checklist = [
-            'สุ่มเก็บตัวอย่างคอนกรีตไปทดสอบกำลังอัด (Compressive Strength Test)',
-            'ตรวจสอบใบกำกับสินค้าและการสั่งซื้อเหล็กเสริมข้ออ้อย',
-            'เฝ้าระวังการเบิกเงินค่างวดล่วงหน้า'
-          ];
+          lawRef = 'ระเบียบกระทรวงการคลังฯ ข้อ 58';
+          finding = `ราคาต่ำกว่าราคากลาง ${Math.abs(diffPct).toFixed(1)}% เสี่ยงต่อการลักไก่ลดวัสดุหรือทิ้งงาน`;
         }
-        // Medium Watch
-        else if (diffPct < 0 && diffPct >= -1.0 && contractPrice > 1000000) {
-          riskScore = 65;
-          riskLevel = 'MEDIUM';
-          riskType = 'ระดับเฝ้าระวัง: ส่วนต่างราคากลางน้อยกว่า 1%';
-          lawRef = 'ระเบียบกระทรวงการคลังฯ ว่าด้วยการจัดซื้อจัดจ้างฯ';
-          finding = 'การประมูลมีส่วนต่างราคาน้อยกว่าเกณฑ์เฉลี่ย ควรตรวจสอบจำนวนผู้ยื่นข้อเสนอแข่งขัน';
-          checklist = [
-            'ตรวจนับจำนวนผู้ขอรับเอกสาร vs ผู้ยื่นซองจริง',
-            'ตรวจสอบการส่งมอบงานตามกรอบเวลาในสัญญา'
-          ];
-        }
+
+        // ข้อ 8: สัญญาที่มีคู่สัญญารายเดิมซ้ำกัน (ประเมินเบื้องต้น = 0.20, หากซ้ำบ่อยจะปรับขึ้นในระดับหน่วยงาน)
+        let f8_val = 0.20;
+        let f8_lvl = "ต่ำ";
+
+        let riskSum = (f1_val + f2_val + f3_val + f4_val + f5_val + f6_val + f7_val);
+        let riskAvg = riskSum / 7;
+        let riskScore = Math.round(riskAvg * 100);
+        let riskLevel = riskAvg >= 0.60 ? 'HIGH' : (riskAvg >= 0.35 ? 'MEDIUM' : 'LOW');
+
+        let checklist = [
+          'สุ่มเจาะตรวจความหนาชั้นโครงสร้างทาง / โครงสร้างคอนกรีต (Coring Test)',
+          'ตรวจสอบบันทึกผลการเปิดซองและเวลาการยื่นซอง e-GP',
+          'ตรวจสอบใบเสร็จสั่งซื้อวัสดุและผลทดสอบกำลังอัดคอนกรีต'
+        ];
 
         list.push({
           project_id: row.project_id || `P-${idx+1}`,
@@ -841,10 +872,20 @@
           status: row.project_status || row.contract_status || 'ระหว่างดำเนินการ',
           risk_level: riskLevel,
           risk_score: riskScore,
+          risk_val: riskAvg,
           risk_type: riskType,
           law_ref: lawRef,
           finding: finding,
           checklist: checklist,
+          // factors detail for ปม.2
+          f1: { lvl: f1_lvl, val: f1_val },
+          f2: { lvl: f2_lvl, val: f2_val },
+          f3: { lvl: f3_lvl, val: f3_val },
+          f4: { lvl: f4_lvl, val: f4_val },
+          f5: { lvl: f5_lvl, val: f5_val },
+          f6: { lvl: f6_lvl, val: f6_val },
+          f7: { lvl: f7_lvl, val: f7_val },
+          f8: { lvl: f8_lvl, val: f8_val },
           lat: coords.lat,
           lng: coords.lng
         });
@@ -883,11 +924,9 @@
         return matchDist && matchType && matchNameKey && matchQuery;
       });
 
-      // Update Grouping for ปม.1
       computePm1Entities(filteredRecords);
       updateTopKPIs(filteredRecords);
 
-      // If already viewing an entity in Stage 2, refresh stage 2
       if (currentStage === 2 && selectedEntityName) {
         renderPm2View(selectedEntityName);
       }
@@ -939,9 +978,8 @@
         }
       });
 
-      // Calculate PM.1 Weighted Risk Score for each entity
+      // Calculate PM.1 according to Official สตง. Criteria (1 to 5 levels)
       let entityList = Object.values(entityGroups).map(ent => {
-        // Find most frequent winner
         let topWinner = '-';
         let topWinnerCount = 0;
         for (let w in ent.winnerCount) {
@@ -953,34 +991,116 @@
         ent.topWinner = topWinner;
         ent.topWinnerCount = topWinnerCount;
 
-        // Weights according to แบบ ปม.1:
-        // ข้อ 1: วงเงินสัญญา (น้ำหนัก 0.1)
-        let s1 = Math.min(10, (ent.totalBudget / 10000000) * 2); // 50M = 10 pts
-        // ข้อ 2: จำนวนสัญญา (น้ำหนัก 0.1)
-        let s2 = Math.min(10, ent.totalProjects / 3);
-        // ข้อ 6: จัดซื้อวิธีคัดเลือก/เฉพาะเจาะจงเกิน 5 แสน (น้ำหนัก 0.2)
-        let s6 = Math.min(10, ent.specificOver500kCount * 3.5);
-        // ข้อ 7: ความถี่คู่สัญญาซ้ำรายเดิม (น้ำหนัก 0.2)
-        let repeatRate = ent.totalProjects > 0 ? (topWinnerCount / ent.totalProjects) : 0;
-        let s7 = repeatRate * 10;
-        // ข้อ 3,4,5 อื่นๆ
-        let sOther = Math.min(10, ent.highRiskProjects * 2.5);
+        // เกณฑ์ ๑. วงเงินสัญญาที่ความถี่สูงสุด (1=1-5M, 2=5-10M, 3=10-50M, 4=50-100M, 5=>100M)
+        let r1 = 1;
+        if (ent.totalBudget > 100000000) r1 = 5;
+        else if (ent.totalBudget > 50000000) r1 = 4;
+        else if (ent.totalBudget > 10000000) r1 = 3;
+        else if (ent.totalBudget > 5000000) r1 = 2;
 
-        // Weighted Sum (Scale 0 - 100)
-        let pm1Score = (s1 * 0.1) + (s2 * 0.1) + (sOther * 0.2) + (s6 * 0.2) + (s7 * 0.2);
-        ent.pm1Score = Math.min(100, Math.round(pm1Score * 10));
+        // เกณฑ์ ๒. จำนวนสัญญาในรอบ 1 ปี (1=1-50, 2=51-100, 3=101-150, 4=151-200, 5=>200)
+        let r2 = 1;
+        if (ent.totalProjects > 200) r2 = 5;
+        else if (ent.totalProjects > 150) r2 = 4;
+        else if (ent.totalProjects > 100) r2 = 3;
+        else if (ent.totalProjects > 50) r2 = 2;
+
+        // เกณฑ์ ๓. ผลตรวจปีที่แล้ว (สมมุติฐานค่ากลาง = 1)
+        let r3 = 1;
+        // เกณฑ์ ๔. แหล่งเงิน (เงินงบประมาณ = 1)
+        let r4 = 1;
+        // เกณฑ์ ๕. เรื่องร้องเรียน (มีข้อสังเกตความเสี่ยงสูง = 3, ไม่มี = 1)
+        let r5 = ent.highRiskProjects > 0 ? 3 : 1;
+
+        // เกณฑ์ ๖. คัดเลือก/เฉพาะเจาะจงเกิน 5 แสน (1=ไม่มี, 2=คัดเลือก, 3=เฉพาะเจาะจง, 4=ทั้งคู่, 5=นวัตกรรม/ทำเอง)
+        let r6 = 1;
+        if (ent.specificOver500kCount > 5) r6 = 4;
+        else if (ent.specificOver500kCount > 0) r6 = 3;
+
+        // เกณฑ์ ๗. ความถี่คู่สัญญาซ้ำ (1=ไม่มีซ้ำ, 3=ซ้ำ 2-5 สัญญา, 5=ซ้ำมากกว่า 5 สัญญา)
+        let r7 = 1;
+        if (topWinnerCount > 5) r7 = 5;
+        else if (topWinnerCount >= 2) r7 = 3;
+
+        // ผลการประเมิน = ระดับ x น้ำหนัก
+        let res1 = r1 * 0.1;
+        let res2 = r2 * 0.1;
+        let res3 = r3 * 0.1;
+        let res4 = r4 * 0.1;
+        let res5 = r5 * 0.2;
+        let res6 = r6 * 0.2;
+        let res7 = r7 * 0.2;
+
+        let totalScore = res1 + res2 + res3 + res4 + res5 + res6 + res7;
+        ent.pm1Score = totalScore;
+        ent.pm1_factors = {
+          r1: r1, res1: res1,
+          r2: r2, res2: res2,
+          r3: r3, res3: res3,
+          r4: r4, res4: res4,
+          r5: r5, res5: res5,
+          r6: r6, res6: res6,
+          r7: r7, res7: res7
+        };
+
+        // Auto select top high risk into selected set
+        if (totalScore >= 2.5) {
+          selectedEntitiesForExport.add(ent.name);
+        }
 
         return ent;
       });
 
-      // Sort descending by PM.1 Score
       entityList.sort((a, b) => b.pm1Score - a.pm1Score);
-
-      // Count High Risk Departments
-      let highRiskDepts = entityList.filter(e => e.pm1Score >= 60).length;
+      let highRiskDepts = entityList.filter(e => e.pm1Score >= 2.5).length;
+      document.getElementById('kpiHighRiskDept').textContent = `${highRiskDepts} หน่วยงาน`;
+      renderPm1Table(entityList);
+    }
       document.getElementById('kpiHighRiskDept').textContent = `${highRiskDepts} หน่วยงาน`;
 
       renderPm1Table(entityList);
+    }
+
+    // Selection States for PM.1 and PM.2
+    let selectedEntitiesForExport = new Set();
+    let selectedProjectsForExport = new Set();
+
+    function toggleSelectAllEntities(check) {
+      if (check) {
+        Object.keys(entityGroups).forEach(name => selectedEntitiesForExport.add(name));
+      } else {
+        selectedEntitiesForExport.clear();
+      }
+      renderPm1Table(Object.values(entityGroups).sort((a,b) => b.pm1Score - a.pm1Score));
+    }
+
+    function toggleEntityCheck(name, event) {
+      event.stopPropagation();
+      if (selectedEntitiesForExport.has(name)) {
+        selectedEntitiesForExport.delete(name);
+      } else {
+        selectedEntitiesForExport.add(name);
+      }
+    }
+
+    function toggleSelectAllProjects(check) {
+      if (!selectedEntityName || !entityGroups[selectedEntityName]) return;
+      let projects = entityGroups[selectedEntityName].records;
+      if (check) {
+        projects.forEach(p => selectedProjectsForExport.add(p.project_id));
+      } else {
+        selectedProjectsForExport.clear();
+      }
+      renderPm2View(selectedEntityName);
+    }
+
+    function toggleProjectCheck(id, event) {
+      event.stopPropagation();
+      if (selectedProjectsForExport.has(id)) {
+        selectedProjectsForExport.delete(id);
+      } else {
+        selectedProjectsForExport.add(id);
+      }
     }
 
     function renderPm1Table(entityList) {
@@ -988,13 +1108,14 @@
       tbody.innerHTML = '';
 
       if (entityList.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 3rem;">ไม่พบหน่วยรับตรวจตามเงื่อนไขที่เลือก</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--muted); padding: 3rem;">ไม่พบหน่วยรับตรวจตามเงื่อนไขที่เลือก</td></tr>`;
         return;
       }
 
       entityList.forEach((ent, idx) => {
-        let badgeClass = ent.pm1Score >= 65 ? 'risk-high' : (ent.pm1Score >= 45 ? 'risk-med' : 'risk-low');
-        let rankText = ent.pm1Score >= 65 ? '🔴 เสี่ยงสูง (Rank A)' : (ent.pm1Score >= 45 ? '🟡 ปานกลาง (Rank B)' : '🟢 ปกติ (Rank C)');
+        let isChecked = selectedEntitiesForExport.has(ent.name) ? 'checked' : '';
+        let badgeClass = ent.pm1Score >= 3.0 ? 'risk-high' : (ent.pm1Score >= 2.0 ? 'risk-med' : 'risk-low');
+        let rankText = ent.pm1Score >= 3.0 ? '🔴 สูง' : (ent.pm1Score >= 2.0 ? '🟡 ปานกลาง' : '🟢 ต่ำ');
 
         const tr = document.createElement('tr');
         if (selectedEntityName === ent.name) tr.classList.add('selected-row');
@@ -1002,6 +1123,9 @@
         tr.onclick = () => selectEntityForPm2(ent.name);
 
         tr.innerHTML = `
+          <td style="text-align: center;" onclick="event.stopPropagation();">
+            <input type="checkbox" ${isChecked} onchange="toggleEntityCheck('${ent.name}', event)">
+          </td>
           <td style="text-align: center; font-weight: bold; color: var(--muted);">${idx + 1}</td>
           <td>
             <div style="font-weight: 700; color: var(--primary); font-size: 0.95rem;">${ent.name}</div>
@@ -1021,7 +1145,7 @@
           </td>
           <td style="text-align: center;">
             <span class="badge-risk ${badgeClass}">${rankText}</span>
-            <div style="font-size: 0.7rem; color: var(--muted); margin-top: 2px;">คะแนน: ${ent.pm1Score}/100</div>
+            <div style="font-size: 0.7rem; color: var(--muted); margin-top: 2px;">ผลลัพธ์: ${ent.pm1Score.toFixed(2)}</div>
           </td>
           <td style="text-align: center;">
             <button class="btn btn-primary" style="padding: 3px 8px; font-size: 0.75rem;" onclick="event.stopPropagation(); selectEntityForPm2('${ent.name}')">
@@ -1037,6 +1161,11 @@
     function selectEntityForPm2(deptName) {
       selectedEntityName = deptName;
       document.getElementById('currentFocusEntityText').innerHTML = `หน่วยรับตรวจเป้าหมาย: <strong style="color: #1e40af;">${deptName}</strong>`;
+      // By default select all projects of this entity
+      selectedProjectsForExport.clear();
+      if (entityGroups[deptName]) {
+        entityGroups[deptName].records.forEach(p => selectedProjectsForExport.add(p.project_id));
+      }
       switchStage(2);
       renderPm2View(deptName);
     }
@@ -1057,7 +1186,6 @@
         document.getElementById('stage2Section').style.display = 'block';
         document.getElementById('step1Tab').classList.remove('active');
         document.getElementById('step2Tab').classList.add('active');
-        // trigger map resize
         setTimeout(() => { map.invalidateSize(); }, 200);
       }
     }
@@ -1068,23 +1196,24 @@
       if (!entity) return;
 
       const projects = entity.records;
-
-      // Sort projects by Risk Score (ปม.2) descending
       projects.sort((a, b) => b.risk_score - a.risk_score);
 
-      // Render Table
       const tbody = document.getElementById('pm2TableBody');
       tbody.innerHTML = '';
 
       projects.forEach(p => {
+        let isChecked = selectedProjectsForExport.has(p.project_id) ? 'checked' : '';
         let riskClass = p.risk_level === 'HIGH' ? 'risk-high' : (p.risk_level === 'MEDIUM' ? 'risk-med' : 'risk-low');
-        let riskText = p.risk_level === 'HIGH' ? '🔴 เสี่ยงสูง' : (p.risk_level === 'MEDIUM' ? '🟡 เฝ้าระวัง' : '🟢 ปกติ');
+        let riskText = p.risk_level === 'HIGH' ? '🔴 สูง' : (p.risk_level === 'MEDIUM' ? '🟡 ปานกลาง' : '🟢 ต่ำ');
 
         const tr = document.createElement('tr');
         tr.innerHTML = `
+          <td style="text-align: center;" onclick="event.stopPropagation();">
+            <input type="checkbox" ${isChecked} onchange="toggleProjectCheck('${p.project_id}', event)">
+          </td>
           <td>
             <span class="badge-risk ${riskClass}">${riskText}</span>
-            <div style="font-size: 0.7rem; color: var(--muted); margin-top: 3px;">Score: ${p.risk_score}/100</div>
+            <div style="font-size: 0.7rem; color: var(--muted); margin-top: 3px;">ค่าความเสี่ยง: ${p.risk_val.toFixed(2)}</div>
           </td>
           <td>
             <div style="font-weight: 600; color: #0a2540;">${p.project_name}</div>
@@ -1104,16 +1233,13 @@
             <div style="font-size: 0.75rem; color: var(--muted);">TIN: ${p.winner_tin}</div>
           </td>
           <td style="text-align: center;">
-            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.8rem;" onclick="openModal('${p.project_id}')">🔍 ดูผล</button>
+            <button class="btn btn-outline" style="padding: 4px 8px; font-size: 0.8rem;" onclick="openModal('${p.project_id}')">🔍 เจาะลึก</button>
           </td>
         `;
         tbody.appendChild(tr);
       });
 
-      // Render Markers on Map for this entity
       renderEntityMapMarkers(projects);
-
-      // Render Risk Doughnut Chart for this entity
       updateEntityRiskChart(projects);
     }
 
@@ -1217,138 +1343,208 @@
 
     // ==================== EXPORT FUNCTIONS (EXCEL & PDF FOR ปม.1 & ปม.2) ====================
 
-    // 1. Export ปม.1 เป็น Excel (.xlsx) ตามโครงสร้าง 7 ปัจจัยเสี่ยง
+    // ==================== EXPORT FUNCTIONS (EXCEL & PDF MATCHING OFFICIAL สตง. FORMS) ====================
+
+    // 1. ส่งออก Excel แบบ ปม.1 ตามโครงสร้างทางการ สตง.
     function exportPm1Excel() {
       let entityList = Object.values(entityGroups);
-      if (entityList.length === 0) {
-        alert('ยังไม่มีข้อมูลหน่วยรับตรวจให้ส่งออก');
-        return;
+      if (entityList.length === 0) { alert('ไม่มีข้อมูล'); return; }
+      
+      // กรองเฉพาะหน่วยงานที่ผู้ใช้ติ๊กเลือก (ถ้าไม่มีการติ๊กเลือกเลย ให้ใช้ทั้งหมด)
+      if (selectedEntitiesForExport.size > 0) {
+        entityList = entityList.filter(e => selectedEntitiesForExport.has(e.name));
       }
       entityList.sort((a, b) => b.pm1Score - a.pm1Score);
 
       let data = [
-        ["แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ (แบบ ปม.1)"],
-        ["สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ - สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ"],
+        ["แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "แบบ ปม.1"],
+        ["สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        ["สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4)", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        ["ประจำปีงบประมาณ พ.ศ. 2568", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [""],
         [
           "ลำดับ",
           "หน่วยรับตรวจ",
-          "อำเภอ",
-          "จำนวนสัญญาในรอบปี (น้ำหนัก 0.1)",
-          "วงเงินสัญญารวม (น้ำหนัก 0.1)",
-          "สัญญาวิธีคัดเลือก/เฉพาะเจาะจงเกิน 500,000 บ. (น้ำหนัก 0.2)",
-          "ผู้รับเหมาที่ได้งานบ่อยสุด",
-          "จำนวนงานที่ผู้รับเหมารายเดิมได้ (น้ำหนัก 0.2)",
-          "โครงการเสี่ยงสูงในหน่วย",
-          "คะแนนประเมิน ปม.1 (เต็ม 100)",
-          "ระดับความเสี่ยง (Rank)",
-          "ผลการคัดเลือก"
+          "๑.จำนวนสัญญาที่มีความถี่สูงสุดตามวงเงินสัญญา", "", "",
+          "๒. จำนวนสัญญาที่ได้รับภายใน ๑ ปี", "", "",
+          "๓. ผลการตรวจสอบสัญญาปีที่แล้ว", "", "",
+          "๔. แหล่งที่มาของเงินที่ใช้ในการจัดหา", "", "",
+          "๕. มีเรื่องร้องเรียน หรือปรากฏข่าวการดำเนินการที่ไม่ปกติ", "", "",
+          "๖. การจัดหาพัสดุและบริการ โดยวิธีคัดเลือก วิธีเฉพาะเจาะจง (กรณีวงเงินเกิน ๕๐๐,๐๐๐ บาท) ดำเนินการเอง / นวัตกรรม", "", "",
+          "๗. ความถี่ของคู่สัญญาที่มีชื่อซ้ำกันภายใน ๑ ปีที่ผ่านมา", "", "",
+          "รวมผลการประเมิน"
+        ],
+        [
+          "", "",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          "ระดับความเสี่ยง", "น้ำหนัก", "ผลการประเมิน",
+          ""
         ]
       ];
 
       entityList.forEach((e, idx) => {
-        let rank = e.pm1Score >= 65 ? "เสี่ยงสูง (Rank A)" : (e.pm1Score >= 45 ? "ปานกลาง (Rank B)" : "ปกติ (Rank C)");
-        let selected = e.pm1Score >= 65 ? "คัดเลือกเข้าแผนตรวจสอบ" : "เฝ้าระวัง";
+        let f = e.pm1_factors || {
+          r1: 1, res1: 0.1, r2: 1, res2: 0.1, r3: 1, res3: 0.1,
+          r4: 1, res4: 0.1, r5: 1, res5: 0.2, r6: 1, res6: 0.2,
+          r7: 1, res7: 0.2
+        };
+
         data.push([
           idx + 1,
           e.name,
-          e.district,
-          e.totalProjects,
-          e.totalBudget,
-          e.specificOver500kCount,
-          e.topWinner,
-          e.topWinnerCount,
-          e.highRiskProjects,
-          e.pm1Score,
-          rank,
-          selected
+          f.r1, 0.1, f.res1.toFixed(2),
+          f.r2, 0.1, f.res2.toFixed(2),
+          f.r3, 0.1, f.res3.toFixed(2),
+          f.r4, 0.1, f.res4.toFixed(2),
+          f.r5, 0.2, f.res5.toFixed(2),
+          f.r6, 0.2, f.res6.toFixed(2),
+          f.r7, 0.2, f.res7.toFixed(2),
+          e.pm1Score.toFixed(2)
         ]);
       });
 
+      // สรุปความเห็นท้ายแบบฟอร์มตาม ปม.1
+      data.push([""]);
+      data.push(["สรุปความเห็น:"]);
+      data.push(["ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย"]);
+      data.push([""]);
+      data.push(["", "", "ผู้ประเมิน.................................................................", "", "", "", "", "", "ผู้สอบทาน................................................................."]);
+      data.push(["", "", "(                                          )", "", "", "", "", "", "(                                          )"]);
+      data.push(["", "", "ตำแหน่ง....................................................................", "", "", "", "", "", "ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม..............................................................."]);
+      data.push(["", "", "วันที่...........................................................................", "", "", "", "", "", "วันที่..........................................................................."]);
+
       let ws = XLSX.utils.aoa_to_sheet(data);
       let wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "ปม.1-คัดเลือกหน่วยรับตรวจ");
+      XLSX.utils.book_append_sheet(wb, ws, "แบบ ปม.1");
       XLSX.writeFile(wb, `แบบ_ปม1_คัดเลือกหน่วยรับตรวจ_ชัยภูมิ_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // 2. Export ปม.2 เป็น Excel (.xlsx) ตามโครงสร้าง 8 ปัจจัยเสี่ยง
+    // 2. ส่งออก Excel แบบ ปม.2 ตามโครงสร้างทางการ สตง.
     function exportPm2Excel() {
-      if (!selectedEntityName || !entityGroups[selectedEntityName]) {
-        alert('กรุณาเลือกหน่วยรับตรวจก่อน');
-        return;
-      }
+      if (!selectedEntityName || !entityGroups[selectedEntityName]) { alert('กรุณาเลือกหน่วยรับตรวจก่อน'); return; }
       let projects = entityGroups[selectedEntityName].records;
+      
+      // กรองเฉพาะโครงการที่ติ๊กเลือก (ถ้าไม่มีการติ๊กเลือกเลย ให้ใช้ทั้งหมดของหน่วยนั้น)
+      if (selectedProjectsForExport.size > 0) {
+        projects = projects.filter(p => selectedProjectsForExport.has(p.project_id));
+      }
       projects.sort((a, b) => b.risk_score - a.risk_score);
 
       let data = [
-        ["แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม (แบบ ปม.2)"],
-        [`ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.1)`],
-        ["สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ"],
+        ["แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "แบบ ปม.2"],
+        ["การตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        ["สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4)", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [`ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.๑)`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        ["ประจำปีงบประมาณ พ.ศ. 2568", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [""],
         [
           "ลำดับ",
-          "เลขที่โครงการ",
           "สัญญา/งาน/โครงการ/กิจกรรม",
-          "ประเภทงาน",
-          "วิธีการจัดหา",
-          "ราคากลาง (บาท)",
-          "วงเงินสัญญา (บาท)",
-          "ส่วนต่างราคากลาง (%)",
-          "ผู้ชนะการเสนอราคา (คู่สัญญา)",
-          "เลขประจำตัวผู้เสียภาษี (TIN)",
-          "คะแนนความเสี่ยง (ปม.2)",
-          "ระดับความเสี่ยง",
-          "ปัจจัยเสี่ยง/ความผิดปกติที่ตรวจพบ",
-          "ฐานกฎหมาย/ระเบียบ",
-          "ข้อสั่งการสุ่มตรวจภาคสนาม"
+          "๑.แหล่งที่มาของเงินที่ใช้ในการดำเนินการ", "",
+          "๒. วงเงินที่ใช้ในการดำเนินการ", "",
+          "๓. ที่มาของสัญญา/งาน/โครงการ/กิจกรรม", "",
+          "๔. วิธีการในการจัดหาพัสดุและบริการ", "",
+          "๕. ลักษณะการดำเนินงาน", "",
+          "๖. ผลกระทบต่อสิ่งแวดล้อม", "",
+          "๗. ความผิดปกติของการดำเนินงาน", "",
+          "๘. สัญญาที่มีคู่สัญญารายเดิมซ้ำกัน", "",
+          "รวมความเสี่ยงทั้งหมด", ""
+        ],
+        [
+          "", "",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "ระดับความเสี่ยง", "ค่าความเสี่ยง",
+          "รวม", "เฉลี่ย"
         ]
       ];
 
       projects.forEach((p, idx) => {
+        let f1 = p.f1 || { lvl: "ต่ำ", val: 0.2 };
+        let f2 = p.f2 || { lvl: "ต่ำ", val: 0.2 };
+        let f3 = p.f3 || { lvl: "ต่ำ", val: 0.2 };
+        let f4 = p.f4 || { lvl: "ต่ำ", val: 0.2 };
+        let f5 = p.f5 || { lvl: "ต่ำ", val: 0.2 };
+        let f6 = p.f6 || { lvl: "ต่ำ", val: 0.2 };
+        let f7 = p.f7 || { lvl: "ต่ำ", val: 0.2 };
+        let f8 = p.f8 || { lvl: "ต่ำ", val: 0.2 };
+
+        let sumVal = (f1.val + f2.val + f3.val + f4.val + f5.val + f6.val + f7.val + f8.val);
+        let avgVal = sumVal / 8;
+
         data.push([
           idx + 1,
-          p.project_id,
           p.project_name,
-          p.project_type,
-          p.procure_method,
-          p.median_price,
-          p.contract_price,
-          p.diff_pct.toFixed(2) + "%",
-          p.winner,
-          p.winner_tin,
-          p.risk_score,
-          p.risk_level,
-          p.risk_type + " - " + p.finding,
-          p.law_ref,
-          p.checklist.join(" | ")
+          f1.lvl, f1.val.toFixed(2),
+          f2.lvl, f2.val.toFixed(2),
+          f3.lvl, f3.val.toFixed(2),
+          f4.lvl, f4.val.toFixed(2),
+          f5.lvl, f5.val.toFixed(2),
+          f6.lvl, f6.val.toFixed(2),
+          f7.lvl, f7.val.toFixed(2),
+          f8.lvl, f8.val.toFixed(2),
+          sumVal.toFixed(2),
+          avgVal.toFixed(2)
         ]);
       });
 
+      // สรุปความเห็นท้ายแบบฟอร์มตาม ปม.2
+      data.push([""]);
+      data.push(["สรุปความเห็น:"]);
+      data.push(["ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย"]);
+      data.push([""]);
+      data.push(["", "ผู้ประเมิน.................................................................", "", "", "", "", "", "", "ผู้สอบทาน................................................................."]);
+      data.push(["", "(                                          )", "", "", "", "", "", "", "(                                          )"]);
+      data.push(["", "ตำแหน่ง....................................................................", "", "", "", "", "", "", "ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม..............................................................."]);
+      data.push(["", "วันที่...........................................................................", "", "", "", "", "", "", "วันที่..........................................................................."]);
+
       let ws = XLSX.utils.aoa_to_sheet(data);
       let wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "ปม.2-คัดเลือกโครงการ");
+      XLSX.utils.book_append_sheet(wb, ws, "แบบ ปม.2");
       let safeName = selectedEntityName.replace(/[\/\\?%*:|"<>]/g, '_').substring(0, 25);
       XLSX.writeFile(wb, `แบบ_ปม2_โครงการ_${safeName}_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    // 3. Export ปม.1 เป็น PDF (แบบฟอร์มทางการ สตง.)
+    // 3. Export PDF แบบ ปม.1 (จัดรูปแบบตามตาราง 7 ปัจจัยเสี่ยงและค่าน้ำหนัก)
     function exportPm1PDF() {
       let entityList = Object.values(entityGroups);
       if (entityList.length === 0) { alert('ไม่มีข้อมูล'); return; }
+      if (selectedEntitiesForExport.size > 0) {
+        entityList = entityList.filter(e => selectedEntitiesForExport.has(e.name));
+      }
       entityList.sort((a, b) => b.pm1Score - a.pm1Score);
 
-      let rowsHtml = entityList.map((e, idx) => `
-        <tr>
-          <td style="text-align: center;">${idx + 1}</td>
-          <td><strong>${e.name}</strong> (${e.district})</td>
-          <td style="text-align: right;">${e.totalProjects.toLocaleString()}</td>
-          <td style="text-align: right;">${(e.totalBudget).toLocaleString()}</td>
-          <td style="text-align: center;">${e.specificOver500kCount}</td>
-          <td>${e.topWinner} (${e.topWinnerCount} สัญญา)</td>
-          <td style="text-align: center; font-weight: bold; color: ${e.pm1Score >= 65 ? '#dc2626' : '#0a2540'};">${e.pm1Score}/100</td>
-          <td style="text-align: center;"><strong>${e.pm1Score >= 65 ? 'คัดเลือกตรวจ' : 'เฝ้าระวัง'}</strong></td>
-        </tr>
-      `).join('');
+      let rowsHtml = entityList.map((e, idx) => {
+        let f = e.pm1_factors || {
+          r1: 1, res1: 0.1, r2: 1, res2: 0.1, r3: 1, res3: 0.1,
+          r4: 1, res4: 0.1, r5: 1, res5: 0.2, r6: 1, res6: 0.2,
+          r7: 1, res7: 0.2
+        };
+        return `
+          <tr>
+            <td style="text-align: center;">${idx + 1}</td>
+            <td><strong>${e.name}</strong></td>
+            <td style="text-align: center;">${f.r1}</td><td style="text-align: center;">0.1</td><td style="text-align: center;">${f.res1.toFixed(2)}</td>
+            <td style="text-align: center;">${f.r2}</td><td style="text-align: center;">0.1</td><td style="text-align: center;">${f.res2.toFixed(2)}</td>
+            <td style="text-align: center;">${f.r3}</td><td style="text-align: center;">0.1</td><td style="text-align: center;">${f.res3.toFixed(2)}</td>
+            <td style="text-align: center;">${f.r4}</td><td style="text-align: center;">0.1</td><td style="text-align: center;">${f.res4.toFixed(2)}</td>
+            <td style="text-align: center;">${f.r5}</td><td style="text-align: center;">0.2</td><td style="text-align: center;">${f.res5.toFixed(2)}</td>
+            <td style="text-align: center;">${f.r6}</td><td style="text-align: center;">0.2</td><td style="text-align: center;">${f.res6.toFixed(2)}</td>
+            <td style="text-align: center;">${f.r7}</td><td style="text-align: center;">0.2</td><td style="text-align: center;">${f.res7.toFixed(2)}</td>
+            <td style="text-align: center; font-weight: bold; background: #f8fafc;">${e.pm1Score.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
 
       let printWin = window.open('', '_blank');
       printWin.document.write(`
@@ -1357,87 +1553,113 @@
         <head>
           <title>แบบ ปม.1 - สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ</title>
           <style>
-            body { font-family: 'Sarabun', sans-serif; font-size: 11pt; padding: 20px; }
-            h2, h3, h4 { margin: 4px 0; text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 9.5pt; }
-            th, td { border: 1px solid #000; padding: 6px 8px; }
-            th { background: #f0f0f0; text-align: center; }
-            .sign-box { margin-top: 40px; display: flex; justify-content: space-between; font-size: 10pt; }
+            body { font-family: 'Sarabun', sans-serif; font-size: 8pt; padding: 10px; }
+            h2, h3, h4 { margin: 2px 0; text-align: center; font-size: 11pt; }
+            h3 { font-size: 10pt; }
+            h4 { font-size: 9.5pt; font-weight: normal; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 7.5pt; }
+            th, td { border: 1px solid #000; padding: 4px 3px; }
+            th { background: #f1f5f9; text-align: center; font-weight: bold; }
+            .sign-box { margin-top: 25px; display: flex; justify-content: space-between; font-size: 9pt; }
             @media print {
-              @page { size: landscape; margin: 10mm; }
+              @page { size: landscape; margin: 8mm; }
               body { padding: 0; }
             }
           </style>
         </head>
         <body>
-          <div style="text-align: right; font-size: 9pt; font-weight: bold;">แบบ ปม.1</div>
+          <div style="text-align: right; font-weight: bold; font-size: 9pt;">ปม.1</div>
           <h2>แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ</h2>
           <h3>สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</h3>
           <h4>สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4) ประจำปีงบประมาณ พ.ศ. 2568</h4>
-          <p style="font-size: 9pt; margin-top: 10px;"><strong>เกณฑ์ 7 ปัจจัยเสี่ยง:</strong> 1.วงเงินสัญญา (0.1) | 2.จำนวนสัญญา (0.1) | 3-5.ผลตรวจเดิมและแหล่งเงิน (0.2) | 6.จัดหาเฉพาะเจาะจงเกิน 5 แสน (0.2) | 7.คู่สัญญาชื่อซ้ำกัน (0.2)</p>
           <table>
             <thead>
               <tr>
-                <th style="width: 40px;">ลำดับ</th>
-                <th>หน่วยรับตรวจ</th>
-                <th>จำนวนสัญญา</th>
-                <th>วงเงินสัญญารวม (บาท)</th>
-                <th>วิธีเฉพาะเจาะจง > 5 แสน</th>
-                <th>คู่สัญญาที่ได้งานซ้ำมากที่สุด</th>
-                <th>คะแนน ปม.1</th>
-                <th>ผลการประเมิน</th>
+                <th rowspan="2" style="width: 25px;">ลำดับ</th>
+                <th rowspan="2" style="width: 140px;">ปัจจัยเสี่ยง<br><br>หน่วยรับตรวจ</th>
+                <th colspan="3">๑.จำนวนสัญญาที่มีความถี่สูงสุดตามวงเงินสัญญา</th>
+                <th colspan="3">๒. จำนวนสัญญาที่ได้รับภายใน ๑ ปี</th>
+                <th colspan="3">๓. ผลการตรวจสอบสัญญาปีที่แล้ว</th>
+                <th colspan="3">๔. แหล่งที่มาของเงินที่ใช้ในการจัดหา</th>
+                <th colspan="3">๕. มีเรื่องร้องเรียน หรือปรากฏข่าวที่ไม่ปกติ</th>
+                <th colspan="3">๖. จัดหาคัดเลือก/เฉพาะเจาะจงเกิน ๕ แสน</th>
+                <th colspan="3">๗. ความถี่คู่สัญญาชื่อซ้ำกันภายใน ๑ ปี</th>
+                <th rowspan="2" style="width: 45px;">รวมผลการประเมิน</th>
+              </tr>
+              <tr>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
+                <th>ระดับ</th><th>น้ำหนัก</th><th>ผล</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
           </table>
-          <div style="margin-top: 15px; font-size: 9.5pt;">
-            <strong>สรุปความเห็น:</strong> เห็นควรคัดเลือกหน่วยรับตรวจที่มีคะแนนความเสี่ยงระดับสูง (Rank A) เพื่อเข้าสู่กระบวนการคัดเลือกสัญญา/โครงการตามแบบ ปม.2 ต่อไป
+          <div style="margin-top: 10px; font-size: 8.5pt;">
+            <strong>สรุปความเห็น:</strong> ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย
           </div>
           <div class="sign-box">
             <div style="text-align: center; width: 45%;">
-              ลงชื่อ................................................................. ผู้ประเมิน<br>
+              ผู้ประเมิน.................................................................<br>
               (.................................................................)<br>
               ตำแหน่ง.................................................................<br>
               วันที่........../........../..........
             </div>
             <div style="text-align: center; width: 45%;">
-              ลงชื่อ................................................................. ผู้สอบทาน<br>
+              ผู้สอบทาน.................................................................<br>
               (.................................................................)<br>
               ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม<br>
               วันที่........../........../..........
             </div>
           </div>
-          <script>
-            window.onload = function() { window.print(); }
-          <\/script>
+          <script>window.onload = function() { window.print(); }<\/script>
         </body>
         </html>
       `);
       printWin.document.close();
     }
 
-    // 4. Export ปม.2 เป็น PDF (แบบฟอร์มทางการ สตง.)
+    // 4. Export PDF แบบ ปม.2 (จัดรูปแบบตามตาราง 8 ปัจจัยเสี่ยงและค่าความเสี่ยง/เฉลี่ย)
     function exportPm2PDF() {
       if (!selectedEntityName || !entityGroups[selectedEntityName]) { alert('กรุณาเลือกหน่วยรับตรวจก่อน'); return; }
       let projects = entityGroups[selectedEntityName].records;
+      if (selectedProjectsForExport.size > 0) {
+        projects = projects.filter(p => selectedProjectsForExport.has(p.project_id));
+      }
       projects.sort((a, b) => b.risk_score - a.risk_score);
 
-      let rowsHtml = projects.map((p, idx) => `
-        <tr>
-          <td style="text-align: center;">${idx + 1}</td>
-          <td><strong>${p.project_name}</strong><br><small>รหัส: ${p.project_id}</small></td>
-          <td style="text-align: right;">${(p.contract_price).toLocaleString()}</td>
-          <td style="text-align: center;">${p.procure_method}</td>
-          <td style="text-align: center; color: ${p.diff_pct < -15 || (p.diff_pct > -0.25 && p.diff_pct < 0) ? '#dc2626' : '#000'}; font-weight: bold;">
-            ${p.diff_pct.toFixed(2)}%
-          </td>
-          <td>${p.winner}</td>
-          <td style="text-align: center; font-weight: bold; color: ${p.risk_level === 'HIGH' ? '#dc2626' : '#0a2540'};">
-            ${p.risk_score}/100
-          </td>
-          <td style="font-size: 8pt;">${p.risk_type}</td>
-        </tr>
-      `).join('');
+      let rowsHtml = projects.map((p, idx) => {
+        let f1 = p.f1 || { lvl: "ต่ำ", val: 0.2 };
+        let f2 = p.f2 || { lvl: "ต่ำ", val: 0.2 };
+        let f3 = p.f3 || { lvl: "ต่ำ", val: 0.2 };
+        let f4 = p.f4 || { lvl: "ต่ำ", val: 0.2 };
+        let f5 = p.f5 || { lvl: "ต่ำ", val: 0.2 };
+        let f6 = p.f6 || { lvl: "ต่ำ", val: 0.2 };
+        let f7 = p.f7 || { lvl: "ต่ำ", val: 0.2 };
+        let f8 = p.f8 || { lvl: "ต่ำ", val: 0.2 };
+        let sumVal = (f1.val + f2.val + f3.val + f4.val + f5.val + f6.val + f7.val + f8.val);
+        let avgVal = sumVal / 8;
+
+        return `
+          <tr>
+            <td style="text-align: center;">${idx + 1}</td>
+            <td><strong>${p.project_name}</strong><br><small style="color: #64748b;">วงเงิน: ฿${p.contract_price.toLocaleString()}</small></td>
+            <td style="text-align: center;">${f1.lvl}</td><td style="text-align: center;">${f1.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f2.lvl}</td><td style="text-align: center;">${f2.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f3.lvl}</td><td style="text-align: center;">${f3.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f4.lvl}</td><td style="text-align: center;">${f4.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f5.lvl}</td><td style="text-align: center;">${f5.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f6.lvl}</td><td style="text-align: center;">${f6.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f7.lvl}</td><td style="text-align: center;">${f7.val.toFixed(2)}</td>
+            <td style="text-align: center;">${f8.lvl}</td><td style="text-align: center;">${f8.val.toFixed(2)}</td>
+            <td style="text-align: center; font-weight: bold;">${sumVal.toFixed(2)}</td>
+            <td style="text-align: center; font-weight: bold; background: #f8fafc;">${avgVal.toFixed(2)}</td>
+          </tr>
+        `;
+      }).join('');
 
       let printWin = window.open('', '_blank');
       printWin.document.write(`
@@ -1446,59 +1668,73 @@
         <head>
           <title>แบบ ปม.2 - ${selectedEntityName}</title>
           <style>
-            body { font-family: 'Sarabun', sans-serif; font-size: 10pt; padding: 20px; }
-            h2, h3, h4 { margin: 3px 0; text-align: center; }
-            table { width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 8.5pt; }
-            th, td { border: 1px solid #000; padding: 5px 6px; }
-            th { background: #f0f0f0; text-align: center; }
-            .sign-box { margin-top: 35px; display: flex; justify-content: space-between; font-size: 9.5pt; }
+            body { font-family: 'Sarabun', sans-serif; font-size: 8pt; padding: 10px; }
+            h2, h3, h4 { margin: 2px 0; text-align: center; font-size: 11pt; }
+            h3 { font-size: 10pt; }
+            h4 { font-size: 9.5pt; font-weight: normal; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 7.5pt; }
+            th, td { border: 1px solid #000; padding: 4px 3px; }
+            th { background: #f1f5f9; text-align: center; font-weight: bold; }
+            .sign-box { margin-top: 25px; display: flex; justify-content: space-between; font-size: 9pt; }
             @media print {
-              @page { size: landscape; margin: 10mm; }
+              @page { size: landscape; margin: 8mm; }
               body { padding: 0; }
             }
           </style>
         </head>
         <body>
-          <div style="text-align: right; font-size: 9pt; font-weight: bold;">แบบ ปม.2</div>
+          <div style="text-align: right; font-weight: bold; font-size: 9pt;">ปม.2</div>
           <h2>แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม</h2>
           <h3>การตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</h3>
-          <h4>ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.1)</h4>
-          <p style="text-align: center; font-size: 9pt;">สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ ประจำปีงบประมาณ พ.ศ. 2568</p>
+          <h4>ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.๑)</h4>
+          <p style="text-align: center; font-size: 9pt; margin: 3px 0;">สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ ประจำปีงบประมาณ พ.ศ. 2568</p>
           <table>
             <thead>
               <tr>
-                <th style="width: 35px;">ลำดับ</th>
-                <th>สัญญา/งาน/โครงการ/กิจกรรม</th>
-                <th>วงเงินสัญญา (บาท)</th>
-                <th>วิธีการจัดหา</th>
-                <th>ส่วนต่างราคากลาง</th>
-                <th>คู่สัญญา (ผู้รับจ้าง)</th>
-                <th>คะแนน ปม.2</th>
-                <th>ข้อบ่งชี้ความผิดปกติ (Red Flag)</th>
+                <th rowspan="2" style="width: 25px;">ลำดับ</th>
+                <th rowspan="2" style="width: 150px;">ปัจจัยเสี่ยง<br><br>สัญญา/งาน/โครงการ/กิจกรรม</th>
+                <th colspan="2">๑.แหล่งที่มาของเงิน</th>
+                <th colspan="2">๒. วงเงินที่ใช้</th>
+                <th colspan="2">๓. ที่มาของโครงการ</th>
+                <th colspan="2">๔. วิธีการจัดหา</th>
+                <th colspan="2">๕. ลักษณะการดำเนินงาน</th>
+                <th colspan="2">๖. ผลกระทบสิ่งแวดล้อม</th>
+                <th colspan="2">๗. ความผิดปกติ</th>
+                <th colspan="2">๘. คู่สัญญารายเดิมซ้ำกัน</th>
+                <th colspan="2">รวมความเสี่ยงทั้งหมด</th>
+              </tr>
+              <tr>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>ระดับ</th><th>ค่าเสี่ยง</th>
+                <th>รวม</th><th>เฉลี่ย</th>
               </tr>
             </thead>
             <tbody>${rowsHtml}</tbody>
           </table>
-          <div style="margin-top: 12px; font-size: 9pt;">
-            <strong>สรุปความเห็น:</strong> เห็นควรคัดเลือกโครงการที่มีคะแนนความเสี่ยงสูงลำดับต้น เพื่อลงพื้นที่สุ่มตรวจทางวิศวกรรม (เจาะแกนคอนกรีต/ตรวจ BOQ) ภาคสนาม
+          <div style="margin-top: 10px; font-size: 8.5pt;">
+            <strong>สรุปความเห็น:</strong> ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย
           </div>
           <div class="sign-box">
             <div style="text-align: center; width: 45%;">
-              ลงชื่อ................................................................. ผู้ประเมิน<br>
+              ผู้ประเมิน.................................................................<br>
               (.................................................................)<br>
               ตำแหน่ง.................................................................<br>
               วันที่........../........../..........
             </div>
             <div style="text-align: center; width: 45%;">
-              ลงชื่อ................................................................. ผู้สอบทาน<br>
+              ผู้สอบทาน.................................................................<br>
               (.................................................................)<br>
               ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม<br>
               วันที่........../........../..........
             </div>
           </div>
-          <script>
-            window.onload = function() { window.print(); }
-          <\/script>
+          <script>window.onload = function() { window.print(); }<\/script>
         </body>
         </html>
       `);
