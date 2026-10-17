@@ -513,13 +513,34 @@
         </select>
       </div>
 
-      <!-- 3.1 Filter Budget Range (ช่วงวงเงินสัญญา/งบประมาณ) -->
-      <div class="filter-item" style="min-width: 220px;">
+      <!-- 3.1 Filter Budget Range (ช่วงวงเงินสัญญา/งบประมาณ แบบดรอปดาวน์รวดเร็วไม่หน่วง) -->
+      <div class="filter-item" style="min-width: 250px;">
         <label class="filter-label">💰 วงเงินสัญญา (บาท):</label>
         <div style="display: flex; align-items: center; gap: 4px;">
-          <input type="number" id="filterMinBudget" placeholder="ขั้นต่ำ (0)" min="0" step="100000" oninput="applyGlobalFilters()" style="width: 50%; font-size: 0.8rem; padding: 5px 6px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: white;" title="กรอกวงเงินขั้นต่ำ">
+          <select id="filterMinBudget" onchange="applyGlobalFilters()" style="width: 50%; font-size: 0.78rem; padding: 5px 4px; border: 1.5px solid #0284c7; border-radius: 6px; background: white; color: #0f172a; cursor: pointer;" title="เลือกวงเงินขั้นต่ำ">
+            <option value="0" selected>ขั้นต่ำ: ทั้งหมด</option>
+            <option value="500000">5 แสน (500k)</option>
+            <option value="1000000">1 ล้าน (1M)</option>
+            <option value="2000000">2 ล้าน (2M)</option>
+            <option value="5000000">5 ล้าน (5M)</option>
+            <option value="10000000">10 ล้าน (10M)</option>
+            <option value="20000000">20 ล้าน (20M)</option>
+            <option value="50000000">50 ล้าน (50M)</option>
+            <option value="100000000">100 ล้าน (100M)</option>
+          </select>
           <span style="font-size: 0.8rem; color: var(--muted); font-weight: bold;">-</span>
-          <input type="number" id="filterMaxBudget" placeholder="ขั้นสูง (ไม่จำกัด)" min="0" step="100000" oninput="applyGlobalFilters()" style="width: 50%; font-size: 0.8rem; padding: 5px 6px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: white;" title="กรอกวงเงินขั้นสูง">
+          <select id="filterMaxBudget" onchange="applyGlobalFilters()" style="width: 50%; font-size: 0.78rem; padding: 5px 4px; border: 1.5px solid #0284c7; border-radius: 6px; background: white; color: #0f172a; cursor: pointer;" title="เลือกวงเงินขั้นสูง">
+            <option value="ALL" selected>ขั้นสูง: ไม่จำกัด</option>
+            <option value="500000">5 แสน (500k)</option>
+            <option value="1000000">1 ล้าน (1M)</option>
+            <option value="2000000">2 ล้าน (2M)</option>
+            <option value="5000000">5 ล้าน (5M)</option>
+            <option value="10000000">10 ล้าน (10M)</option>
+            <option value="20000000">20 ล้าน (20M)</option>
+            <option value="50000000">50 ล้าน (50M)</option>
+            <option value="100000000">100 ล้าน (100M)</option>
+            <option value="500000000">500 ล้าน (500M)</option>
+          </select>
         </div>
       </div>
 
@@ -557,13 +578,18 @@
       <!-- 6. Text Search -->
       <div class="filter-item" style="min-width: 200px;">
         <label class="filter-label">🔎 ค้นหาข้อความอิสระ:</label>
-        <input type="text" id="searchInput" placeholder="พิมพ์ชื่อโครงการ, ผู้รับเหมา, หรือ อบต..." onkeyup="applyGlobalFilters()">
+        <input type="text" id="searchInput" placeholder="พิมพ์ชื่อโครงการ, ผู้รับเหมา, หรือ อบต..." oninput="debounceApplyFilters()">
       </div>
     </div>
 
     <!-- Workflow Stage Indicator -->
     <div class="stage-indicator">
       <div class="stage-steps">
+        <div class="stage-step" id="step0Tab" onclick="switchStage(0)">
+          <span class="step-circle">0</span>
+          <span>🔍 สำรวจโครงการทั้งหมด (Master Data)</span>
+        </div>
+        <span style="color: #cbd5e1; font-weight: bold;">➔</span>
         <div class="stage-step active" id="step1Tab" onclick="switchStage(1)">
           <span class="step-circle">1</span>
           <span>แบบ ปม.1: คัดเลือกหน่วยรับตรวจ</span>
@@ -607,6 +633,104 @@
         <div class="kpi-title">สัญญาเฉพาะเจาะจงปริ่ม (&lt; 5 แสน)</div>
         <div class="kpi-value" style="color: var(--success);" id="kpiSplitCount">0 สัญญา</div>
         <div class="kpi-sub" id="kpiSplitMoney">วงเงินรวม ฿0.0 ล้าน</div>
+      </div>
+    </div>
+
+    <!-- ==================== STAGE 0: 🔍 สำรวจโครงการทั้งหมด (Project Master Data Explorer) ==================== -->
+    <div id="stage0Section" style="display: none;">
+      <div class="card" style="margin-bottom: 1.25rem;">
+        <div class="card-header" style="flex-wrap: wrap; gap: 10px; align-items: center;">
+          <div>
+            <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+              <span>📋</span>
+              <span>ฐานข้อมูลสัญญา/โครงการทั้งหมด (Project Master Explorer)</span>
+              <span id="stage0MatchBadge" style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 0.8rem; padding: 2px 10px; border-radius: 9999px; font-weight: 700;">
+                พบ 0 สัญญา
+              </span>
+            </div>
+            <p style="font-size: 0.82rem; color: var(--muted); margin-top: 4px;">
+              สืบค้น เจาะลึก และสำรวจรายการสัญญาทุกโครงการก่อนนำเข้าสู่กระบวนการคัดเลือก ปม.1 และ ปม.2 ค้นหาตามชื่อโครงการ ผู้รับจ้าง หรือหน่วยงาน ได้ทันที
+            </p>
+          </div>
+
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <!-- Sort dropdown -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-size: 0.82rem; color: #475569; font-weight: 600;">เรียงตาม:</label>
+              <select id="stage0SortSelect" onchange="onStage0SortChange(this.value)" style="font-size: 0.82rem; padding: 5px 8px; border: 1.5px solid #0284c7; border-radius: 6px; background: white; color: #0f172a; font-weight: 500;">
+                <option value="budget_desc">💰 วงเงินสัญญา (มาก ➔ น้อย)</option>
+                <option value="budget_asc">💰 วงเงินสัญญา (น้อย ➔ มาก)</option>
+                <option value="risk_desc">⚠️ ค่าความเสี่ยง ปม.2 (สูง ➔ ต่ำ)</option>
+                <option value="risk_asc">⚠️ ค่าความเสี่ยง ปม.2 (ต่ำ ➔ สูง)</option>
+                <option value="dept_asc">🏢 หน่วยงาน (ก - ฮ)</option>
+                <option value="dept_desc">🏢 หน่วยงาน (ฮ - ก)</option>
+                <option value="method_asc">🛒 วิธีการจัดหา (ก - ฮ)</option>
+                <option value="method_desc">🛒 วิธีการจัดหา (ฮ - ก)</option>
+                <option value="name_asc">🔤 ชื่อโครงการ (ก - ฮ)</option>
+                <option value="name_desc">🔤 ชื่อโครงการ (ฮ - ก)</option>
+              </select>
+            </div>
+
+            <!-- Page size dropdown -->
+            <div style="display: flex; align-items: center; gap: 6px;">
+              <label style="font-size: 0.82rem; color: #475569; font-weight: 600;">แสดง:</label>
+              <select id="stage0PageSizeSelect" onchange="setStage0PageSize(this.value)" style="font-size: 0.82rem; padding: 5px 8px; border: 1px solid var(--border); border-radius: 6px; background: white; color: var(--text);">
+                <option value="25">25 รายการ/หน้า</option>
+                <option value="50" selected>50 รายการ/หน้า</option>
+                <option value="100">100 รายการ/หน้า</option>
+                <option value="200">200 รายการ/หน้า</option>
+              </select>
+            </div>
+
+            <!-- Export Stage 0 Excel -->
+            <button class="btn btn-outline" style="border-color: #10b981; color: #047857; font-size: 0.82rem; font-weight: 600; display: inline-flex; align-items: center; gap: 5px;" onclick="exportStage0Excel()" title="ส่งออกตารางสัญญาโครงการทั้งหมดที่กรองอยู่เป็น Excel">
+              <span>📊</span>
+              <span>ส่งออก Excel</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Table Container -->
+        <div class="table-container" style="max-height: 640px; overflow-y: auto;">
+          <table style="width: 100%; border-collapse: collapse; font-size: 0.85rem;">
+            <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,0.05);">
+              <tr>
+                <th style="width: 48px; text-align: center;">#</th>
+                <th style="width: 125px; text-align: center; cursor: pointer; user-select: none;" onclick="sortStage0By('risk')" title="คลิกเพื่อสลับเรียงลำดับตามระดับความเสี่ยง (▲ / ▼)">
+                  <span id="thStage0Risk">ระดับความเสี่ยง ⇅</span>
+                </th>
+                <th style="min-width: 270px; cursor: pointer; user-select: none;" onclick="sortStage0By('name')" title="คลิกเพื่อสลับเรียงลำดับตามชื่อโครงการ (ก-ฮ / ฮ-ก)">
+                  <span id="thStage0Name">ชื่อโครงการ / รหัสสัญญา / ลักษณะงาน ⇅</span>
+                </th>
+                <th style="min-width: 180px; cursor: pointer; user-select: none;" onclick="sortStage0By('dept')" title="คลิกเพื่อสลับเรียงลำดับตามหน่วยงานผู้ว่าจ้าง (ก-ฮ / ฮ-ก)">
+                  <span id="thStage0Dept">หน่วยงานผู้ว่าจ้าง / อำเภอ ⇅</span>
+                </th>
+                <th style="min-width: 125px; cursor: pointer; user-select: none;" onclick="sortStage0By('method')" title="คลิกเพื่อสลับเรียงลำดับตามวิธีการจัดหา (ก-ฮ / ฮ-ก)">
+                  <span id="thStage0Method">วิธีการจัดหา ⇅</span>
+                </th>
+                <th style="min-width: 160px; text-align: right; cursor: pointer; user-select: none;" onclick="sortStage0By('budget')" title="คลิกเพื่อสลับเรียงลำดับตามวงเงินสัญญา (มาก➔น้อย / น้อย➔มาก)">
+                  <span id="thStage0Budget">วงเงินสัญญา &amp; ราคากลาง ⇅</span>
+                </th>
+                <th style="min-width: 175px;">ผู้ชนะการเสนอราคา / เลขผู้เสียภาษี</th>
+                <th style="min-width: 120px; text-align: center;">ระยะเวลาตามสัญญา</th>
+                <th style="width: 155px; text-align: center;">การจัดการ</th>
+              </tr>
+            </thead>
+            <tbody id="stage0TableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination Controls Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1.25rem; background: #f8fafc; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 10px;">
+          <div style="font-size: 0.82rem; color: #64748b;" id="stage0PaginationInfo">
+            แสดง 0 ถึง 0 จากทั้งหมด 0 รายการ
+          </div>
+          <div style="display: flex; gap: 6px; align-items: center;" id="stage0PaginationButtons">
+            <!-- Dynamically populated buttons -->
+          </div>
+        </div>
       </div>
     </div>
 
@@ -1128,8 +1252,12 @@
         </div>
 
         <div style="background: #fffbeb; border-left: 4px solid #f59e0b; padding: 0.85rem 1rem; border-radius: 6px;">
-          <strong style="color: #b45309; font-size: 0.95rem;">🎯 3. ลำดับขั้นตอนการตรวจสอบ (Audit Workflow 3 ขั้น)</strong>
+          <strong style="color: #b45309; font-size: 0.95rem;">🎯 3. ลำดับขั้นตอนการตรวจสอบ (Audit Workflow 4 ขั้น)</strong>
           <ul style="margin-top: 6px; padding-left: 1.25rem; display: flex; flex-direction: column; gap: 6px;">
+            <li>
+              <strong>ขั้นตอนที่ 0: 🔍 สำรวจโครงการทั้งหมด (Master Data)</strong><br>
+              ดูฐานข้อมูลและค้นหาสัญญาทุกโครงการแบบเสรี ค้นหาตามชื่อโครงการ ผู้รับเหมา หรือหน่วยงาน กรองช่วงงบประมาณ พร้อมปุ่มเจาะลึก หรือกระโดดไป ปม.1 / ปม.2 ของหน่วยงานนั้นได้ทันที
+            </li>
             <li>
               <strong>ขั้นตอนที่ 1 (ปม.1): คัดเลือกหน่วยรับตรวจ</strong><br>
               ดูตารางจัดอันดับความเสี่ยงหน่วยรับตรวจ สามารถคลิกหัวตารางเพื่อเรียงลำดับ หรือเปิดแผงปรับเกณฑ์ 7 ปัจจัยเสี่ยง และพิมพ์สรุปความเห็น/หมายเหตุ แล้วส่งออก Excel หรือ PDF แบบ ปม.1
@@ -1171,7 +1299,10 @@
     let currentProvinceName = 'ชัยภูมิ';
     let currentBudgetYear = '2568';
 
-    let currentStage = 1; // 1 = ปม.1, 2 = ปม.2, 3 = สัญญาทับซ้อน
+    let currentStage = 1; // 0 = สำรวจโครงการทั้งหมด, 1 = ปม.1, 2 = ปม.2, 3 = สัญญาทับซ้อน
+    let stage0CurrentPage = 1;
+    let stage0PageSize = 50;
+    let stage0SortField = 'budget_desc';
     let map, markers = [], entityRiskChart;
     let overlapMap = null, overlapMarkers = [];
     let currentTimelineMode = 'executive'; // 'executive' or 'gantt'
@@ -1562,6 +1693,14 @@
       return 'GROUP_OTHER';
     }
 
+    let searchDebounceTimer = null;
+    function debounceApplyFilters() {
+      clearTimeout(searchDebounceTimer);
+      searchDebounceTimer = setTimeout(() => {
+        applyGlobalFilters();
+      }, 150);
+    }
+
     // Apply Global Filters (Dept Category, District, Procure Method, Budget Range, Project Type, Project Name Keyword, Text Search)
     function applyGlobalFilters() {
       const deptCat = document.getElementById('filterDeptCategory')?.value || 'ALL';
@@ -1572,10 +1711,10 @@
       const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
 
       // Filter Budget Range
-      const minBudgetInput = document.getElementById('filterMinBudget')?.value;
-      const maxBudgetInput = document.getElementById('filterMaxBudget')?.value;
-      const minBudget = (minBudgetInput !== '' && minBudgetInput !== undefined && !isNaN(parseFloat(minBudgetInput))) ? parseFloat(minBudgetInput) : 0;
-      const maxBudget = (maxBudgetInput !== '' && maxBudgetInput !== undefined && !isNaN(parseFloat(maxBudgetInput))) ? parseFloat(maxBudgetInput) : Infinity;
+      const minBudgetVal = document.getElementById('filterMinBudget')?.value || '0';
+      const maxBudgetVal = document.getElementById('filterMaxBudget')?.value || 'ALL';
+      const minBudget = (minBudgetVal !== 'ALL' && minBudgetVal !== '' && !isNaN(parseFloat(minBudgetVal))) ? parseFloat(minBudgetVal) : 0;
+      const maxBudget = (maxBudgetVal !== 'ALL' && maxBudgetVal !== '' && !isNaN(parseFloat(maxBudgetVal))) ? parseFloat(maxBudgetVal) : Infinity;
 
       filteredRecords = rawCSVRecords.filter(p => {
         // กรองตามกลุ่มหน่วยรับตรวจ (dept_name)
@@ -1598,7 +1737,9 @@
         const matchQuery = !query || 
           p.project_name.toLowerCase().includes(query) ||
           p.winner.toLowerCase().includes(query) ||
-          p.dept_name.toLowerCase().includes(query);
+          p.dept_name.toLowerCase().includes(query) ||
+          (p.project_id && p.project_id.toLowerCase().includes(query)) ||
+          (p.winner_tin && p.winner_tin.toLowerCase().includes(query));
 
         return matchDeptCat && matchDist && matchProcure && matchType && matchNameKey && matchBudget && matchQuery;
       });
@@ -1609,12 +1750,12 @@
       computePm1Entities(filteredRecords);
       updateTopKPIs(filteredRecords);
 
-      if (currentStage === 2 && selectedEntityName) {
+      // Keep Stage 0 Explorer table updated if user is on Stage 0
+      if (currentStage === 0) {
+        renderStage0Table();
+      } else if (currentStage === 2 && selectedEntityName) {
         renderPm2View(selectedEntityName);
       } else if (currentStage === 3) {
-        populateContractorsDropdownForOverlap();
-      } else {
-        // Also update contractors dropdown silently so it's ready when clicked
         populateContractorsDropdownForOverlap();
       }
     }
@@ -1811,8 +1952,8 @@
       // Clear Budget Filters
       const minB = document.getElementById('filterMinBudget');
       const maxB = document.getElementById('filterMaxBudget');
-      if (minB) minB.value = '';
-      if (maxB) maxB.value = '';
+      if (minB) minB.value = '0';
+      if (maxB) maxB.value = 'ALL';
 
       // Reset Focus Entity Banner
       const focusEl = document.getElementById('currentFocusEntityText');
@@ -1835,6 +1976,19 @@
       if (pm1Table) {
         pm1Table.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--muted); padding: 3rem;">กรุณาอัพโหลดไฟล์ CSV เพื่อประมวลผลแบบ ปม.1</td></tr>`;
       }
+
+      // Reset Stage 0 Master Explorer
+      stage0CurrentPage = 1;
+      const stage0Table = document.getElementById('stage0TableBody');
+      if (stage0Table) {
+        stage0Table.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 3rem;">กรุณาอัพโหลดไฟล์ CSV เพื่อสำรวจโครงการ</td></tr>`;
+      }
+      const s0Badge = document.getElementById('stage0MatchBadge');
+      if (s0Badge) s0Badge.textContent = 'พบ 0 สัญญา';
+      const s0Info = document.getElementById('stage0PaginationInfo');
+      if (s0Info) s0Info.textContent = 'แสดง 0 ถึง 0 จากทั้งหมด 0 รายการ';
+      const s0Btns = document.getElementById('stage0PaginationButtons');
+      if (s0Btns) s0Btns.innerHTML = '';
 
       // Reset Top KPIs
       document.getElementById('kpiTotalBudget').textContent = '฿0.0 ล้าน';
@@ -2599,33 +2753,357 @@
     function switchStage(stageNum) {
       currentStage = stageNum;
       
-      document.getElementById('stage1Section').style.display = 'none';
-      document.getElementById('stage2Section').style.display = 'none';
-      document.getElementById('stage3Section').style.display = 'none';
+      const s0 = document.getElementById('stage0Section');
+      const s1 = document.getElementById('stage1Section');
+      const s2 = document.getElementById('stage2Section');
+      const s3 = document.getElementById('stage3Section');
+      if (s0) s0.style.display = 'none';
+      if (s1) s1.style.display = 'none';
+      if (s2) s2.style.display = 'none';
+      if (s3) s3.style.display = 'none';
 
-      document.getElementById('step1Tab').classList.remove('active');
-      document.getElementById('step2Tab').classList.remove('active');
-      document.getElementById('step3Tab').classList.remove('active');
+      const t0 = document.getElementById('step0Tab');
+      const t1 = document.getElementById('step1Tab');
+      const t2 = document.getElementById('step2Tab');
+      const t3 = document.getElementById('step3Tab');
+      if (t0) t0.classList.remove('active');
+      if (t1) t1.classList.remove('active');
+      if (t2) t2.classList.remove('active');
+      if (t3) t3.classList.remove('active');
 
-      if (stageNum === 1) {
-        document.getElementById('stage1Section').style.display = 'block';
-        document.getElementById('step1Tab').classList.add('active');
+      if (stageNum === 0) {
+        if (s0) s0.style.display = 'block';
+        if (t0) t0.classList.add('active');
+        renderStage0Table();
+      } else if (stageNum === 1) {
+        if (s1) s1.style.display = 'block';
+        if (t1) t1.classList.add('active');
       } else if (stageNum === 2) {
         if (!selectedEntityName) {
-          alert('กรุณาคลิกเลือก "หน่วยรับตรวจ" ในตารางแบบ ปม.1 ก่อนครับ');
+          alert('กรุณาคลิกเลือก "หน่วยรับตรวจ" ในตารางแบบ ปม.1 หรือคลิก "เลือกตรวจ ปม.2" ในตารางสำรวจโครงการก่อนครับ');
           switchStage(1);
           return;
         }
-        document.getElementById('stage2Section').style.display = 'block';
-        document.getElementById('step2Tab').classList.add('active');
-        setTimeout(() => { map.invalidateSize(); }, 200);
+        if (s2) s2.style.display = 'block';
+        if (t2) t2.classList.add('active');
+        setTimeout(() => { if (map) map.invalidateSize(); }, 200);
       } else if (stageNum === 3) {
-        document.getElementById('stage3Section').style.display = 'block';
-        document.getElementById('step3Tab').classList.add('active');
+        if (s3) s3.style.display = 'block';
+        if (t3) t3.classList.add('active');
         initOverlapMap();
         setTimeout(() => { if (overlapMap) overlapMap.invalidateSize(); }, 200);
         populateContractorsDropdownForOverlap();
       }
+    }
+
+    // ==================== STAGE 0: PROJECT MASTER EXPLORER FUNCTIONS ====================
+    function onStage0SortChange(val) {
+      stage0SortField = val;
+      stage0CurrentPage = 1;
+      renderStage0Table();
+    }
+
+    function sortStage0By(col) {
+      if (col === 'risk') {
+        stage0SortField = (stage0SortField === 'risk_desc') ? 'risk_asc' : 'risk_desc';
+      } else if (col === 'budget') {
+        stage0SortField = (stage0SortField === 'budget_desc') ? 'budget_asc' : 'budget_desc';
+      } else if (col === 'dept') {
+        stage0SortField = (stage0SortField === 'dept_asc') ? 'dept_desc' : 'dept_asc';
+      } else if (col === 'method') {
+        stage0SortField = (stage0SortField === 'method_asc') ? 'method_desc' : 'method_asc';
+      } else if (col === 'name') {
+        stage0SortField = (stage0SortField === 'name_asc') ? 'name_desc' : 'name_asc';
+      }
+
+      const sel = document.getElementById('stage0SortSelect');
+      if (sel) {
+        sel.value = stage0SortField;
+      }
+
+      stage0CurrentPage = 1;
+      renderStage0Table();
+    }
+
+    function updateStage0SortIcons() {
+      const getIcon = (ascKey, descKey) => {
+        if (stage0SortField === ascKey) return ' <span style="color: #2563eb; font-weight: bold;">▲</span>';
+        if (stage0SortField === descKey) return ' <span style="color: #2563eb; font-weight: bold;">▼</span>';
+        return ' <span style="color: #94a3b8; font-size: 0.75rem;">⇅</span>';
+      };
+
+      const elRisk = document.getElementById('thStage0Risk');
+      if (elRisk) elRisk.innerHTML = `ระดับความเสี่ยง${getIcon('risk_asc', 'risk_desc')}`;
+
+      const elName = document.getElementById('thStage0Name');
+      if (elName) elName.innerHTML = `ชื่อโครงการ / รหัสสัญญา / ลักษณะงาน${getIcon('name_asc', 'name_desc')}`;
+
+      const elDept = document.getElementById('thStage0Dept');
+      if (elDept) elDept.innerHTML = `หน่วยงานผู้ว่าจ้าง / อำเภอ${getIcon('dept_asc', 'dept_desc')}`;
+
+      const elMethod = document.getElementById('thStage0Method');
+      if (elMethod) elMethod.innerHTML = `วิธีการจัดหา${getIcon('method_asc', 'method_desc')}`;
+
+      const elBudget = document.getElementById('thStage0Budget');
+      if (elBudget) elBudget.innerHTML = `วงเงินสัญญา &amp; ราคากลาง${getIcon('budget_asc', 'budget_desc')}`;
+    }
+
+    function setStage0PageSize(val) {
+      stage0PageSize = parseInt(val, 10) || 50;
+      stage0CurrentPage = 1;
+      renderStage0Table();
+    }
+
+    function changeStage0Page(delta) {
+      stage0CurrentPage += delta;
+      renderStage0Table();
+    }
+
+    function goToStage0Page(pageNum) {
+      stage0CurrentPage = pageNum;
+      renderStage0Table();
+    }
+
+    function jumpToPm1ForDept(deptName) {
+      switchStage(1);
+      setTimeout(() => {
+        const rows = document.querySelectorAll('#pm1TableBody tr');
+        let targetRow = null;
+        rows.forEach(r => {
+          if (r.textContent.includes(deptName)) {
+            targetRow = r;
+          }
+        });
+        if (targetRow) {
+          targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetRow.style.transition = 'background-color 0.5s ease';
+          let origBg = targetRow.style.backgroundColor;
+          targetRow.style.backgroundColor = '#fef08a';
+          setTimeout(() => {
+            targetRow.style.backgroundColor = origBg;
+          }, 2500);
+        }
+      }, 150);
+    }
+
+    function renderStage0Table() {
+      updateStage0SortIcons();
+
+      const tbody = document.getElementById('stage0TableBody');
+      const badge = document.getElementById('stage0MatchBadge');
+      const infoEl = document.getElementById('stage0PaginationInfo');
+      const btnsEl = document.getElementById('stage0PaginationButtons');
+      if (!tbody) return;
+
+      if (!filteredRecords || filteredRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="9" style="text-align: center; color: var(--muted); padding: 3rem;">ไม่พบข้อมูลสัญญาโครงการตามเงื่อนไขที่เลือก (ลองล้างตัวกรองหรือค้นหาคำอื่น)</td></tr>`;
+        if (badge) badge.textContent = 'พบ 0 สัญญา';
+        if (infoEl) infoEl.textContent = 'แสดง 0 ถึง 0 จากทั้งหมด 0 รายการ';
+        if (btnsEl) btnsEl.innerHTML = '';
+        return;
+      }
+
+      let records = [...filteredRecords];
+
+      // Sorting
+      if (stage0SortField === 'budget_desc') {
+        records.sort((a, b) => b.contract_price - a.contract_price);
+      } else if (stage0SortField === 'budget_asc') {
+        records.sort((a, b) => a.contract_price - b.contract_price);
+      } else if (stage0SortField === 'risk_desc') {
+        records.sort((a, b) => (b.risk_val ?? 0) - (a.risk_val ?? 0));
+      } else if (stage0SortField === 'risk_asc') {
+        records.sort((a, b) => (a.risk_val ?? 0) - (b.risk_val ?? 0));
+      } else if (stage0SortField === 'dept_asc') {
+        records.sort((a, b) => (a.dept_name || '').localeCompare(b.dept_name || '', 'th'));
+      } else if (stage0SortField === 'dept_desc') {
+        records.sort((a, b) => (b.dept_name || '').localeCompare(a.dept_name || '', 'th'));
+      } else if (stage0SortField === 'method_asc') {
+        records.sort((a, b) => (a.procure_method || '').localeCompare(b.procure_method || '', 'th'));
+      } else if (stage0SortField === 'method_desc') {
+        records.sort((a, b) => (b.procure_method || '').localeCompare(a.procure_method || '', 'th'));
+      } else if (stage0SortField === 'name_asc') {
+        records.sort((a, b) => (a.project_name || '').localeCompare(b.project_name || '', 'th'));
+      } else if (stage0SortField === 'name_desc') {
+        records.sort((a, b) => (b.project_name || '').localeCompare(a.project_name || '', 'th'));
+      }
+
+      const totalRecords = records.length;
+      const totalPages = Math.ceil(totalRecords / stage0PageSize) || 1;
+      if (stage0CurrentPage > totalPages) stage0CurrentPage = totalPages;
+      if (stage0CurrentPage < 1) stage0CurrentPage = 1;
+
+      const startIndex = (stage0CurrentPage - 1) * stage0PageSize;
+      const endIndex = Math.min(startIndex + stage0PageSize, totalRecords);
+      const pageRecords = records.slice(startIndex, endIndex);
+
+      if (badge) badge.textContent = `พบ ${totalRecords.toLocaleString()} สัญญา`;
+      if (infoEl) {
+        infoEl.innerHTML = `แสดงลำดับ <strong>${(startIndex + 1).toLocaleString()}</strong> - <strong>${endIndex.toLocaleString()}</strong> จากทั้งหมด <strong>${totalRecords.toLocaleString()}</strong> สัญญา`;
+      }
+
+      if (btnsEl) {
+        btnsEl.innerHTML = `
+          <button class="btn btn-outline" style="padding: 3px 8px; font-size: 0.78rem;" onclick="goToStage0Page(1)" ${stage0CurrentPage <= 1 ? 'disabled' : ''}>⏮️ แรกสุด</button>
+          <button class="btn btn-outline" style="padding: 3px 8px; font-size: 0.78rem;" onclick="changeStage0Page(-1)" ${stage0CurrentPage <= 1 ? 'disabled' : ''}>◀ ก่อนหน้า</button>
+          <span style="font-size: 0.82rem; font-weight: 600; padding: 0 8px; color: #334155;">หน้า ${stage0CurrentPage} / ${totalPages}</span>
+          <button class="btn btn-outline" style="padding: 3px 8px; font-size: 0.78rem;" onclick="changeStage0Page(1)" ${stage0CurrentPage >= totalPages ? 'disabled' : ''}>ถัดไป ▶</button>
+          <button class="btn btn-outline" style="padding: 3px 8px; font-size: 0.78rem;" onclick="goToStage0Page(${totalPages})" ${stage0CurrentPage >= totalPages ? 'disabled' : ''}>⏭️ ท้ายสุด</button>
+        `;
+      }
+
+      let html = '';
+      pageRecords.forEach((p, idx) => {
+        const rowNum = startIndex + idx + 1;
+        const riskVal = p.risk_val !== undefined ? p.risk_val : (p.risk_score ? p.risk_score / 100 : 0.30);
+        const riskBadgeClass = riskVal > 0.70 ? 'risk-high' : (riskVal >= 0.31 ? 'risk-med' : 'risk-low');
+        const riskText = riskVal > 0.70 ? '🔴 สูง' : (riskVal >= 0.31 ? '🟡 ปานกลาง' : '🟢 ต่ำ');
+        const safeDept = (p.dept_name || '').replace(/'/g, "\\'");
+        const safePid = (p.project_id || '').replace(/'/g, "\\'");
+
+        html += `
+          <tr>
+            <td style="text-align: center; font-weight: 600; color: #94a3b8;">${rowNum.toLocaleString()}</td>
+            <td style="text-align: center;">
+              <span class="badge-risk ${riskBadgeClass}">${riskText}</span>
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 3px; font-weight: 600;">ปม.2: ${riskVal.toFixed(2)}</div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: #1e3a8a; font-size: 0.88rem; line-height: 1.35;" title="${p.project_name}">${p.project_name}</div>
+              <div style="font-size: 0.75rem; color: #64748b; margin-top: 4px;">
+                รหัสสัญญา: <strong style="color: #0284c7;">${p.project_id}</strong> | ประเภท: ${p.project_type || 'จ้างก่อสร้าง'}
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: #0f172a; font-size: 0.85rem;">${p.dept_name}</div>
+              <div style="font-size: 0.75rem; color: #64748b;">อ.${p.district || '-'} จ.${p.province || currentProvinceName}</div>
+            </td>
+            <td>
+              <span style="font-size: 0.78rem; background: #f8fafc; color: #334155; padding: 2px 7px; border-radius: 4px; border: 1px solid #cbd5e1; display: inline-block;">
+                ${p.procure_method}
+              </span>
+            </td>
+            <td style="text-align: right;">
+              <div style="font-weight: 700; color: #0f2b5c; font-size: 0.88rem;">฿${p.contract_price.toLocaleString()}</div>
+              <div style="font-size: 0.72rem; color: #64748b; margin-top: 2px;">
+                ราคากลาง: ฿${p.median_price.toLocaleString()} (${p.diff_pct >= 0 ? '+' : ''}${p.diff_pct.toFixed(2)}%)
+              </div>
+            </td>
+            <td>
+              <div style="font-weight: 600; color: #1e293b; font-size: 0.82rem;">${p.winner}</div>
+              <div style="font-size: 0.72rem; color: #94a3b8; margin-top: 2px;">Tax ID: ${p.winner_tin || '-'}</div>
+            </td>
+            <td style="text-align: center; font-size: 0.76rem; color: #334155; line-height: 1.3;">
+              <span>${p.raw_contract_date || '-'}</span><br>
+              <span style="color: #94a3b8; font-size: 0.7rem;">ถึง</span><br>
+              <span>${p.raw_contract_finish_date || '-'}</span>
+            </td>
+            <td style="text-align: center;">
+              <div style="display: flex; flex-direction: column; gap: 4px; align-items: stretch;">
+                <button class="btn btn-outline" style="padding: 3px 6px; font-size: 0.75rem; justify-content: center;" onclick="openModal('${safePid}')">
+                  🔍 เจาะลึก
+                </button>
+                <button class="btn btn-outline" style="padding: 3px 6px; font-size: 0.75rem; justify-content: center; border-color: #3b82f6; color: #1d4ed8;" onclick="jumpToPm1ForDept('${safeDept}')" title="กระโดดไปยังแถวหน่วยงานนี้ในตาราง ปม.1">
+                  🏢 ไป ปม.1
+                </button>
+                <button class="btn btn-primary" style="padding: 3px 6px; font-size: 0.75rem; justify-content: center;" onclick="selectEntityForPm2('${safeDept}')" title="เข้าสู่ขั้นตอน ปม.2 ของหน่วยงานนี้">
+                  📑 ตรวจ ปม.2
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      });
+
+      tbody.innerHTML = html;
+    }
+
+    function exportStage0Excel() {
+      if (!filteredRecords || filteredRecords.length === 0) {
+        alert('ไม่มีข้อมูลสัญญาโครงการตามเงื่อนไขที่เลือก');
+        return;
+      }
+
+      let records = [...filteredRecords];
+      // Apply current sorting
+      if (stage0SortField === 'budget_desc') {
+        records.sort((a, b) => b.contract_price - a.contract_price);
+      } else if (stage0SortField === 'budget_asc') {
+        records.sort((a, b) => a.contract_price - b.contract_price);
+      } else if (stage0SortField === 'risk_desc') {
+        records.sort((a, b) => (b.risk_val ?? 0) - (a.risk_val ?? 0));
+      } else if (stage0SortField === 'risk_asc') {
+        records.sort((a, b) => (a.risk_val ?? 0) - (b.risk_val ?? 0));
+      } else if (stage0SortField === 'dept_asc') {
+        records.sort((a, b) => (a.dept_name || '').localeCompare(b.dept_name || '', 'th'));
+      } else if (stage0SortField === 'dept_desc') {
+        records.sort((a, b) => (b.dept_name || '').localeCompare(a.dept_name || '', 'th'));
+      } else if (stage0SortField === 'method_asc') {
+        records.sort((a, b) => (a.procure_method || '').localeCompare(b.procure_method || '', 'th'));
+      } else if (stage0SortField === 'method_desc') {
+        records.sort((a, b) => (b.procure_method || '').localeCompare(a.procure_method || '', 'th'));
+      } else if (stage0SortField === 'name_asc') {
+        records.sort((a, b) => (a.project_name || '').localeCompare(b.project_name || '', 'th'));
+      } else if (stage0SortField === 'name_desc') {
+        records.sort((a, b) => (b.project_name || '').localeCompare(a.project_name || '', 'th'));
+      }
+
+      let data = [
+        [`ฐานข้อมูลสัญญา/โครงการทั้งหมด (Project Master Explorer)`],
+        [`สำนักตรวจเงินแผ่นดินจังหวัด${currentProvinceName} ประจำปีงบประมาณ พ.ศ. ${currentBudgetYear}`],
+        [`ข้อมูล ณ วันที่ส่งออก: ${new Date().toLocaleDateString('th-TH')} | จำนวนที่กรองพบ: ${records.length.toLocaleString()} สัญญา`],
+        [""],
+        [
+          "ลำดับ",
+          "ระดับความเสี่ยง",
+          "ดัชนีความเสี่ยง ปม.2 (0-1)",
+          "รหัสโครงการ/สัญญา",
+          "ชื่อโครงการ/งาน",
+          "ลักษณะงาน",
+          "หน่วยงานผู้ว่าจ้าง",
+          "อำเภอ",
+          "วิธีการจัดซื้อจัดจ้าง",
+          "ราคากลาง (บาท)",
+          "วงเงินสัญญา (บาท)",
+          "ส่วนต่างราคากลาง (%)",
+          "ผู้ชนะการเสนอราคา",
+          "เลขประจำตัวผู้เสียภาษี",
+          "วันที่ลงนามสัญญา",
+          "วันที่สิ้นสุดสัญญา",
+          "สถานะสัญญา",
+          "ประเด็นตรวจพบ/ปัจจัยเสี่ยง"
+        ]
+      ];
+
+      records.forEach((p, idx) => {
+        let riskLvlText = p.risk_level === 'HIGH' ? 'สูง' : (p.risk_level === 'MEDIUM' ? 'ปานกลาง' : 'ต่ำ');
+        let riskVal = p.risk_val !== undefined ? p.risk_val.toFixed(2) : (p.risk_score ? (p.risk_score / 100).toFixed(2) : '0.30');
+        data.push([
+          idx + 1,
+          riskLvlText,
+          parseFloat(riskVal),
+          p.project_id || '',
+          p.project_name || '',
+          p.project_type || '',
+          p.dept_name || '',
+          p.district || '',
+          p.procure_method || '',
+          p.median_price || 0,
+          p.contract_price || 0,
+          p.diff_pct !== undefined ? parseFloat(p.diff_pct.toFixed(2)) : 0,
+          p.winner || '',
+          p.winner_tin || '',
+          p.raw_contract_date || '',
+          p.raw_contract_finish_date || '',
+          p.status || '',
+          p.risk_type || ''
+        ]);
+      });
+
+      let ws = XLSX.utils.aoa_to_sheet(data);
+      let wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, "MasterData");
+      XLSX.writeFile(wb, `ฐานข้อมูลโครงการ_${currentProvinceName}_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
     // ==================== STAGE 3: CONTRACT TIMELINE & OVERLAP LOGIC ====================
@@ -2680,15 +3158,17 @@
       // เรียงตามจำนวนสัญญาที่ได้รับมากที่สุด
       let sortedContractors = Object.keys(contractorContracts).sort((a,b) => contractorContracts[b].length - contractorContracts[a].length);
 
+      let optionsHtml = '<option value="">-- กรุณาเลือกผู้รับจ้างที่ต้องการตรวจสอบ --</option>';
       let foundPrevious = false;
       sortedContractors.forEach(name => {
         let total = contractorContracts[name].length;
         if (total >= 1) { // แสดงผู้รับจ้างที่มีโครงการ
           let isSel = (name === currentSelectedVal) ? 'selected' : '';
           if (isSel) foundPrevious = true;
-          select.innerHTML += `<option value="${name}" ${isSel}>${name} (พบ ${total} สัญญา)</option>`;
+          optionsHtml += `<option value="${name}" ${isSel}>${name} (พบ ${total} สัญญา)</option>`;
         }
       });
+      select.innerHTML = optionsHtml;
 
       if (sortedContractors.length > 0) {
         if (!foundPrevious || !select.value) {
@@ -2728,7 +3208,8 @@
       // - โครงการขนาดเล็ก (< 5 แสน หรือ < 60 วัน): ไม่ตัด (100% เป็นช่วงดำเนินงานหลัก)
       function getSCurveCorePeriod(p) {
         let totalSpan = p.contractEndDate.getTime() - p.startDate.getTime();
-        let durationDays = Math.round(totalSpan / (1000 * 60 * 60 * 24)) + 1;
+        // ไม่นับวันแรกที่เซ็นสัญญา เช่น 1 ม.ค. ถึง 31 ม.ค. คือ 30 วัน หรือ 90 วัน ไม่นับวันแรก
+        let durationDays = Math.max(1, Math.round(totalSpan / (1000 * 60 * 60 * 24)));
         let cutPct = 0;
 
         if (p.contract_price > 2000000 || durationDays > 180) {
@@ -2747,9 +3228,9 @@
           coreEnd = p.contractEndDate;
         }
 
-        let coreDays = Math.max(1, Math.round((coreEnd.getTime() - coreStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
         let mobilizationDays = Math.round((coreStart.getTime() - p.startDate.getTime()) / (1000 * 60 * 60 * 24));
         let closeoutDays = Math.round((p.contractEndDate.getTime() - coreEnd.getTime()) / (1000 * 60 * 60 * 24));
+        let coreDays = Math.max(1, durationDays - mobilizationDays - closeoutDays);
 
         return {
           coreStart: coreStart,
@@ -3271,7 +3752,7 @@
         let cStartPct = ((p.startDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
         let cEndPct = ((p.contractEndDate.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
         let cWidthPct = Math.max(2, cEndPct - cStartPct);
-        let durationDays = Math.round((p.contractEndDate - p.startDate) / (1000 * 60 * 60 * 24)) + 1;
+        let durationDays = (p.sCurve && p.sCurve.durationDays) ? p.sCurve.durationDays : Math.max(1, Math.round((p.contractEndDate - p.startDate) / (1000 * 60 * 60 * 24)));
 
         // คำนวณช่วงดำเนินงานหลัก (Core S-Curve)
         let coreBarHtml = '';
