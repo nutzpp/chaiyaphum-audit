@@ -217,8 +217,18 @@
     /* KPI Summary Cards */
     .kpi-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-template-columns: repeat(4, 1fr);
       gap: 1rem;
+    }
+    @media (max-width: 1024px) {
+      .kpi-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+    @media (max-width: 640px) {
+      .kpi-grid {
+        grid-template-columns: 1fr;
+      }
     }
     .kpi-card {
       background: white;
@@ -435,8 +445,6 @@
       <div id="fileInfoText" style="margin-top: 8px; font-size: 0.8rem; color: #16a34a; font-weight: 600;"></div>
     </div>
 
-    <!-- Dropdowns & Filters Panel -->
-    <div class="filter-card">
     <!-- Active Data Info Banner (แสดงปีงบประมาณและจังหวัดตามไฟล์ที่อัพโหลดอัตโนมัติ) -->
     <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap; background: #ffffff; border: 1px solid var(--border); border-radius: 10px; padding: 0.6rem 1.25rem;">
       <div style="font-size: 0.85rem; font-weight: 700; color: #0f2b5c; display: flex; align-items: center; gap: 6px;">
@@ -451,39 +459,54 @@
         <strong id="displayProvince">ชัยภูมิ</strong>
       </div>
       <div style="display: inline-flex; align-items: center; gap: 6px; background: #fffbeb; border: 1px solid #fde68a; color: #92400e; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
-        <span>📊 สัญญาในระบบ:</span>
-        <strong id="displayRecordCount">0 รายการ</strong>
+        <span>📊 ข้อมูลสัญญาที่นำเข้า:</span>
+        <strong id="displayTotalUploadCount">0 สัญญา</strong>
+      </div>
+      <div style="display: inline-flex; align-items: center; gap: 6px; background: #fdf2f8; border: 1px solid #fbcfe8; color: #9d174d; padding: 4px 10px; border-radius: 6px; font-size: 0.82rem; font-weight: 600;">
+        <span>🎯 ตรงตามเงื่อนไขตัวกรอง:</span>
+        <strong id="displayRecordCount">0 สัญญา</strong>
       </div>
     </div>
 
     <!-- Dropdowns & Filters Panel -->
     <div class="filter-card">
       <!-- 1. Filter Dept Type (จำแนกประเภทหน่วยรับตรวจ 145 หน่วย อปท. + กรมจังหวัด + มรภ.) -->
-      <div class="filter-item" style="min-width: 260px;">
-        <label class="filter-label">🏢 จำแนกกลุ่มหน่วยรับตรวจ (dept_name):</label>
+      <div class="filter-item" style="min-width: 250px;">
+        <label class="filter-label">🏢 จำแนกกลุ่มหน่วยรับตรวจ:</label>
         <select id="filterDeptCategory" onchange="applyGlobalFilters()" style="border: 1.5px solid #2563eb; font-weight: 600; color: #1e40af; background: #eff6ff;">
           <option value="ALL">ทุกกลุ่มหน่วยรับตรวจ (ทั้งหมด)</option>
-          <option value="GROUP_PAO">1. อบจ.ชัยภูมิ (องค์การบริหารส่วนจังหวัด) [1 หน่วย]</option>
-          <option value="GROUP_MUNICIPALITY_CITY">2. เทศบาลเมืองชัยภูมิ [1 หน่วย]</option>
-          <option value="GROUP_MUNICIPALITY_SUB">3. เทศบาลตำบล [44 หน่วย]</option>
-          <option value="GROUP_TAO">4. องค์การบริหารส่วนตำบล (อบต.) [97 หน่วย]</option>
-          <option value="GROUP_LOCAL_ALL">🌟 รวม อปท. ในกำกับดูแล จ.ชัยภูมิ ทั้งหมด [145 หน่วย]</option>
-          <option value="GROUP_PROV_DEPT">5. กรมจังหวัด (จังหวัดชัยภูมิ) [1 หน่วย]</option>
-          <option value="GROUP_CPRU">6. มหาวิทยาลัยราชภัฏชัยภูมิ [1 หน่วย]</option>
+          <option value="GROUP_LOCAL_ALL">🌟 รวม อปท. ในกำกับดูแล จ.ชัยภูมิ ทั้งหมด</option>
+          <option value="GROUP_PAO">1. องค์การบริหารส่วนจังหวัดชัยภูมิ (อบจ.)</option>
+          <option value="GROUP_MUNICIPALITY_CITY">2. เทศบาลเมืองชัยภูมิ</option>
+          <option value="GROUP_MUNICIPALITY_SUB">3. เทศบาลตำบล</option>
+          <option value="GROUP_TAO">4. องค์การบริหารส่วนตำบล (อบต.)</option>
+          <option value="GROUP_PROV_DEPT">5. กรมจังหวัด (จังหวัดชัยภูมิ)</option>
+          <option value="GROUP_CPRU">6. มหาวิทยาลัยราชภัฏชัยภูมิ</option>
           <option value="GROUP_OTHER">7. หน่วยงานอื่น (ส่วนกลาง/ภูมิภาค)</option>
         </select>
       </div>
 
       <!-- 2. Filter District -->
-      <div class="filter-item">
+      <div class="filter-item" style="min-width: 150px;">
         <label class="filter-label">📍 แยกอำเภอ:</label>
         <select id="filterDistrict" onchange="applyGlobalFilters()">
           <option value="ALL">ทุุกอำเภอใน จ.ชัยภูมิ (ทั้งหมด)</option>
         </select>
       </div>
 
-      <!-- 3. Filter project_type_name -->
-      <div class="filter-item">
+      <!-- 3. Filter Procurement Method (วิธีการจัดซื้อจัดจ้าง) -->
+      <div class="filter-item" style="min-width: 180px;">
+        <label class="filter-label">🛒 วิธีการจัดซื้อจัดจ้าง:</label>
+        <select id="filterProcureMethod" onchange="applyGlobalFilters()" style="border: 1.5px solid #059669; font-weight: 600; color: #065f46; background: #f0fdf4;">
+          <option value="ALL">ทุกวิธีการจัดหา (ทั้งหมด)</option>
+          <option value="เฉพาะเจาะจง">เฉพาะเจาะจง</option>
+          <option value="e-bidding">ประกวดราคาอิเล็กทรอนิกส์ (e-bidding)</option>
+          <option value="คัดเลือก">คัดเลือก</option>
+        </select>
+      </div>
+
+      <!-- 4. Filter project_type_name -->
+      <div class="filter-item" style="min-width: 150px;">
         <label class="filter-label">🏷️ แยกประเภทโครงการ:</label>
         <select id="filterProjectType" onchange="applyGlobalFilters()">
           <option value="ALL">ทุกประเภทโครงการ (ทั้งหมด)</option>
@@ -496,8 +519,8 @@
         </select>
       </div>
 
-      <!-- 4. Filter project_name category -->
-      <div class="filter-item">
+      <!-- 5. Filter project_name category -->
+      <div class="filter-item" style="min-width: 170px;">
         <label class="filter-label">🔍 จำแนกลักษณะงาน:</label>
         <select id="filterNameKeyword" onchange="applyGlobalFilters()">
           <option value="ALL">ทุกลักษณะงาน (ทั้งหมด)</option>
@@ -510,8 +533,8 @@
         </select>
       </div>
 
-      <!-- 5. Text Search -->
-      <div class="filter-item">
+      <!-- 6. Text Search -->
+      <div class="filter-item" style="min-width: 200px;">
         <label class="filter-label">🔎 ค้นหาข้อความอิสระ:</label>
         <input type="text" id="searchInput" placeholder="พิมพ์ชื่อโครงการ, ผู้รับเหมา, หรือ อบต..." onkeyup="applyGlobalFilters()">
       </div>
@@ -542,27 +565,27 @@
       </div>
     </div>
 
-    <!-- KPI Summary Grid -->
+    <!-- KPI Summary Grid (จัดเรียงแนวนอน พร้อมแสดงจำนวนและวงเงินรวมทุกการ์ด) -->
     <div class="kpi-grid">
       <div class="kpi-card">
-        <div class="kpi-title">งบประมาณสัญญารวม (ที่ผ่านการกรอง)</div>
+        <div class="kpi-title">งบประมาณสัญญารวม (ที่เลือก)</div>
         <div class="kpi-value" style="color: var(--primary);" id="kpiTotalBudget">฿0.0 ล้าน</div>
-        <div class="kpi-sub" id="kpiTotalProjects">0 สัญญาโครงการ</div>
+        <div class="kpi-sub" id="kpiTotalProjects">0 สัญญา (คิดเป็น 0.0% ของไฟล์)</div>
       </div>
       <div class="kpi-card red">
         <div class="kpi-title">หน่วยรับตรวจเสี่ยงสูง (ปม.1 Rank A)</div>
         <div class="kpi-value" style="color: var(--danger);" id="kpiHighRiskDept">0 หน่วยงาน</div>
-        <div class="kpi-sub">คะแนนความเสี่ยงถ่วงน้ำหนักเกิน 70%</div>
+        <div class="kpi-sub" id="kpiHighRiskDeptMoney">วงเงินรวม ฿0.0 ล้าน</div>
       </div>
       <div class="kpi-card orange">
-        <div class="kpi-title">สัญญาเสี่ยงสมยอมราคา / ตัดราคาเกินเกณฑ์</div>
+        <div class="kpi-title">สัญญาเสี่ยงสมยอมราคา / ตัดราคา</div>
         <div class="kpi-value" style="color: var(--warning);" id="kpiRiggingCount">0 สัญญา</div>
-        <div class="kpi-sub">ผลต่างราคาชนะประมูลผิดปกติ</div>
+        <div class="kpi-sub" id="kpiRiggingMoney">วงเงินรวม ฿0.0 ล้าน</div>
       </div>
       <div class="kpi-card green">
-        <div class="kpi-title">สัญญาเฉพาะเจาะจงปริ่มเพดาน (&lt; 5 แสน)</div>
+        <div class="kpi-title">สัญญาเฉพาะเจาะจงปริ่ม (&lt; 5 แสน)</div>
         <div class="kpi-value" style="color: var(--success);" id="kpiSplitCount">0 สัญญา</div>
-        <div class="kpi-sub">เสี่ยงแบ่งซื้อแบ่งจ้างตาม ม.21</div>
+        <div class="kpi-sub" id="kpiSplitMoney">วงเงินรวม ฿0.0 ล้าน</div>
       </div>
     </div>
 
@@ -1142,10 +1165,10 @@
 
       const yrEl = document.getElementById('displayBudgetYear');
       const prEl = document.getElementById('displayProvince');
-      const cntEl = document.getElementById('displayRecordCount');
+      const totalUploadEl = document.getElementById('displayTotalUploadCount');
       if (yrEl) yrEl.textContent = yrText;
       if (prEl) prEl.textContent = provText;
-      if (cntEl) cntEl.textContent = `${list.length.toLocaleString()} สัญญา`;
+      if (totalUploadEl) totalUploadEl.textContent = `${list.length.toLocaleString()} สัญญา`;
 
       // Populate District Dropdown
       const distSelect = document.getElementById('filterDistrict');
@@ -1170,10 +1193,11 @@
       return 'GROUP_OTHER';
     }
 
-    // Apply Global Filters (Dept Category, District, Project Type, Project Name Keyword, Text Search)
+    // Apply Global Filters (Dept Category, District, Procure Method, Project Type, Project Name Keyword, Text Search)
     function applyGlobalFilters() {
       const deptCat = document.getElementById('filterDeptCategory')?.value || 'ALL';
       const dist = document.getElementById('filterDistrict')?.value || 'ALL';
+      const procureMethod = document.getElementById('filterProcureMethod')?.value || 'ALL';
       const type = document.getElementById('filterProjectType')?.value || 'ALL';
       const nameKey = document.getElementById('filterNameKeyword')?.value || 'ALL';
       const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
@@ -1192,6 +1216,7 @@
         }
 
         const matchDist = dist === 'ALL' || p.district === dist;
+        const matchProcure = procureMethod === 'ALL' || (p.procure_method && p.procure_method.includes(procureMethod));
         const matchType = type === 'ALL' || p.project_type === type;
         const matchNameKey = nameKey === 'ALL' || p.project_name.includes(nameKey);
         const matchQuery = !query || 
@@ -1199,11 +1224,11 @@
           p.winner.toLowerCase().includes(query) ||
           p.dept_name.toLowerCase().includes(query);
 
-        return matchDeptCat && matchDist && matchType && matchNameKey && matchQuery;
+        return matchDeptCat && matchDist && matchProcure && matchType && matchNameKey && matchQuery;
       });
 
       const cntEl = document.getElementById('displayRecordCount');
-      if (cntEl) cntEl.textContent = `${filteredRecords.length.toLocaleString()} สัญญา (ตรงตามเงื่อนไข)`;
+      if (cntEl) cntEl.textContent = `${filteredRecords.length.toLocaleString()} สัญญา`;
 
       computePm1Entities(filteredRecords);
       updateTopKPIs(filteredRecords);
@@ -1220,13 +1245,24 @@
 
     function updateTopKPIs(records) {
       let totalBudget = records.reduce((sum, p) => sum + p.contract_price, 0);
-      let riggingCount = records.filter(p => p.risk_type.includes('สมยอมราคา') || p.risk_type.includes('เฉียดฉิว')).length;
-      let splitCount = records.filter(p => p.risk_type.includes('แบ่งซื้อแบ่งจ้าง')).length;
+      let riggingRecords = records.filter(p => p.risk_type.includes('สมยอมราคา') || p.risk_type.includes('เฉียดฉิว') || p.risk_type.includes('ต่ำกว่าพิกัด'));
+      let riggingCount = riggingRecords.length;
+      let riggingMoney = riggingRecords.reduce((sum, p) => sum + p.contract_price, 0);
+
+      let splitRecords = records.filter(p => p.risk_type.includes('แบ่งซื้อแบ่งจ้าง'));
+      let splitCount = splitRecords.length;
+      let splitMoney = splitRecords.reduce((sum, p) => sum + p.contract_price, 0);
+
+      let pctOfTotal = rawCSVRecords.length > 0 ? ((records.length / rawCSVRecords.length) * 100).toFixed(1) : '0.0';
 
       document.getElementById('kpiTotalBudget').textContent = `฿${(totalBudget / 1000000).toFixed(1)} ล้าน`;
-      document.getElementById('kpiTotalProjects').textContent = `${records.length.toLocaleString()} สัญญาโครงการ`;
-      document.getElementById('kpiRiggingCount').textContent = `${riggingCount} สัญญา`;
-      document.getElementById('kpiSplitCount').textContent = `${splitCount} สัญญา`;
+      document.getElementById('kpiTotalProjects').textContent = `${records.length.toLocaleString()} สัญญา (คิดเป็น ${pctOfTotal}% ของไฟล์)`;
+      
+      document.getElementById('kpiRiggingCount').textContent = `${riggingCount.toLocaleString()} สัญญา`;
+      document.getElementById('kpiRiggingMoney').textContent = `วงเงินรวม ฿${(riggingMoney / 1000000).toFixed(1)} ล้าน`;
+
+      document.getElementById('kpiSplitCount').textContent = `${splitCount.toLocaleString()} สัญญา`;
+      document.getElementById('kpiSplitMoney').textContent = `วงเงินรวม ฿${(splitMoney / 1000000).toFixed(1)} ล้าน`;
     }
 
     // ==================== STAGE 1: COMPUTE & RENDER ปม.1 ====================
@@ -1338,8 +1374,15 @@
       });
 
       entityList.sort((a, b) => b.pm1Score - a.pm1Score);
-      let highRiskDepts = entityList.filter(e => e.pm1Score >= 2.5).length;
+      let highRiskList = entityList.filter(e => e.pm1Score >= 2.5);
+      let highRiskDepts = highRiskList.length;
+      let highRiskMoney = highRiskList.reduce((sum, e) => sum + e.totalBudget, 0);
+
       document.getElementById('kpiHighRiskDept').textContent = `${highRiskDepts} หน่วยงาน`;
+      const highRiskMoneyEl = document.getElementById('kpiHighRiskDeptMoney');
+      if (highRiskMoneyEl) {
+        highRiskMoneyEl.textContent = `วงเงินรวม ฿${(highRiskMoney / 1000000).toFixed(1)} ล้าน`;
+      }
       renderPm1Table(entityList);
     }
 
@@ -1577,6 +1620,47 @@
       let contracts = dataSource.filter(p => p.winner === contractorName);
       if (contracts.length === 0) return;
 
+      // Helper: คำนวณช่วงก่อสร้างหลัก (Core Construction Period / กราฟตัว S ช่วงไข่แดง 70-80%)
+      // ตามขนาดโครงการและระยะเวลา:
+      // - โครงการขนาดใหญ่ (> 2 ล้าน หรือ > 180 วัน): ตัดหัว 15% (เตรียมงาน), ตัดท้าย 15% (ตรวจรับ/เก็บ Defect) -> ก่อสร้างหลัก 70% ตรงกลาง
+      // - โครงการขนาดกลาง (5 แสน - 2 ล้าน หรือ 60 - 180 วัน): ตัดหัว 10%, ตัดท้าย 10% -> ก่อสร้างหลัก 80% ตรงกลาง
+      // - โครงการขนาดเล็ก (< 5 แสน หรือ < 60 วัน): ไม่ตัด (100% เป็นช่วงก่อสร้างหลัก)
+      function getSCurveCorePeriod(p) {
+        let totalSpan = p.contractEndDate.getTime() - p.startDate.getTime();
+        let durationDays = Math.round(totalSpan / (1000 * 60 * 60 * 24)) + 1;
+        let cutPct = 0;
+
+        if (p.contract_price > 2000000 || durationDays > 180) {
+          cutPct = 0.15;
+        } else if (p.contract_price >= 500000 || durationDays >= 60) {
+          cutPct = 0.10;
+        } else {
+          cutPct = 0;
+        }
+
+        let cutMs = totalSpan * cutPct;
+        let coreStart = new Date(p.startDate.getTime() + cutMs);
+        let coreEnd = new Date(p.contractEndDate.getTime() - cutMs);
+        if (coreEnd < coreStart) {
+          coreStart = p.startDate;
+          coreEnd = p.contractEndDate;
+        }
+
+        let coreDays = Math.max(1, Math.round((coreEnd.getTime() - coreStart.getTime()) / (1000 * 60 * 60 * 24)) + 1);
+        let mobilizationDays = Math.round((coreStart.getTime() - p.startDate.getTime()) / (1000 * 60 * 60 * 24));
+        let closeoutDays = Math.round((p.contractEndDate.getTime() - coreEnd.getTime()) / (1000 * 60 * 60 * 24));
+
+        return {
+          coreStart: coreStart,
+          coreEnd: coreEnd,
+          cutPct: cutPct,
+          durationDays: durationDays,
+          coreDays: coreDays,
+          mobilizationDays: mobilizationDays,
+          closeoutDays: closeoutDays
+        };
+      }
+
       // ค้นหาช่วงวันที่เริ่มและสิ้นสุดของแต่ละสัญญา
       let parsedList = contracts.map(p => {
         let start = parseThaiDate(p.raw_contract_date);
@@ -1592,13 +1676,20 @@
           start.setDate(start.getDate() - 120);
         }
 
-        return {
+        let tempObj = {
           ...p,
           startDate: start,
           contractEndDate: contractEnd,
           endDate: contractEnd, // ระยะเวลาตามสัญญาจริง (เริ่มต้น ถึง สิ้นสุดสัญญา)
-          overlapsWith: []
+          overlapsWith: [],
+          coreOverlapsWith: []
         };
+
+        if (start && contractEnd) {
+          tempObj.sCurve = getSCurveCorePeriod(tempObj);
+        }
+
+        return tempObj;
       }).filter(p => p.startDate && p.contractEndDate);
 
       // เรียงตามวันเริ่มสัญญา
@@ -1606,6 +1697,7 @@
 
       // ตรวจสอบการทับซ้อน (Overlap Algorithm: startA <= endB && startB <= endA)
       let overlappingContractIds = new Set();
+      let coreOverlappingContractIds = new Set();
 
       for (let i = 0; i < parsedList.length; i++) {
         for (let j = 0; j < parsedList.length; j++) {
@@ -1613,7 +1705,7 @@
           let a = parsedList[i];
           let b = parsedList[j];
 
-          // คำนวณช่วงเวลาที่คาบเกี่ยว
+          // 1. คำนวณช่วงเวลาที่คาบเกี่ยวตามสัญญาเต็ม
           let overlapStart = new Date(Math.max(a.startDate, b.startDate));
           let overlapEnd = new Date(Math.min(a.endDate, b.endDate));
 
@@ -1629,6 +1721,25 @@
                 overlapDays: days,
                 periodText: `${overlapStart.toLocaleDateString('th-TH')} ถึง ${overlapEnd.toLocaleDateString('th-TH')}`
               });
+            }
+          }
+
+          // 2. คำนวณช่วงเวลาที่คาบเกี่ยวเฉพาะช่วงก่อสร้างหลัก (S-Curve Core / ไข่แดง)
+          if (a.sCurve && b.sCurve) {
+            let cOverlapStart = new Date(Math.max(a.sCurve.coreStart, b.sCurve.coreStart));
+            let cOverlapEnd = new Date(Math.min(a.sCurve.coreEnd, b.sCurve.coreEnd));
+            if (cOverlapStart <= cOverlapEnd) {
+              let cDays = Math.round((cOverlapEnd - cOverlapStart) / (1000 * 60 * 60 * 24)) + 1;
+              if (cDays > 0) {
+                coreOverlappingContractIds.add(a.project_id);
+                coreOverlappingContractIds.add(b.project_id);
+                a.coreOverlapsWith.push({
+                  targetId: b.project_id,
+                  targetName: b.project_name,
+                  targetDept: b.dept_name,
+                  coreDays: cDays
+                });
+              }
             }
           }
         }
@@ -1895,7 +2006,7 @@
     }
 
     // วาดแผนผังไทม์ไลน์แบบ Gantt Chart Bars
-    // แสดงระยะเวลาตามสัญญา (เขียว) + ระยะเวลาปฏิบัติงานจริง (แดงถ้าเกิน) ในแถบเดียวกัน
+    // แสดงระยะเวลาตามสัญญา (ขอบนอก) และช่วงก่อสร้างหลัก (Core S-Curve แถบด้านใน)
     // พร้อมเส้นมาร์กวันสิ้นสุดสัญญา และแถบคร่อมไฮไลต์แนวตั้งโปร่งแสงตามช่วงเวลาที่เลือก
     function renderGanttChart(parsedList, highlightIds = null, activeWindow = null) {
       const container = document.getElementById('ganttTimelineContainer');
@@ -1941,7 +2052,7 @@
           <!-- Header Month Guides -->
           <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--muted); border-bottom: 2px solid #cbd5e1; padding-bottom: 6px; margin-bottom: 12px; font-weight: 600;">
             <span>จุดเริ่มต้นสัญญาแรก: ${minDate.toLocaleDateString('th-TH')}</span>
-            <span>ห้วงเวลาตามสัญญารวม ${totalDays} วัน (${parsedList.length} โครงการ)</span>
+            <span>ห้วงเวลาตามสัญญารวม ${totalDays} วัน (${parsedList.length} โครงการ) | แถบเขียวเข้มกลาง = ช่วงลุยงานหลักตาม S-Curve</span>
             <span>สิ้นสุดสัญญาสุดท้าย: ${maxDate.toLocaleDateString('th-TH')}</span>
           </div>
 
@@ -1958,22 +2069,48 @@
         let cWidthPct = Math.max(2, cEndPct - cStartPct);
         let durationDays = Math.round((p.contractEndDate - p.startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-        // ป้ายแสดงสถานะการทับซ้อน
+        // คำนวณช่วงก่อสร้างหลัก (Core S-Curve)
+        let coreBarHtml = '';
+        let coreDesc = '';
+        if (p.sCurve) {
+          let sc = p.sCurve;
+          let coreStartPct = ((sc.coreStart.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
+          let coreEndPct = ((sc.coreEnd.getTime() - minDate.getTime()) / totalTimeSpan) * 100;
+          let coreLeftRelPct = Math.max(0, ((sc.coreStart.getTime() - p.startDate.getTime()) / (p.contractEndDate.getTime() - p.startDate.getTime())) * 100);
+          let coreWidthRelPct = Math.min(100, ((sc.coreEnd.getTime() - sc.coreStart.getTime()) / (p.contractEndDate.getTime() - p.startDate.getTime())) * 100);
+
+          let coreOverlapCount = p.coreOverlapsWith ? p.coreOverlapsWith.length : 0;
+          let coreColor = coreOverlapCount > 0 ? '#b91c1c' : '#047857';
+
+          coreDesc = `ช่วงลุยงานหลัก (S-Curve): ${sc.coreStart.toLocaleDateString('th-TH')} ถึง ${sc.coreEnd.toLocaleDateString('th-TH')} (${sc.coreDays} วัน) | เตรียมงาน ${sc.mobilizationDays} วัน, ตรวจรับ ${sc.closeoutDays} วัน`;
+
+          coreBarHtml = `
+            <div style="position: absolute; left: ${coreLeftRelPct}%; width: ${coreWidthRelPct}%; height: 65%; top: 17.5%; background: ${coreColor}; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 0.68rem; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.25); z-index: 3;" title="${coreDesc}">
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;">🔨 ก่อสร้างหลัก (${sc.coreDays} วัน)</span>
+            </div>
+          `;
+        }
+
+        // ป้ายแสดงสถานะการทับซ้อน (แสดงทั้งการทับซ้อนรวม และการทับซ้อนช่วงลุยงานหลัก)
         let overlapCount = p.overlapsWith ? p.overlapsWith.length : 0;
+        let coreOverlapCount = p.coreOverlapsWith ? p.coreOverlapsWith.length : 0;
         let badgeHtml = '';
-        if (overlapCount > 0) {
-          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;">⚠️ ชน ${overlapCount} สัญญา</span>`;
+        if (coreOverlapCount > 0) {
+          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;" title="หน้างานลุยพร้อมกัน ${coreOverlapCount} สัญญา">⚠️ ชนงานหลัก ${coreOverlapCount} สัญญา</span>`;
+        } else if (overlapCount > 0) {
+          badgeHtml = `<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;" title="คาบเกี่ยวเฉพาะช่วงเตรียมงาน/ตรวจรับ">คาบเกี่ยวสัญญา ${overlapCount} สัญญา</span>`;
         } else {
           badgeHtml = `<span style="background: #f0fdf4; color: #16a34a; border: 1px solid #86efac; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 500; white-space: nowrap;">ไม่ทับซ้อน</span>`;
         }
 
-        // แถบสีเขียวแสดงระยะเวลาสัญญา (เริ่มต้น ถึง สิ้นสุด)
-        let barColor = overlapCount > 0 ? '#10b981' : '#059669';
+        // แถบสัญญารวม (สีเขียวโปร่งแสง/โทนสุภาพ)
+        let outerBarBg = overlapCount > 0 ? '#a7f3d0' : '#d1fae5';
+        let outerBorder = overlapCount > 0 ? '#10b981' : '#34d399';
         let segmentsHtml = `
-          <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: ${barColor}; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; color: white; font-size: 0.72rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 2; box-shadow: 0 1px 3px rgba(16,185,129,0.35);" title="สัญญา: ${p.startDate.toLocaleDateString('th-TH')} ถึง ${p.contractEndDate.toLocaleDateString('th-TH')} (${durationDays} วัน)">
-            <span>เริ่ม: ${p.startDate.toLocaleDateString('th-TH')}</span>
-            <span style="opacity: 0.9;">(${durationDays} วัน)</span>
-            <span>สิ้นสุด: ${p.contractEndDate.toLocaleDateString('th-TH')}</span>
+          <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: ${outerBarBg}; border: 1.5px solid ${outerBorder}; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; color: #064e3b; font-size: 0.70rem; font-weight: 600; white-space: nowrap; z-index: 2; box-shadow: 0 1px 3px rgba(0,0,0,0.06);" title="สัญญาเต็ม: ${p.startDate.toLocaleDateString('th-TH')} ถึง ${p.contractEndDate.toLocaleDateString('th-TH')} (${durationDays} วัน)\n${coreDesc}">
+            <span style="z-index: 4; text-shadow: 0 0 2px #fff;">เริ่ม: ${p.startDate.toLocaleDateString('th-TH')}</span>
+            ${coreBarHtml}
+            <span style="z-index: 4; text-shadow: 0 0 2px #fff;">สิ้นสุด: ${p.contractEndDate.toLocaleDateString('th-TH')}</span>
           </div>
         `;
 
@@ -1989,7 +2126,7 @@
                 <strong style="color: #1e40af; font-size: 0.8rem; white-space: nowrap;">฿${(p.contract_price/1000000).toFixed(2)}M</strong>
               </div>
             </div>
-            <div style="width: 100%; height: 26px; background: #f1f5f9; border-radius: 6px; position: relative; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
+            <div style="width: 100%; height: 28px; background: #f8fafc; border-radius: 6px; position: relative; border: 1px solid #e2e8f0; cursor: pointer;" onclick="openModal('${p.project_id}')">
               ${segmentsHtml}
             </div>
           </div>
