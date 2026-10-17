@@ -475,7 +475,6 @@
         <label class="filter-label">🏢 จำแนกกลุ่มหน่วยรับตรวจ:</label>
         <select id="filterDeptCategory" onchange="applyGlobalFilters()" style="border: 1.5px solid #2563eb; font-weight: 600; color: #1e40af; background: #eff6ff;">
           <option value="ALL">ทุกกลุ่มหน่วยรับตรวจ (ทั้งหมด)</option>
-          <option value="GROUP_LOCAL_ALL">🌟 รวมองค์กรปกครองส่วนท้องถิ่น (อปท. ทั้งหมด)</option>
           <option value="GROUP_PAO">1. องค์การบริหารส่วนจังหวัด (อบจ.)</option>
           <option value="GROUP_MUNICIPALITY_CITY">2. เทศบาลนคร / เทศบาลเมือง</option>
           <option value="GROUP_MUNICIPALITY_SUB">3. เทศบาลตำบล</option>
@@ -591,6 +590,61 @@
 
     <!-- ==================== STAGE 1: ปม.1 แบบคัดเลือกหน่วยรับตรวจ ==================== -->
     <div id="stage1Section">
+
+      <!-- Collapsible Full-Width Parameter Panel for แบบ ปม.1 -->
+      <div class="card" style="margin-bottom: 1.25rem; border: 1.5px solid #3b82f6; background: #f8fafc; overflow: hidden;">
+        <div style="padding: 1rem 1.25rem; cursor: pointer; display: flex; justify-content: space-between; align-items: center; background: #eff6ff; border-radius: 8px; user-select: none;" onclick="togglePm1ParamPanel()">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span style="font-size: 1.25rem;">⚙️</span>
+            <div>
+              <strong style="color: #1e40af; font-size: 0.98rem;">แผงปรับแต่งระดับความเสี่ยง (7 ปัจจัย ปม.1) และบันทึกสรุปความเห็นของผู้ตรวจสอบ (เฉพาะหน่วยที่เลือก)</strong>
+              <div style="font-size: 0.8rem; color: #64748b; margin-top: 2px;">
+                คลิกเพื่อเปิด/พับเก็บแผงปรับคะแนนตามดุลยพินิจ (1-5) และแก้ไขสรุปความเห็นสำหรับส่งออกรายงาน ปม.1
+              </div>
+            </div>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span id="pm1SelectedCountBadge" style="background: #2563eb; color: white; padding: 4px 12px; border-radius: 9999px; font-size: 0.82rem; font-weight: 700;">เลือกแล้ว 0 หน่วย</span>
+            <span id="pm1ParamPanelToggleIcon" style="font-size: 0.95rem; color: #1e40af; font-weight: bold; transition: transform 0.2s;">▼ เปิดแผงกรอกข้อมูล</span>
+          </div>
+        </div>
+
+        <div id="pm1ParamPanelContent" style="display: none; padding: 1.25rem; border-top: 1px solid #bfdbfe;">
+          <!-- Empty State -->
+          <div id="pm1NoSelectionMsg" style="text-align: center; padding: 1.5rem; color: #475569; background: white; border-radius: 8px; border: 1.5px dashed #cbd5e1;">
+            💡 <strong>ยังไม่มีการเลือกหน่วยรับตรวจ:</strong> กรุณาทำเครื่องหมายถูก ☑️ ในช่อง &quot;เลือก&quot; หน้าหน่วยรับตรวจในตาราง ปม.1 ด้านล่าง (เช่น ติ๊กเลือกมา 3 - 5 หน่วยงานที่สนใจ) เพื่อปรับแก้ระดับคะแนนความเสี่ยงและระบุเหตุผลเฉพาะรายหน่วย
+          </div>
+
+          <!-- Entity Factor Rows Container -->
+          <div id="pm1SelectedEntitiesContainer" style="display: none;">
+            <div style="margin-bottom: 0.75rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
+              <span style="font-size: 0.88rem; color: #1e293b; font-weight: 700;">
+                📝 ปรับคะแนนปัจจัยเสี่ยงตามดุลยพินิจของผู้ตรวจสอบ (คะแนนระดับ 1 ถึง 5):
+              </span>
+              <button type="button" class="btn btn-outline" onclick="resetAllSelectedPm1Factors()" style="font-size: 0.75rem; padding: 4px 8px;">
+                🔄 รีเซ็ตค่าคำนวณอัตโนมัติทั้งหมด
+              </button>
+            </div>
+            
+            <div id="pm1EntityFactorRows" style="display: flex; flex-direction: column; gap: 12px;">
+              <!-- Dynamic Rows -->
+            </div>
+          </div>
+
+          <!-- Auditor Summary Notes for ปม.1 -->
+          <div style="margin-top: 1.25rem; background: white; padding: 1rem; border-radius: 8px; border: 1px solid #cbd5e1;">
+            <label style="display: block; font-weight: 700; color: #1e3a8a; font-size: 0.9rem; margin-bottom: 6px;">
+              ✍️ สรุปความเห็น / ข้อสังเกตของผู้ตรวจสอบ (จะแสดงท้ายรายงาน ปม.1 ทั้ง PDF และ Excel):
+            </label>
+            <textarea id="pm1AuditorNotes" rows="3" style="width: 100%; border: 1.5px solid #94a3b8; border-radius: 6px; padding: 8px 10px; font-family: 'Sarabun'; font-size: 0.88rem; color: #1e293b; resize: vertical;" placeholder="พิมพ์สรุปความเห็นของผู้ประเมิน..."></textarea>
+            <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+              <span style="font-size: 0.75rem; color: #64748b;">* สามารถพิมพ์ระบุเหตุผล ข้อสังเกต หรือความเห็นเพิ่มเติมตามระเบียบ สตง.</span>
+              <button type="button" onclick="resetPm1Notes()" style="font-size: 0.75rem; color: #2563eb; background: none; border: none; cursor: pointer; text-decoration: underline;">คืนค่าข้อความมาตรฐาน</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="card-header">
           <div>
@@ -666,6 +720,20 @@
           <button class="btn btn-primary" onclick="exportPm2PDF()">
             📑 พิมพ์ / บันทึก PDF (แบบ ปม.2)
           </button>
+        </div>
+      </div>
+
+      <!-- Stage 2 Auditor Notes Box -->
+      <div class="card" style="margin-top: 1rem; margin-bottom: 1rem; border: 1.5px solid #0284c7; background: #f0f9ff;">
+        <div style="padding: 0.85rem 1rem;">
+          <label style="display: block; font-weight: 700; color: #0369a1; font-size: 0.88rem; margin-bottom: 4px;">
+            ✍️ สรุปความเห็น / ข้อสังเกตของผู้ตรวจสอบสำหรับแบบ ปม.2 (จะแสดงท้ายรายงาน ปม.2 ทั้ง PDF และ Excel):
+          </label>
+          <textarea id="pm2AuditorNotes" rows="2" style="width: 100%; border: 1.5px solid #7dd3fc; border-radius: 6px; padding: 6px 10px; font-family: 'Sarabun'; font-size: 0.85rem; color: #1e293b; resize: vertical;" placeholder="พิมพ์สรุปความเห็นของผู้ประเมินสำหรับแบบ ปม.2..."></textarea>
+          <div style="display: flex; justify-content: space-between; margin-top: 4px;">
+            <span style="font-size: 0.75rem; color: #0369a1;">* สามารถพิมพ์ระบุเหตุผลหรือความเห็นเพิ่มเติมสำหรับโครงการในหน่วยรับตรวจนี้</span>
+            <button type="button" onclick="resetPm2Notes()" style="font-size: 0.75rem; color: #0284c7; background: none; border: none; cursor: pointer; text-decoration: underline;">คืนค่าข้อความมาตรฐาน</button>
+          </div>
         </div>
       </div>
 
@@ -808,7 +876,7 @@
               📍 แผนที่แสดงพิกัดโครงการของผู้รับจ้าง (Contractor Site Map)
             </div>
             <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-              🔴 หมุดสีแดง = สัญญาที่มีช่วงเวลาทับซ้อน | 🟢 หมุดสีเขียว = สัญญาปกติ | 🟡 หมุดสีส้ม/เหลืองทองจาง = สัญญานอกเดือนที่เลือก | 🏢 หมุดสีน้ำเงินเข้ม = จุดศูนย์กลาง/ที่ตั้งผู้รับจ้าง
+              🔴 หมุดสีแดง = สัญญาที่มีช่วงเวลาทับซ้อน | 🟢 หมุดสีเขียว = สัญญาปกติ | 🟡 หมุดสีส้ม/เหลืองทองจาง = สัญญานอกเดือนที่เลือก
             </p>
           </div>
           <span style="font-size: 0.8rem; color: var(--muted);" id="overlapMapCount">0 จุดพิกัด</span>
@@ -1197,19 +1265,38 @@
         distSelect.innerHTML += `<option value="${d}">อ.${d}</option>`;
       });
 
-      // Populate Dept Category Dropdown แบบ Dynamic & Generic
+      // Populate Dept Category Dropdown แบบ Dynamic พร้อมนับจำนวนหน่วยงานจริงในแต่ละกลุ่ม [..หน่วย]
       const deptCatSelect = document.getElementById('filterDeptCategory');
       if (deptCatSelect) {
+        const catDepts = {
+          GROUP_PAO: new Set(),
+          GROUP_MUNICIPALITY_CITY: new Set(),
+          GROUP_MUNICIPALITY_SUB: new Set(),
+          GROUP_TAO: new Set(),
+          GROUP_PROV_DEPT: new Set(),
+          GROUP_EDUCATION: new Set(),
+          GROUP_OTHER: new Set()
+        };
+        const allDepts = new Set();
+        list.forEach(p => {
+          if (p.dept_name) {
+            allDepts.add(p.dept_name);
+            const cat = classifyDept(p.dept_name);
+            if (catDepts[cat]) {
+              catDepts[cat].add(p.dept_name);
+            }
+          }
+        });
+
         deptCatSelect.innerHTML = `
-          <option value="ALL">ทุกกลุ่มหน่วยรับตรวจ (ทั้งหมด)</option>
-          <option value="GROUP_LOCAL_ALL">🌟 รวมองค์กรปกครองส่วนท้องถิ่น (อปท. ทั้งหมด)</option>
-          <option value="GROUP_PAO">1. องค์การบริหารส่วนจังหวัด (อบจ.)</option>
-          <option value="GROUP_MUNICIPALITY_CITY">2. เทศบาลนคร / เทศบาลเมือง</option>
-          <option value="GROUP_MUNICIPALITY_SUB">3. เทศบาลตำบล</option>
-          <option value="GROUP_TAO">4. องค์การบริหารส่วนตำบล (อบต.)</option>
-          <option value="GROUP_PROV_DEPT">5. หน่วยงานราชการบริหารส่วนภูมิภาค / จังหวัด</option>
-          <option value="GROUP_EDUCATION">6. สถาบันอุดมศึกษา / โรงเรียน / มหาวิทยาลัย</option>
-          <option value="GROUP_OTHER">7. หน่วยงานอื่น (ส่วนกลาง/รัฐวิสาหกิจ)</option>
+          <option value="ALL">ทุกกลุ่มหน่วยรับตรวจ (${allDepts.size} หน่วยงาน)</option>
+          <option value="GROUP_PAO">1. องค์การบริหารส่วนจังหวัด (อบจ.) [${catDepts.GROUP_PAO.size} หน่วย]</option>
+          <option value="GROUP_MUNICIPALITY_CITY">2. เทศบาลนคร / เทศบาลเมือง [${catDepts.GROUP_MUNICIPALITY_CITY.size} หน่วย]</option>
+          <option value="GROUP_MUNICIPALITY_SUB">3. เทศบาลตำบล [${catDepts.GROUP_MUNICIPALITY_SUB.size} หน่วย]</option>
+          <option value="GROUP_TAO">4. องค์การบริหารส่วนตำบล (อบต.) [${catDepts.GROUP_TAO.size} หน่วย]</option>
+          <option value="GROUP_PROV_DEPT">5. หน่วยงานราชการบริหารส่วนภูมิภาค / จังหวัด [${catDepts.GROUP_PROV_DEPT.size} หน่วย]</option>
+          <option value="GROUP_EDUCATION">6. สถาบันอุดมศึกษา / โรงเรียน / มหาวิทยาลัย [${catDepts.GROUP_EDUCATION.size} หน่วย]</option>
+          <option value="GROUP_OTHER">7. หน่วยงานอื่น (ส่วนกลาง/รัฐวิสาหกิจ) [${catDepts.GROUP_OTHER.size} หน่วย]</option>
         `;
       }
 
@@ -1350,60 +1437,27 @@
         ent.topWinner = topWinner;
         ent.topWinnerCount = topWinnerCount;
 
-        // เกณฑ์ ๑. วงเงินสัญญาที่ความถี่สูงสุด (1=1-5M, 2=5-10M, 3=10-50M, 4=50-100M, 5=>100M)
-        let r1 = 1;
-        if (ent.totalBudget > 100000000) r1 = 5;
-        else if (ent.totalBudget > 50000000) r1 = 4;
-        else if (ent.totalBudget > 10000000) r1 = 3;
-        else if (ent.totalBudget > 5000000) r1 = 2;
+        // ถ้าผู้ตรวจสอบเคยปรับแก้คะแนนปัจจัยเสี่ยงของหน่วยนี้ด้วยตนเองแล้ว ให้คงค่าเดิมไว้
+        if (ent.isManuallyEdited && ent.pm1_factors) {
+          let f = ent.pm1_factors;
+          ent.pm1_factors.res1 = (f.r1 || 1) * 0.1;
+          ent.pm1_factors.res2 = (f.r2 || 1) * 0.1;
+          ent.pm1_factors.res3 = (f.r3 || 1) * 0.1;
+          ent.pm1_factors.res4 = (f.r4 || 1) * 0.1;
+          ent.pm1_factors.res5 = (f.r5 || 1) * 0.2;
+          ent.pm1_factors.res6 = (f.r6 || 1) * 0.2;
+          ent.pm1_factors.res7 = (f.r7 || 1) * 0.2;
+          ent.pm1Score = ent.pm1_factors.res1 + ent.pm1_factors.res2 + ent.pm1_factors.res3 + 
+                         ent.pm1_factors.res4 + ent.pm1_factors.res5 + ent.pm1_factors.res6 + 
+                         ent.pm1_factors.res7;
+          return ent;
+        }
 
-        // เกณฑ์ ๒. จำนวนสัญญาในรอบ 1 ปี (1=1-50, 2=51-100, 3=101-150, 4=151-200, 5=>200)
-        let r2 = 1;
-        if (ent.totalProjects > 200) r2 = 5;
-        else if (ent.totalProjects > 150) r2 = 4;
-        else if (ent.totalProjects > 100) r2 = 3;
-        else if (ent.totalProjects > 50) r2 = 2;
+        // คำนวณเกณฑ์อัตโนมัติรอบแรก
+        calculateEntityDefaultFactors(ent);
 
-        // เกณฑ์ ๓. ผลตรวจปีที่แล้ว (สมมุติฐานค่ากลาง = 1)
-        let r3 = 1;
-        // เกณฑ์ ๔. แหล่งเงิน (เงินงบประมาณ = 1)
-        let r4 = 1;
-        // เกณฑ์ ๕. เรื่องร้องเรียน (มีข้อสังเกตความเสี่ยงสูง = 3, ไม่มี = 1)
-        let r5 = ent.highRiskProjects > 0 ? 3 : 1;
-
-        // เกณฑ์ ๖. คัดเลือก/เฉพาะเจาะจงเกิน 5 แสน (1=ไม่มี, 2=คัดเลือก, 3=เฉพาะเจาะจง, 4=ทั้งคู่, 5=นวัตกรรม/ทำเอง)
-        let r6 = 1;
-        if (ent.specificOver500kCount > 5) r6 = 4;
-        else if (ent.specificOver500kCount > 0) r6 = 3;
-
-        // เกณฑ์ ๗. ความถี่คู่สัญญาซ้ำ (1=ไม่มีซ้ำ, 3=ซ้ำ 2-5 สัญญา, 5=ซ้ำมากกว่า 5 สัญญา)
-        let r7 = 1;
-        if (topWinnerCount > 5) r7 = 5;
-        else if (topWinnerCount >= 2) r7 = 3;
-
-        // ผลการประเมิน = ระดับ x น้ำหนัก
-        let res1 = r1 * 0.1;
-        let res2 = r2 * 0.1;
-        let res3 = r3 * 0.1;
-        let res4 = r4 * 0.1;
-        let res5 = r5 * 0.2;
-        let res6 = r6 * 0.2;
-        let res7 = r7 * 0.2;
-
-        let totalScore = res1 + res2 + res3 + res4 + res5 + res6 + res7;
-        ent.pm1Score = totalScore;
-        ent.pm1_factors = {
-          r1: r1, res1: res1,
-          r2: r2, res2: res2,
-          r3: r3, res3: res3,
-          r4: r4, res4: res4,
-          r5: r5, res5: res5,
-          r6: r6, res6: res6,
-          r7: r7, res7: res7
-        };
-
-        // Auto select top high risk into selected set
-        if (totalScore >= 2.5) {
+        // Auto select top high risk into selected set on initial load
+        if (ent.pm1Score >= 2.5 && !hasUserManuallyToggledSelection) {
           selectedEntitiesForExport.add(ent.name);
         }
 
@@ -1423,26 +1477,262 @@
       renderPm1Table(entityList);
     }
 
+    // Helper คำนวณปัจจัยเริ่มต้นตามเกณฑ์ สตง.
+    function calculateEntityDefaultFactors(ent) {
+      let r1 = 1;
+      if (ent.totalBudget > 100000000) r1 = 5;
+      else if (ent.totalBudget > 50000000) r1 = 4;
+      else if (ent.totalBudget > 10000000) r1 = 3;
+      else if (ent.totalBudget > 5000000) r1 = 2;
+
+      let r2 = 1;
+      if (ent.totalProjects > 200) r2 = 5;
+      else if (ent.totalProjects > 150) r2 = 4;
+      else if (ent.totalProjects > 100) r2 = 3;
+      else if (ent.totalProjects > 50) r2 = 2;
+
+      let r3 = 1;
+      let r4 = 1;
+      let r5 = ent.highRiskProjects > 0 ? 3 : 1;
+
+      let r6 = 1;
+      if (ent.specificOver500kCount > 5) r6 = 4;
+      else if (ent.specificOver500kCount > 0) r6 = 3;
+
+      let r7 = 1;
+      if (ent.topWinnerCount > 5) r7 = 5;
+      else if (ent.topWinnerCount >= 2) r7 = 3;
+
+      let res1 = r1 * 0.1;
+      let res2 = r2 * 0.1;
+      let res3 = r3 * 0.1;
+      let res4 = r4 * 0.1;
+      let res5 = r5 * 0.2;
+      let res6 = r6 * 0.2;
+      let res7 = r7 * 0.2;
+
+      ent.pm1_factors = {
+        r1: r1, res1: res1,
+        r2: r2, res2: res2,
+        r3: r3, res3: res3,
+        r4: r4, res4: res4,
+        r5: r5, res5: res5,
+        r6: r6, res6: res6,
+        r7: r7, res7: res7
+      };
+      ent.pm1Score = res1 + res2 + res3 + res4 + res5 + res6 + res7;
+      ent.isManuallyEdited = false;
+    }
+
     // Selection States for PM.1 and PM.2
     let selectedEntitiesForExport = new Set();
     let selectedProjectsForExport = new Set();
+    let hasUserManuallyToggledSelection = false;
+
+    // ==================== PM.1 PARAMETER PANEL & AUDITOR NOTES ====================
+    let isPm1ParamOpen = false;
+    const defaultPm1Note = "ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย";
+    const defaultPm2Note = "ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย";
+
+    function resetPm1Notes() {
+      const el = document.getElementById('pm1AuditorNotes');
+      if (el) el.value = defaultPm1Note;
+    }
+
+    function resetPm2Notes() {
+      const el = document.getElementById('pm2AuditorNotes');
+      if (el) el.value = defaultPm2Note;
+    }
+
+    function togglePm1ParamPanel() {
+      isPm1ParamOpen = !isPm1ParamOpen;
+      const content = document.getElementById('pm1ParamPanelContent');
+      const icon = document.getElementById('pm1ParamPanelToggleIcon');
+      if (content) content.style.display = isPm1ParamOpen ? 'block' : 'none';
+      if (icon) {
+        icon.innerHTML = isPm1ParamOpen ? '▲ พับเก็บแผงกรอกข้อมูล' : '▼ เปิดแผงกรอกข้อมูล';
+      }
+      if (isPm1ParamOpen) {
+        updatePm1ParamPanel();
+      }
+    }
+
+    function updatePm1ParamPanel() {
+      const badge = document.getElementById('pm1SelectedCountBadge');
+      if (badge) badge.textContent = `เลือกแล้ว ${selectedEntitiesForExport.size} หน่วย`;
+
+      const emptyMsg = document.getElementById('pm1NoSelectionMsg');
+      const container = document.getElementById('pm1SelectedEntitiesContainer');
+      const rowsDiv = document.getElementById('pm1EntityFactorRows');
+
+      // Initialize default notes if empty
+      const notesEl = document.getElementById('pm1AuditorNotes');
+      if (notesEl && !notesEl.value.trim()) {
+        notesEl.value = defaultPm1Note;
+      }
+
+      if (!rowsDiv) return;
+
+      if (selectedEntitiesForExport.size === 0) {
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        if (container) container.style.display = 'none';
+        rowsDiv.innerHTML = '';
+        return;
+      }
+
+      if (emptyMsg) emptyMsg.style.display = 'none';
+      if (container) container.style.display = 'block';
+
+      const factorLabels = [
+        { key: 'r1', w: '0.1', name: '๑.วงเงินสัญญาความถี่สูงสุด', desc: '1=1-5M, 2=5-10M, 3=10-50M, 4=50-100M, 5=>100M' },
+        { key: 'r2', w: '0.1', name: '๒.จำนวนสัญญาใน ๑ ปี', desc: '1=1-50, 2=51-100, 3=101-150, 4=151-200, 5=>200' },
+        { key: 'r3', w: '0.1', name: '๓.ผลตรวจปีที่แล้ว', desc: '1=ไม่มีข้อตรวจพบ, 3=มีข้อสังเกต, 5=แจ้งชดใช้/ละเมิด/วินัย' },
+        { key: 'r4', w: '0.1', name: '๔.แหล่งที่มาของเงิน', desc: '1=อุดหนุนระบุวัตถุประสงค์, 3=เงินกู้, 5=เงินสะสม/รายได้ตนเอง' },
+        { key: 'r5', w: '0.2', name: '๕.เรื่องร้องเรียน/ข่าวไม่ปกติ', desc: '1=ไม่มี, 3=มีข่าว/เบาะแส, 5=มีเรื่องร้องเรียนทางการ' },
+        { key: 'r6', w: '0.2', name: '๖.คัดเลือก/เจาะจง > ๕ แสน', desc: '1=ไม่มี, 2=คัดเลือก, 3=เจาะจง, 4=ทั้งคู่, 5=นวัตกรรม/ทำเอง' },
+        { key: 'r7', w: '0.2', name: '๗.ความถี่คู่สัญญาซ้ำ', desc: '1=ไม่ซ้ำ, 3=ซ้ำ 2-5 สัญญา, 5=ซ้ำ > 5 สัญญา' }
+      ];
+
+      let html = '';
+      Array.from(selectedEntitiesForExport).forEach((entName) => {
+        let ent = entityGroups[entName];
+        if (!ent) return;
+        let f = ent.pm1_factors || { r1:1, r2:1, r3:1, r4:1, r5:1, r6:1, r7:1 };
+        let safeId = entName.replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+        let score = ent.pm1Score || 1.0;
+        let badgeBg = score >= 3.0 ? '#fee2e2' : (score >= 2.0 ? '#fef3c7' : '#dcfce7');
+        let badgeText = score >= 3.0 ? '#991b1b' : (score >= 2.0 ? '#92400e' : '#166534');
+        let badgeBorder = score >= 3.0 ? '#ef4444' : (score >= 2.0 ? '#f59e0b' : '#10b981');
+
+        html += `
+          <div style="background: white; border: 1.5px solid #cbd5e1; border-radius: 8px; padding: 12px 14px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 8px; margin-bottom: 10px; flex-wrap: wrap; gap: 6px;">
+              <div>
+                <strong style="color: #0f172a; font-size: 0.95rem;">🏢 ${ent.name}</strong>
+                <span style="font-size: 0.8rem; color: #64748b; margin-left: 6px;">(อ.${ent.district} | ${ent.totalProjects} สัญญา | วงเงินรวม ฿${(ent.totalBudget/1000000).toFixed(2)}M)</span>
+                ${ent.isManuallyEdited ? '<span style="background: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; margin-left: 6px; font-weight: 600;">✍️ ปรับแก้คะแนนแล้ว</span>' : ''}
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="font-size: 0.82rem; color: #475569; font-weight: 600;">คะแนน ปม.1:</span>
+                <span id="score-badge-${safeId}" style="background: ${badgeBg}; color: ${badgeText}; font-weight: 700; padding: 3px 12px; border-radius: 9999px; font-size: 0.95rem; border: 1.5px solid ${badgeBorder};">
+                  ${score.toFixed(2)}
+                </span>
+                <button type="button" onclick="resetSingleEntityFactor('${ent.name}')" title="รีเซ็ตคะแนนเฉพาะหน่วยนี้เป็นค่าคำนวณอัตโนมัติ" style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 3px 8px; font-size: 0.75rem; color: #475569; cursor: pointer;">
+                  🔄 รีเซ็ต
+                </button>
+              </div>
+            </div>
+
+            <!-- 7 Factors Grid -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(135px, 1fr)); gap: 8px;">
+              ${factorLabels.map(fl => {
+                let currentVal = f[fl.key] || 1;
+                return `
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
+                    <div style="font-size: 0.74rem; font-weight: 700; color: #1e3a8a; line-height: 1.25; height: 28px; overflow: hidden;" title="${fl.name} (${fl.desc})">
+                      ${fl.name}
+                    </div>
+                    <div style="font-size: 0.68rem; color: #64748b; margin-bottom: 4px;">น้ำหนัก: ${fl.w}</div>
+                    <select onchange="onFactorChange('${ent.name}', '${fl.key}', this.value)" style="width: 100%; font-size: 0.82rem; padding: 4px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: 600; color: #0f172a; background: white; cursor: pointer;">
+                      <option value="1" ${currentVal === 1 ? 'selected' : ''}>1 (น้อยที่สุด)</option>
+                      <option value="2" ${currentVal === 2 ? 'selected' : ''}>2 (น้อย)</option>
+                      <option value="3" ${currentVal === 3 ? 'selected' : ''}>3 (ปานกลาง)</option>
+                      <option value="4" ${currentVal === 4 ? 'selected' : ''}>4 (สูง)</option>
+                      <option value="5" ${currentVal === 5 ? 'selected' : ''}>5 (สูงมาก)</option>
+                    </select>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        `;
+      });
+
+      rowsDiv.innerHTML = html;
+    }
+
+    function onFactorChange(entName, factorKey, val) {
+      let ent = entityGroups[entName];
+      if (!ent) return;
+      let num = parseInt(val) || 1;
+      if (!ent.pm1_factors) {
+        ent.pm1_factors = { r1: 1, r2: 1, r3: 1, r4: 1, r5: 1, r6: 1, r7: 1 };
+      }
+      ent.pm1_factors[factorKey] = num;
+      ent.isManuallyEdited = true;
+
+      // Recalculate weights
+      ent.pm1_factors.res1 = ent.pm1_factors.r1 * 0.1;
+      ent.pm1_factors.res2 = ent.pm1_factors.r2 * 0.1;
+      ent.pm1_factors.res3 = ent.pm1_factors.r3 * 0.1;
+      ent.pm1_factors.res4 = ent.pm1_factors.r4 * 0.1;
+      ent.pm1_factors.res5 = ent.pm1_factors.r5 * 0.2;
+      ent.pm1_factors.res6 = ent.pm1_factors.r6 * 0.2;
+      ent.pm1_factors.res7 = ent.pm1_factors.r7 * 0.2;
+
+      ent.pm1Score = ent.pm1_factors.res1 + ent.pm1_factors.res2 + ent.pm1_factors.res3 + 
+                     ent.pm1_factors.res4 + ent.pm1_factors.res5 + ent.pm1_factors.res6 + 
+                     ent.pm1_factors.res7;
+
+      // Update badge in panel
+      let safeId = entName.replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+      let badge = document.getElementById(`score-badge-${safeId}`);
+      if (badge) {
+        badge.textContent = ent.pm1Score.toFixed(2);
+        badge.style.background = ent.pm1Score >= 3.0 ? '#fee2e2' : (ent.pm1Score >= 2.0 ? '#fef3c7' : '#dcfce7');
+        badge.style.color = ent.pm1Score >= 3.0 ? '#991b1b' : (ent.pm1Score >= 2.0 ? '#92400e' : '#166534');
+        badge.style.borderColor = ent.pm1Score >= 3.0 ? '#ef4444' : (ent.pm1Score >= 2.0 ? '#f59e0b' : '#10b981');
+      }
+
+      // Update table cell
+      let tableScoreCell = document.getElementById(`pm1-score-cell-${safeId}`);
+      if (tableScoreCell) {
+        let badgeClass = ent.pm1Score >= 3.0 ? 'risk-high' : (ent.pm1Score >= 2.0 ? 'risk-med' : 'risk-low');
+        let rankText = ent.pm1Score >= 3.0 ? '🔴 สูง' : (ent.pm1Score >= 2.0 ? '🟡 ปานกลาง' : '🟢 ต่ำ');
+        tableScoreCell.innerHTML = `
+          <span class="badge-risk ${badgeClass}">${rankText}</span>
+          <div style="font-size: 0.7rem; color: var(--muted); margin-top: 2px;">ผลลัพธ์: ${ent.pm1Score.toFixed(2)}</div>
+        `;
+      }
+    }
+
+    function resetSingleEntityFactor(entName) {
+      let ent = entityGroups[entName];
+      if (!ent) return;
+      calculateEntityDefaultFactors(ent);
+      updatePm1ParamPanel();
+      renderPm1Table(Object.values(entityGroups).sort((a,b) => b.pm1Score - a.pm1Score));
+    }
+
+    function resetAllSelectedPm1Factors() {
+      selectedEntitiesForExport.forEach(entName => {
+        let ent = entityGroups[entName];
+        if (ent) calculateEntityDefaultFactors(ent);
+      });
+      updatePm1ParamPanel();
+      renderPm1Table(Object.values(entityGroups).sort((a,b) => b.pm1Score - a.pm1Score));
+    }
 
     function toggleSelectAllEntities(check) {
+      hasUserManuallyToggledSelection = true;
       if (check) {
         Object.keys(entityGroups).forEach(name => selectedEntitiesForExport.add(name));
       } else {
         selectedEntitiesForExport.clear();
       }
       renderPm1Table(Object.values(entityGroups).sort((a,b) => b.pm1Score - a.pm1Score));
+      updatePm1ParamPanel();
     }
 
     function toggleEntityCheck(name, event) {
       event.stopPropagation();
+      hasUserManuallyToggledSelection = true;
       if (selectedEntitiesForExport.has(name)) {
         selectedEntitiesForExport.delete(name);
       } else {
         selectedEntitiesForExport.add(name);
       }
+      updatePm1ParamPanel();
     }
 
     function toggleSelectAllProjects(check) {
@@ -1471,6 +1761,7 @@
 
       if (entityList.length === 0) {
         tbody.innerHTML = `<tr><td colspan="10" style="text-align: center; color: var(--muted); padding: 3rem;">ไม่พบหน่วยรับตรวจตามเงื่อนไขที่เลือก</td></tr>`;
+        updatePm1ParamPanel();
         return;
       }
 
@@ -1478,6 +1769,7 @@
         let isChecked = selectedEntitiesForExport.has(ent.name) ? 'checked' : '';
         let badgeClass = ent.pm1Score >= 3.0 ? 'risk-high' : (ent.pm1Score >= 2.0 ? 'risk-med' : 'risk-low');
         let rankText = ent.pm1Score >= 3.0 ? '🔴 สูง' : (ent.pm1Score >= 2.0 ? '🟡 ปานกลาง' : '🟢 ต่ำ');
+        let safeId = ent.name.replace(/[^a-zA-Z0-9ก-๙]/g, '_');
 
         const tr = document.createElement('tr');
         if (selectedEntityName === ent.name) tr.classList.add('selected-row');
@@ -1505,7 +1797,7 @@
             <div style="font-size: 0.85rem; font-weight: 500;">${ent.topWinner}</div>
             <div style="font-size: 0.75rem; color: var(--muted);">ชนะไป ${ent.topWinnerCount} สัญญา</div>
           </td>
-          <td style="text-align: center;">
+          <td style="text-align: center;" id="pm1-score-cell-${safeId}">
             <span class="badge-risk ${badgeClass}">${rankText}</span>
             <div style="font-size: 0.7rem; color: var(--muted); margin-top: 2px;">ผลลัพธ์: ${ent.pm1Score.toFixed(2)}</div>
           </td>
@@ -1517,6 +1809,8 @@
         `;
         tbody.appendChild(tr);
       });
+
+      updatePm1ParamPanel();
     }
 
     // ==================== STAGE 2: SELECT & RENDER ปม.2 ====================
@@ -2139,36 +2433,6 @@
         bounds.push([p.lat, p.lng]);
       });
 
-      // 3. หมุดสีน้ำเงินเข้ม: แสดงจุดศูนย์กลาง/ที่ตั้งผู้รับจ้าง (Company Hub)
-      let allPoints = (fullList && fullList.length > 0) ? fullList : activeList;
-      if (allPoints.length > 0) {
-        let avgLat = allPoints.reduce((sum, p) => sum + p.lat, 0) / allPoints.length;
-        let avgLng = allPoints.reduce((sum, p) => sum + p.lng, 0) / allPoints.length;
-
-        let compMarker = L.circleMarker([avgLat, avgLng], {
-          radius: 12,
-          fillColor: '#1d4ed8', // สีน้ำเงินเข้ม
-          color: '#ffffff',
-          weight: 3,
-          opacity: 1,
-          fillOpacity: 0.95
-        }).addTo(overlapMap);
-
-        compMarker.bindPopup(`
-          <div style="font-family: 'Sarabun'; min-width: 220px; text-align: center;">
-            <div style="background: #1e40af; color: white; padding: 4px; border-radius: 4px; font-weight: bold; font-size: 0.85rem;">
-              🏢 ที่ตั้ง/ศูนย์ปฏิบัติการผู้รับจ้าง
-            </div>
-            <div style="font-weight: 700; color: #0f172a; margin-top: 6px; font-size: 0.9rem;">${currentContractorName}</div>
-            <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;">
-              ศูนย์กลางพิกัดของสัญญาที่ได้รับ (${allPoints.length} สัญญา)
-            </div>
-          </div>
-        `);
-
-        overlapMarkers.push(compMarker);
-        bounds.push([avgLat, avgLng]);
-      }
 
       if (bounds.length > 0) {
         overlapMap.fitBounds(bounds, { maxZoom: 13, padding: [25, 25] });
@@ -2582,15 +2846,16 @@
         ]);
       });
 
-      // สรุปความเห็นท้ายแบบฟอร์มตาม ปม.1
+      // สรุปความเห็นท้ายแบบฟอร์มตาม ปม.1 (ดึงข้อความจาก textarea ที่ผู้ตรวจสอบพิมพ์)
+      let pm1Note = document.getElementById('pm1AuditorNotes')?.value || "ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย";
       data.push([""]);
       data.push(["สรุปความเห็น:"]);
-      data.push(["ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย"]);
+      data.push([pm1Note]);
       data.push([""]);
       data.push(["", "", "ผู้ประเมิน.................................................................", "", "", "", "", "", "ผู้สอบทาน................................................................."]);
-      data.push(["", "", "(                                          )", "", "", "", "", "", "(                                          )"]);
-      data.push(["", "", "ตำแหน่ง....................................................................", "", "", "", "", "", "ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม..............................................................."]);
-      data.push(["", "", "วันที่...........................................................................", "", "", "", "", "", "วันที่..........................................................................."]);
+      data.push(["", "", "(.................................................................)", "", "", "", "", "", "(.................................................................)"]);
+      data.push(["", "", "ตำแหน่ง.................................................................", "", "", "", "", "", "ตำแหน่ง................................................................."]);
+      data.push(["", "", "วันที่........../........../..........", "", "", "", "", "", "วันที่........../........../.........."]);
 
       let ws = XLSX.utils.aoa_to_sheet(data);
       let wb = XLSX.utils.book_new();
@@ -2672,15 +2937,16 @@
         ]);
       });
 
-      // สรุปความเห็นท้ายแบบฟอร์มตาม ปม.2
+      // สรุปความเห็นท้ายแบบฟอร์มตาม ปม.2 (ดึงข้อความจาก textarea ที่ผู้ตรวจสอบพิมพ์)
+      let pm2Note = document.getElementById('pm2AuditorNotes')?.value || "ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย";
       data.push([""]);
       data.push(["สรุปความเห็น:"]);
-      data.push(["ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย"]);
+      data.push([pm2Note]);
       data.push([""]);
       data.push(["", "ผู้ประเมิน.................................................................", "", "", "", "", "", "", "ผู้สอบทาน................................................................."]);
-      data.push(["", "(                                          )", "", "", "", "", "", "", "(                                          )"]);
-      data.push(["", "ตำแหน่ง....................................................................", "", "", "", "", "", "", "ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม..............................................................."]);
-      data.push(["", "วันที่...........................................................................", "", "", "", "", "", "", "วันที่..........................................................................."]);
+      data.push(["", "(.................................................................)", "", "", "", "", "", "", "(.................................................................)"]);
+      data.push(["", "ตำแหน่ง.................................................................", "", "", "", "", "", "", "ตำแหน่ง................................................................."]);
+      data.push(["", "วันที่........../........../..........", "", "", "", "", "", "", "วันที่........../........../.........."]);
 
       let ws = XLSX.utils.aoa_to_sheet(data);
       let wb = XLSX.utils.book_new();
@@ -2720,18 +2986,25 @@
         `;
       }).join('');
 
+      let pm1Note = document.getElementById('pm1AuditorNotes')?.value || 'ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย';
+
       let printWin = window.open('', '_blank');
       printWin.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
           <title>แบบ ปม.1 - สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ</title>
+          <!-- ฟอนต์ราชการ Sarabun และ TH Sarabun -->
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            body { font-family: 'Sarabun', sans-serif; font-size: 8pt; padding: 10px; }
-            h2, h3, h4 { margin: 2px 0; text-align: center; font-size: 11pt; }
-            h3 { font-size: 10pt; }
+            * { font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important; }
+            body { font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important; font-size: 8.5pt; padding: 10px; }
+            h2, h3, h4 { margin: 2px 0; text-align: center; font-size: 11.5pt; }
+            h3 { font-size: 10.5pt; }
             h4 { font-size: 9.5pt; font-weight: normal; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 7.5pt; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 8pt; }
             th, td { border: 1px solid #000; padding: 4px 3px; }
             th { background: #f1f5f9; text-align: center; font-weight: bold; }
             .sign-box { margin-top: 25px; display: flex; justify-content: space-between; font-size: 9pt; }
@@ -2773,7 +3046,7 @@
             <tbody>${rowsHtml}</tbody>
           </table>
           <div style="margin-top: 10px; font-size: 8.5pt;">
-            <strong>สรุปความเห็น:</strong> ให้ผู้ประเมินสรุปผลในการคัดเลือกหน่วยรับตรวจนั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย
+            <strong>สรุปความเห็น:</strong> ${pm1Note}
           </div>
           <div class="sign-box">
             <div style="text-align: center; width: 45%;">
@@ -2785,7 +3058,7 @@
             <div style="text-align: center; width: 45%;">
               ผู้สอบทาน.................................................................<br>
               (.................................................................)<br>
-              ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม<br>
+              ตำแหน่ง.................................................................<br>
               วันที่........../........../..........
             </div>
           </div>
@@ -2835,18 +3108,25 @@
         `;
       }).join('');
 
+      let pm2Note = document.getElementById('pm2AuditorNotes')?.value || 'ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย';
+
       let printWin = window.open('', '_blank');
       printWin.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
           <title>แบบ ปม.2 - ${selectedEntityName}</title>
+          <!-- ฟอนต์ราชการ Sarabun และ TH Sarabun -->
+          <link rel="preconnect" href="https://fonts.googleapis.com">
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+          <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
           <style>
-            body { font-family: 'Sarabun', sans-serif; font-size: 8pt; padding: 10px; }
-            h2, h3, h4 { margin: 2px 0; text-align: center; font-size: 11pt; }
-            h3 { font-size: 10pt; }
+            * { font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important; }
+            body { font-family: 'TH Sarabun New', 'TH Sarabun PSK', 'Sarabun', sans-serif !important; font-size: 8.5pt; padding: 10px; }
+            h2, h3, h4 { margin: 2px 0; text-align: center; font-size: 11.5pt; }
+            h3 { font-size: 10.5pt; }
             h4 { font-size: 9.5pt; font-weight: normal; }
-            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 7.5pt; }
+            table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 8pt; }
             th, td { border: 1px solid #000; padding: 4px 3px; }
             th { background: #f1f5f9; text-align: center; font-weight: bold; }
             .sign-box { margin-top: 25px; display: flex; justify-content: space-between; font-size: 9pt; }
@@ -2892,7 +3172,7 @@
             <tbody>${rowsHtml}</tbody>
           </table>
           <div style="margin-top: 10px; font-size: 8.5pt;">
-            <strong>สรุปความเห็น:</strong> ให้ผู้ประเมินสรุปผลการคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม นั้นๆ หรือในกรณีที่มีความเห็นแตกต่างจากผลการประเมินเพิ่มเติมให้ระบุเหตุผลเพิ่มเติมไว้ด้วย
+            <strong>สรุปความเห็น:</strong> ${pm2Note}
           </div>
           <div class="sign-box">
             <div style="text-align: center; width: 45%;">
@@ -2904,7 +3184,7 @@
             <div style="text-align: center; width: 45%;">
               ผู้สอบทาน.................................................................<br>
               (.................................................................)<br>
-              ตำแหน่ง ผู้อำนวยการกลุ่ม / หัวหน้ากลุ่ม<br>
+              ตำแหน่ง.................................................................<br>
               วันที่........../........../..........
             </div>
           </div>
