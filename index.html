@@ -513,17 +513,30 @@
         </select>
       </div>
 
-      <!-- 4. Filter project_type_name -->
-      <div class="filter-item" style="min-width: 150px;">
+      <!-- 3.1 Filter Budget Range (ช่วงวงเงินสัญญา/งบประมาณ) -->
+      <div class="filter-item" style="min-width: 220px;">
+        <label class="filter-label">💰 วงเงินสัญญา (บาท):</label>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <input type="number" id="filterMinBudget" placeholder="ขั้นต่ำ (0)" min="0" step="100000" oninput="applyGlobalFilters()" style="width: 50%; font-size: 0.8rem; padding: 5px 6px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: white;" title="กรอกวงเงินขั้นต่ำ">
+          <span style="font-size: 0.8rem; color: var(--muted); font-weight: bold;">-</span>
+          <input type="number" id="filterMaxBudget" placeholder="ขั้นสูง (ไม่จำกัด)" min="0" step="100000" oninput="applyGlobalFilters()" style="width: 50%; font-size: 0.8rem; padding: 5px 6px; border: 1.5px solid #cbd5e1; border-radius: 6px; background: white;" title="กรอกวงเงินขั้นสูง">
+        </div>
+      </div>
+
+      <!-- 4. Filter project_type_name (9 ประเภททางการ e-GP) -->
+      <div class="filter-item" style="min-width: 170px;">
         <label class="filter-label">🏷️ แยกประเภทโครงการ:</label>
         <select id="filterProjectType" onchange="applyGlobalFilters()">
-          <option value="ALL">ทุกประเภทโครงการ (ทั้งหมด)</option>
-          <option value="จ้างก่อสร้าง" selected>จ้างก่อสร้าง</option>
+          <option value="ALL" selected>ทุกประเภทโครงการ (ทั้งหมด)</option>
           <option value="ซื้อ">ซื้อ</option>
           <option value="จ้างทำของ/จ้างเหมาบริการ">จ้างทำของ / จ้างเหมาบริการ</option>
-          <option value="เช่า">เช่า</option>
+          <option value="จ้างก่อสร้าง">จ้างก่อสร้าง</option>
           <option value="จ้างออกแบบ">จ้างออกแบบ</option>
+          <option value="เช่า">เช่า</option>
           <option value="จ้างที่ปรึกษา">จ้างที่ปรึกษา</option>
+          <option value="จ้างควบคุมงาน">จ้างควบคุมงาน</option>
+          <option value="จ้างออกแบบและควบคุมงาน">จ้างออกแบบและควบคุมงาน</option>
+          <option value="จ้างออกแบบและควบคุมงานก่อสร้าง">จ้างออกแบบและควบคุมงานก่อสร้าง</option>
         </select>
       </div>
 
@@ -568,7 +581,7 @@
       </div>
       <div>
         <span style="font-size: 0.85rem; color: var(--muted);" id="currentFocusEntityText">
-          หน่วยรับตรวจเป้าหมาย: <strong style="color: var(--primary);">ยังไม่ได้เลือกหน่วย</strong>
+          หน่วยรับตรวจเป้าหมาย: <span style="color: #94a3b8; font-style: italic;">ยังไม่ได้เลือก (กรุณาคลิกเลือกในแบบ ปม.1)</span>
         </span>
       </div>
     </div>
@@ -990,7 +1003,7 @@
               📊 แผนผังไทม์ไลน์ห้วงเวลาปฏิบัติงาน (Gantt Chart Timeline)
             </div>
             <p style="font-size: 0.8rem; color: var(--muted); margin-top: 2px;">
-              🟢 แถบสีเขียวอ่อน = สัญญาทั้งหมด (เริ่ม - สิ้นสุด) | 🔨 แถบสีเข้มกลาง = ช่วงลุยงานหลักตาม S-Curve (Core Period) | 🟨 แถบโปร่งแสงแนวดิ่ง = เดือนที่เลือก
+              🟢 แถบสีเขียวอ่อน = สัญญาทั้งหมด (เริ่ม - สิ้นสุด) | ⚙️ แถบสีเข้มกลาง = ช่วงดำเนินงานหลักตาม S-Curve (Core Execution Period) | 🟨 แถบโปร่งแสงแนวดิ่ง = เดือนที่เลือก
             </p>
           </div>
           <button class="btn btn-outline" onclick="exportOverlapExcel()" style="font-size: 0.8rem; padding: 0.4rem 0.8rem;">
@@ -998,15 +1011,15 @@
           </button>
         </div>
 
-        <!-- หมายเหตุและเกณฑ์การคำนวณช่วงก่อสร้างหลัก (S-Curve Core Window) -->
+        <!-- หมายเหตุและเกณฑ์การคำนวณช่วงดำเนินงานหลัก (S-Curve Core Window) -->
         <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; padding: 0.75rem 1rem; margin-bottom: 1rem; font-size: 0.78rem; color: #1e3a8a; line-height: 1.5;">
           <div style="font-weight: 700; display: flex; align-items: center; gap: 6px; margin-bottom: 4px; color: #1e40af;">
-            <span>📐 ข้อกำหนดและเกณฑ์การคำนวณช่วงก่อสร้างหลัก (Core Construction Period / S-Curve):</span>
+            <span>📐 ข้อกำหนดและเกณฑ์การคำนวณช่วงดำเนินงานหลัก (Core Execution Period / S-Curve):</span>
           </div>
           <div>
-            • <strong>โครงการขนาดใหญ่ (&gt; 2 ล้านบาท หรือ &gt; 180 วัน):</strong> กราฟการทำงานแบนราบช่วงแรก (เตรียมงาน/ตั้งแคมป์/ขออนุมัติ 15%) และช่วงท้าย (ตรวจรับ/เก็บ Defect 15%) จึงคำนวณ <strong>ช่วงลุยงานหลัก 70% ตรงกลาง</strong><br>
-            • <strong>โครงการขนาดกลาง (5 แสน - 2 ล้านบาท หรือ 60 - 180 วัน):</strong> ตัดช่วงเตรียมงาน 10% และตัดช่วงตรวจรับ 10% เหลือ <strong>ช่วงลุยงานหลัก 80% ตรงกลาง</strong><br>
-            • <strong>โครงการขนาดเล็ก (&lt; 5 แสนบาท หรือ &lt; 60 วัน):</strong> คิดเป็นช่วงลุยงานหลัก <strong>100% เต็มสัญญา</strong>
+            • <strong>โครงการขนาดใหญ่ (&gt; 2 ล้านบาท หรือ &gt; 180 วัน):</strong> กราฟการทำงานแบนราบช่วงแรก (เตรียมงาน/เบิกจ่ายเงินล่วงหน้า/ขออนุมัติ 15%) และช่วงท้าย (ตรวจรับ/ส่งมอบงานงวดสุดท้าย 15%) จึงคำนวณ <strong>ช่วงดำเนินงานหลัก 70% ตรงกลาง</strong><br>
+            • <strong>โครงการขนาดกลาง (5 แสน - 2 ล้านบาท หรือ 60 - 180 วัน):</strong> ตัดช่วงเตรียมงาน 10% และตัดช่วงตรวจรับ 10% เหลือ <strong>ช่วงดำเนินงานหลัก 80% ตรงกลาง</strong><br>
+            • <strong>โครงการขนาดเล็ก (&lt; 5 แสนบาท หรือ &lt; 60 วัน):</strong> คิดเป็นช่วงดำเนินงานหลัก <strong>100% เต็มสัญญา</strong>
           </div>
         </div>
 
@@ -1127,7 +1140,7 @@
             </li>
             <li>
               <strong>ขั้นตอนที่ 3: ตรวจสอบการลงนามสัญญาและระยะเวลาทับซ้อน (Gantt Chart &amp; S-Curve)</strong><br>
-              เลือกดูผู้รับจ้างรายที่มีหลายสัญญา ระบบจะวิเคราะห์ช่วงก่อสร้างหลัก (Core S-Curve) สัญญาที่เดินงานพร้อมกันเกินกำลัง และแสดงจุดพิกัดหน้างานบนแผนที่ Leaflet
+              เลือกดูผู้รับจ้างรายที่มีหลายสัญญา ระบบจะวิเคราะห์ช่วงดำเนินงานหลัก (Core S-Curve) สัญญาที่เดินงานพร้อมกันเกินกำลัง และแสดงจุดพิกัดหน้างานบนแผนที่ Leaflet
             </li>
           </ul>
         </div>
@@ -1155,6 +1168,8 @@
     let filteredRecords = [];
     let entityGroups = {}; // dept_name -> list of records
     let selectedEntityName = null;
+    let currentProvinceName = 'ชัยภูมิ';
+    let currentBudgetYear = '2568';
 
     let currentStage = 1; // 1 = ปม.1, 2 = ปม.2, 3 = สัญญาทับซ้อน
     let map, markers = [], entityRiskChart;
@@ -1303,75 +1318,75 @@
         let projectType = (row.project_type_name || 'จ้างก่อสร้าง').trim();
         let dept = (row.dept_name || row.dept_sub_name || 'ไม่ระบุหน่วยงาน').trim();
 
-        // Evaluate Project Risk according to แบบ ปม.2 เกณฑ์ทางการ สตง. (8 ปัจจัยเสี่ยง: ต่ำ=0.15, กลาง=0.50, สูง=0.85)
-        // ข้อ 1: วงเงินงบประมาณ (<= 10M -> 0.15 ต่ำ, 10-50M -> 0.50 ปานกลาง, > 50M -> 0.85 สูง)
-        let f1_val = 0.15;
+        // Evaluate Project Risk according to แบบ ปม.2 เกณฑ์ทางการ สตง. (8 ปัจจัยเสี่ยง: ต่ำ=0.30, กลาง=0.45, สูง=0.70)
+        // ข้อ 1: วงเงินงบประมาณ (<= 10M -> 0.30 ต่ำ, 10-50M -> 0.45 ปานกลาง, > 50M -> 0.70 สูง)
+        let f1_val = 0.30;
         let f1_lvl = "ต่ำ";
-        if (contractPrice > 50000000) { f1_val = 0.85; f1_lvl = "สูง"; }
-        else if (contractPrice > 10000000) { f1_val = 0.50; f1_lvl = "ปานกลาง"; }
+        if (contractPrice > 50000000) { f1_val = 0.70; f1_lvl = "สูง"; }
+        else if (contractPrice > 10000000) { f1_val = 0.45; f1_lvl = "ปานกลาง"; }
 
-        // ข้อ 2: ลักษณะของโครงการ (ปรับปรุง/ซ่อมแซม=0.15 ต่ำ, ก่อสร้างใหม่มาตรฐาน=0.50 กลาง, อาคารสูง/ซับซ้อน=0.85 สูง)
-        let f2_val = 0.15;
+        // ข้อ 2: ลักษณะของโครงการ (ปรับปรุง/ซ่อมแซม=0.30 ต่ำ, ก่อสร้างใหม่มาตรฐาน=0.45 กลาง, อาคารสูง/ซับซ้อน=0.70 สูง)
+        let f2_val = 0.30;
         let f2_lvl = "ต่ำ";
         let pName = (row.project_name || '').toLowerCase();
         if (pName.includes('อาคารสูง') || pName.includes('สะพาน') || pName.includes('ระบบบำบัด') || pName.includes('เขื่อน')) {
-          f2_val = 0.85; f2_lvl = "สูง";
+          f2_val = 0.70; f2_lvl = "สูง";
         } else if (projectType.includes('ก่อสร้าง') || pName.includes('ก่อสร้าง') || pName.includes('สร้าง')) {
-          f2_val = 0.50; f2_lvl = "ปานกลาง";
+          f2_val = 0.45; f2_lvl = "ปานกลาง";
         }
 
-        // ข้อ 3: ความพร้อมในการดำเนินงาน (พร้อม=0.15 ต่ำ, ไม่พร้อมบางส่วน=0.50 กลาง, ข้อพิพาท/ยังไม่ได้รับอนุญาต=0.85 สูง)
-        let f3_val = 0.15;
+        // ข้อ 3: ความพร้อมในการดำเนินงาน (พร้อม=0.30 ต่ำ, ไม่พร้อมบางส่วน=0.45 กลาง, ข้อพิพาท/ยังไม่ได้รับอนุญาต=0.70 สูง)
+        let f3_val = 0.30;
         let f3_lvl = "ต่ำ";
 
-        // ข้อ 4: แหล่งที่มาของเงิน (งบประมาณ=0.15 ต่ำ, งบ+นอกงบ=0.50 กลาง, งบ+นอกงบ+อื่นๆ=0.85 สูง)
-        let f4_val = 0.15;
+        // ข้อ 4: แหล่งที่มาของเงิน (งบประมาณ=0.30 ต่ำ, งบ+นอกงบ=0.45 กลาง, งบ+นอกงบ+อื่นๆ=0.70 สูง)
+        let f4_val = 0.30;
         let f4_lvl = "ต่ำ";
 
-        // ข้อ 5: การมีส่วนได้เสียของผู้บริหารและเจ้าหน้าที่ (ไม่มี=0.15 ต่ำ, ปรากฏข่าว=0.50 กลาง, มีเรื่องร้องเรียน=0.85 สูง)
-        let f5_val = 0.15;
+        // ข้อ 5: การมีส่วนได้เสียของผู้บริหารและเจ้าหน้าที่ (ไม่มี=0.30 ต่ำ, ปรากฏข่าว=0.45 กลาง, มีเรื่องร้องเรียน=0.70 สูง)
+        let f5_val = 0.30;
         let f5_lvl = "ต่ำ";
 
-        // ข้อ 6: วิธีการจัดซื้อจัดจ้าง (e-bidding/e-market=0.15 ต่ำ, คัดเลือก=0.50 กลาง, เฉพาะเจาะจง=0.85 สูง)
-        let f6_val = 0.15;
+        // ข้อ 6: วิธีการจัดซื้อจัดจ้าง (e-bidding/e-market=0.30 ต่ำ, คัดเลือก=0.45 กลาง, เฉพาะเจาะจง=0.70 สูง)
+        let f6_val = 0.30;
         let f6_lvl = "ต่ำ";
         if (method.includes('เฉพาะเจาะจง')) {
-          f6_val = 0.85;
+          f6_val = 0.70;
           f6_lvl = "สูง";
         } else if (method.includes('คัดเลือก')) {
-          f6_val = 0.50;
+          f6_val = 0.45;
           f6_lvl = "ปานกลาง";
         }
 
-        // ข้อ 7: คู่สัญญา (ไม่มีสัมพันธ์/ประวัติดี=0.15 ต่ำ, ได้งานหลายสัญญา=0.50 กลาง, ทิ้งงาน/ส่งมอบช้า/ซ้ำซ้อน=0.85 สูง)
-        let f7_val = 0.15;
+        // ข้อ 7: คู่สัญญา (ไม่มีสัมพันธ์/ประวัติดี=0.30 ต่ำ, ได้งานหลายสัญญา=0.45 กลาง, ทิ้งงาน/ส่งมอบช้า/ซ้ำซ้อน=0.70 สูง)
+        let f7_val = 0.30;
         let f7_lvl = "ต่ำ";
         let finding = 'การแข่งขันเสนอราคาเป็นไปตามเกณฑ์ปกติ';
         let riskType = 'การประมูลแข่งขันตามปกติ';
         let lawRef = 'ระเบียบกระทรวงการคลังฯ พ.ศ. 2560';
 
         if (method.includes('e-bidding') && diffPct < 0 && diffPct >= -0.25 && contractPrice > 3000000) {
-          f7_val = 0.85;
+          f7_val = 0.70;
           f7_lvl = "สูง";
           riskType = 'สงสัยสมยอมราคา (เสนอราคาเฉียดฉิว < 0.25%)';
           lawRef = 'พ.ร.บ. ว่าด้วยความผิดเกี่ยวกับการเสนอราคาต่อหน่วยงานของรัฐ พ.ศ. 2542';
           finding = `ผลต่างราคาห่างจากราคากลางเพียง ${Math.abs(diffPct).toFixed(2)}% ส่อพฤติกรรมรู้ราคากันล่วงหน้า`;
         } else if (contractPrice >= 450000 && contractPrice <= 500000 && method.includes('เฉพาะเจาะจง')) {
-          f7_val = 0.85;
+          f7_val = 0.70;
           f7_lvl = "สูง";
           riskType = 'พฤติกรรมแบ่งซื้อแบ่งจ้าง (เฉพาะเจาะจงปริ่ม 5 แสน)';
           lawRef = 'มาตรา 21 แห่ง พ.ร.บ. จัดซื้อจัดจ้างฯ พ.ศ. 2560';
           finding = `วงเงินสัญญา ฿${contractPrice.toLocaleString()} ปริ่มเพดาน 500,000 บาท เสี่ยงต่อการซอยโครงการ`;
         } else if (diffPct <= -25 && projectType.includes('ก่อสร้าง')) {
-          f7_val = 0.85;
+          f7_val = 0.70;
           f7_lvl = "สูง";
           riskType = 'ราคาต่ำกว่าพิกัดวิศวกรรมผิดปกติ (เสี่ยงทิ้งงาน/ลดสเปก)';
           lawRef = 'ระเบียบกระทรวงการคลังฯ ข้อ 58';
           finding = `ราคาต่ำกว่าราคากลาง ${Math.abs(diffPct).toFixed(1)}% เสี่ยงต่อการลักไก่ลดวัสดุหรือทิ้งงาน`;
         }
 
-        // ข้อ 8: ผลการตรวจสอบที่ผ่านมา (ไม่เคยมีข้อทักท้วง=0.15 ต่ำ, ทักท้วงไม่สาระสำคัญ=0.50 กลาง, ทักท้วงสาระสำคัญ/ชี้มูล=0.85 สูง)
-        let f8_val = 0.15;
+        // ข้อ 8: ผลการตรวจสอบที่ผ่านมา (ไม่เคยมีข้อทักท้วง=0.30 ต่ำ, ทักท้วงไม่สาระสำคัญ=0.45 กลาง, ทักท้วงสาระสำคัญ/ชี้มูล=0.70 สูง)
+        let f8_val = 0.30;
         let f8_lvl = "ต่ำ";
 
         let riskSum = (f1_val + f2_val + f3_val + f4_val + f5_val + f6_val + f7_val + f8_val);
@@ -1435,6 +1450,20 @@
       let yrText = foundYears.length > 0 ? foundYears.join(', ') : '2568';
       let provText = foundProvs.length > 0 ? foundProvs.join(', ') : 'ทุกจังหวัด';
 
+      currentProvinceName = provText;
+      currentBudgetYear = yrText;
+
+      // Reset selected entity state upon new file load
+      selectedEntityName = null;
+      selectedEntitiesForExport.clear();
+      selectedProjectsForExport.clear();
+      const focusEl = document.getElementById('currentFocusEntityText');
+      if (focusEl) {
+        focusEl.innerHTML = 'หน่วยรับตรวจเป้าหมาย: <span style="color: #94a3b8; font-style: italic;">ยังไม่ได้เลือก (กรุณาคลิกเลือกในแบบ ปม.1)</span>';
+      }
+      const headEl = document.getElementById('selectedEntityHeaderName');
+      if (headEl) headEl.textContent = '-';
+
       const yrEl = document.getElementById('displayBudgetYear');
       const prEl = document.getElementById('displayProvince');
       const totalUploadEl = document.getElementById('displayTotalUploadCount');
@@ -1451,6 +1480,37 @@
       districts.forEach(d => {
         distSelect.innerHTML += `<option value="${d}">อ.${d}</option>`;
       });
+
+      // Populate Project Types Dropdown แบบ Dynamic พร้อมแสดงจำนวนสัญญา
+      const typeSelect = document.getElementById('filterProjectType');
+      if (typeSelect) {
+        const standardTypes = [
+          "ซื้อ",
+          "จ้างทำของ/จ้างเหมาบริการ",
+          "จ้างก่อสร้าง",
+          "จ้างออกแบบ",
+          "เช่า",
+          "จ้างที่ปรึกษา",
+          "จ้างควบคุมงาน",
+          "จ้างออกแบบและควบคุมงาน",
+          "จ้างออกแบบและควบคุมงานก่อสร้าง"
+        ];
+        const typeCounts = {};
+        list.forEach(p => {
+          if (p.project_type) {
+            typeCounts[p.project_type] = (typeCounts[p.project_type] || 0) + 1;
+          }
+        });
+        let allTypes = [...new Set([...standardTypes, ...Object.keys(typeCounts)])];
+        let optionsHtml = `<option value="ALL" selected>ทุกประเภทโครงการ (ทั้งหมด ${list.length.toLocaleString()} สัญญา)</option>`;
+        allTypes.forEach(t => {
+          let cnt = typeCounts[t] || 0;
+          if (cnt > 0 || standardTypes.includes(t)) {
+            optionsHtml += `<option value="${t}">${t} (${cnt.toLocaleString()} สัญญา)</option>`;
+          }
+        });
+        typeSelect.innerHTML = optionsHtml;
+      }
 
       // Populate Dept Category Dropdown แบบ Dynamic พร้อมนับจำนวนหน่วยงานจริงในแต่ละกลุ่ม [..หน่วย]
       const deptCatSelect = document.getElementById('filterDeptCategory');
@@ -1502,7 +1562,7 @@
       return 'GROUP_OTHER';
     }
 
-    // Apply Global Filters (Dept Category, District, Procure Method, Project Type, Project Name Keyword, Text Search)
+    // Apply Global Filters (Dept Category, District, Procure Method, Budget Range, Project Type, Project Name Keyword, Text Search)
     function applyGlobalFilters() {
       const deptCat = document.getElementById('filterDeptCategory')?.value || 'ALL';
       const dist = document.getElementById('filterDistrict')?.value || 'ALL';
@@ -1510,6 +1570,12 @@
       const type = document.getElementById('filterProjectType')?.value || 'ALL';
       const nameKey = document.getElementById('filterNameKeyword')?.value || 'ALL';
       const query = (document.getElementById('searchInput')?.value || '').toLowerCase().trim();
+
+      // Filter Budget Range
+      const minBudgetInput = document.getElementById('filterMinBudget')?.value;
+      const maxBudgetInput = document.getElementById('filterMaxBudget')?.value;
+      const minBudget = (minBudgetInput !== '' && minBudgetInput !== undefined && !isNaN(parseFloat(minBudgetInput))) ? parseFloat(minBudgetInput) : 0;
+      const maxBudget = (maxBudgetInput !== '' && maxBudgetInput !== undefined && !isNaN(parseFloat(maxBudgetInput))) ? parseFloat(maxBudgetInput) : Infinity;
 
       filteredRecords = rawCSVRecords.filter(p => {
         // กรองตามกลุ่มหน่วยรับตรวจ (dept_name)
@@ -1528,12 +1594,13 @@
         const matchProcure = procureMethod === 'ALL' || (p.procure_method && p.procure_method.includes(procureMethod));
         const matchType = type === 'ALL' || p.project_type === type;
         const matchNameKey = nameKey === 'ALL' || p.project_name.includes(nameKey);
+        const matchBudget = p.contract_price >= minBudget && p.contract_price <= maxBudget;
         const matchQuery = !query || 
           p.project_name.toLowerCase().includes(query) ||
           p.winner.toLowerCase().includes(query) ||
           p.dept_name.toLowerCase().includes(query);
 
-        return matchDeptCat && matchDist && matchProcure && matchType && matchNameKey && matchQuery;
+        return matchDeptCat && matchDist && matchProcure && matchType && matchNameKey && matchBudget && matchQuery;
       });
 
       const cntEl = document.getElementById('displayRecordCount');
@@ -1729,6 +1796,8 @@
       selectedEntitiesForExport.clear();
       selectedProjectsForExport.clear();
       hasUserManuallyToggledSelection = false;
+      currentProvinceName = 'ชัยภูมิ';
+      currentBudgetYear = '2568';
 
       const fileInput = document.getElementById('csvFileInput');
       if (fileInput) fileInput.value = '';
@@ -1738,6 +1807,29 @@
 
       const countEl = document.getElementById('displayRecordCount');
       if (countEl) countEl.textContent = '0 สัญญา';
+
+      // Clear Budget Filters
+      const minB = document.getElementById('filterMinBudget');
+      const maxB = document.getElementById('filterMaxBudget');
+      if (minB) minB.value = '';
+      if (maxB) maxB.value = '';
+
+      // Reset Focus Entity Banner
+      const focusEl = document.getElementById('currentFocusEntityText');
+      if (focusEl) {
+        focusEl.innerHTML = 'หน่วยรับตรวจเป้าหมาย: <span style="color: #94a3b8; font-style: italic;">ยังไม่ได้เลือก (กรุณาคลิกเลือกในแบบ ปม.1)</span>';
+      }
+      const headEl = document.getElementById('selectedEntityHeaderName');
+      if (headEl) headEl.textContent = '-';
+
+      const yrEl = document.getElementById('displayBudgetYear');
+      const prEl = document.getElementById('displayProvince');
+      const totalUploadEl = document.getElementById('displayTotalUploadCount');
+      const pm1ProvEl = document.getElementById('pm1ProvinceTitle');
+      if (yrEl) yrEl.textContent = '2568';
+      if (prEl) prEl.textContent = 'ชัยภูมิ';
+      if (totalUploadEl) totalUploadEl.textContent = '0 สัญญา';
+      if (pm1ProvEl) pm1ProvEl.textContent = 'จ.ชัยภูมิ';
 
       const pm1Table = document.getElementById('pm1TableBody');
       if (pm1Table) {
@@ -2154,71 +2246,39 @@
       if (emptyMsg) emptyMsg.style.display = 'none';
       if (container) container.style.display = 'block';
 
-      // 8 Factors from Images 2 & 3: Level low (0.15), med (0.50), high (0.85)
+      // 8 Factors from Official Table: Level low (0.30), med (0.45), high (0.70)
       const pm2FactorDefs = [
         {
           key: 'f1', name: '๑. วงเงินงบประมาณ',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) ไม่เกิน ๑๐ ล้านบาท' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) เกินกว่า ๑๐ ล้านบาท แต่ไม่เกิน ๕๐ ล้านบาท' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) เกินกว่า ๕๐ ล้านบาทขึ้นไป' }
-          ]
+          tooltip: '๑. วงเงินงบประมาณ:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): ไม่เกิน ๑๐ ล้านบาท\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): เกินกว่า ๑๐ ล้านบาท แต่ไม่เกิน ๕๐ ล้านบาท\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): เกินกว่า ๕๐ ล้านบาทขึ้นไป'
         },
         {
           key: 'f2', name: '๒. ลักษณะของโครงการ',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) โครงการปรับปรุง ซ่อมแซม หรือบำรุงรักษา' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) โครงการก่อสร้างใหม่ตามแบบมาตรฐานทั่วไป' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) โครงการก่อสร้างใหม่ อาคารสูง หรือโครงสร้างทางวิศวกรรมที่มีความซับซ้อน' }
-          ]
+          tooltip: '๒. ลักษณะของโครงการ:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): โครงการปรับปรุง ซ่อมแซม หรือบำรุงรักษา\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): โครงการก่อสร้างใหม่ตามแบบมาตรฐานทั่วไป\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): โครงการก่อสร้างใหม่ อาคารสูง หรือโครงสร้างทางวิศวกรรมที่มีความซับซ้อน'
         },
         {
           key: 'f3', name: '๓. ความพร้อมในการดำเนินงาน',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) สถานที่ดำเนินงานมีความพร้อม ไม่มีข้อจำกัดในการเข้าใช้พื้นที่' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) สถานที่ดำเนินงานยังมีความไม่พร้อมบางส่วน หรือต้องขออนุญาตจากหน่วยงานอื่น' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) ยังไม่ได้รับอนุญาตให้ใช้พื้นที่ หรือมีข้อพิพาท/ส่งมอบพื้นที่ล่าช้า' }
-          ]
+          tooltip: '๓. ความพร้อมในการดำเนินงาน:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): สถานที่ดำเนินงานมีความพร้อม ไม่มีข้อจำกัดในการเข้าใช้พื้นที่\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): สถานที่ดำเนินงานยังมีความไม่พร้อมบางส่วน หรือต้องขออนุญาตจากหน่วยงานอื่น\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): ยังไม่ได้รับอนุญาตให้ใช้พื้นที่ หรือมีข้อพิพาท/ส่งมอบพื้นที่ล่าช้า'
         },
         {
           key: 'f4', name: '๔. แหล่งที่มาของเงิน',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) เงินงบประมาณ' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) เงินงบประมาณ และเงินนอกงบประมาณ' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) เงินงบประมาณ เงินนอกงบประมาณ และเงินอื่นๆ' }
-          ]
+          tooltip: '๔. แหล่งที่มาของเงิน:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): เงินงบประมาณ\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): เงินงบประมาณ และเงินนอกงบประมาณ\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): เงินงบประมาณ เงินนอกงบประมาณ และเงินอื่นๆ'
         },
         {
-          key: 'f5', name: '๕. การมีส่วนได้เสียของผู้บริหารและเจ้าหน้าที่',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) ไม่มี' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) ปรากฏข่าวหรือข้อสังเกตเกี่ยวกับความไม่โปร่งใส' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) มีเรื่องร้องเรียน หรือปรากฏข่าวการมีส่วนได้เสียอย่างชัดเจน' }
-          ]
+          key: 'f5', name: '๕. ส่วนได้เสียของผู้บริหารและจนท.',
+          tooltip: '๕. การมีส่วนได้เสียของผู้บริหารและเจ้าหน้าที่:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): ไม่มี\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): ปรากฏข่าวหรือข้อสังเกตเกี่ยวกับความไม่โปร่งใส\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): มีเรื่องร้องเรียน หรือปรากฏข่าวการมีส่วนได้เสียอย่างชัดเจน'
         },
         {
           key: 'f6', name: '๖. วิธีการจัดซื้อจัดจ้าง',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) วิธีประกาศเชิญชวนทั่วไป (e-bidding / e-market)' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) วิธีคัดเลือก' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) วิธีเฉพาะเจาะจง' }
-          ]
+          tooltip: '๖. วิธีการจัดซื้อจัดจ้าง:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): วิธีประกาศเชิญชวนทั่วไป (e-bidding / e-market)\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): วิธีคัดเลือก\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): วิธีเฉพาะเจาะจง'
         },
         {
           key: 'f7', name: '๗. คู่สัญญา',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) ไม่มีความสัมพันธ์กับเจ้าหน้าที่ และไม่มีประวัติทิ้งงาน' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) ได้รับงานหลายสัญญาในหน่วยงานเดียวกัน' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) เคยมีประวัติการทิ้งงาน ส่งมอบงานล่าช้า หรือคู่สัญญาซ้ำซ้อนผิดปกติ' }
-          ]
+          tooltip: '๗. คู่สัญญา:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): ไม่มีความสัมพันธ์กับเจ้าหน้าที่ และไม่มีประวัติทิ้งงาน\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): ได้รับงานหลายสัญญาในหน่วยงานเดียวกัน\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): เคยมีประวัติการทิ้งงาน ส่งมอบงานล่าช้า หรือคู่สัญญาซ้ำซ้อนผิดปกติ'
         },
         {
           key: 'f8', name: '๘. ผลการตรวจสอบที่ผ่านมา',
-          options: [
-            { val: 0.15, lvl: 'ต่ำ', text: 'ต่ำ (0.15): ๑) ไม่เคยมีข้อทักท้วง' },
-            { val: 0.50, lvl: 'ปานกลาง', text: 'ปานกลาง (0.50): ๒) เคยมีข้อทักท้วงแต่ไม่ใช่สาระสำคัญ' },
-            { val: 0.85, lvl: 'สูง', text: 'สูง (0.85): ๓) เคยมีข้อทักท้วงในสาระสำคัญ หรือเคยถูกชี้มูลความผิด' }
-          ]
+          tooltip: '๘. ผลการตรวจสอบที่ผ่านมา:\n• ต่ำ (ไม่เกิน 0.30, ค่ามาตรฐาน 0.30): ไม่เคยมีข้อทักท้วง\n• ปานกลาง (0.31 - 0.70, ค่ามาตรฐาน 0.45): เคยมีข้อทักท้วงแต่ไม่ใช่สาระสำคัญ\n• สูง (มากกว่า 0.70, ค่ามาตรฐาน 0.70): เคยมีข้อทักท้วงในสาระสำคัญ หรือเคยถูกชี้มูลความผิด'
         }
       ];
 
@@ -2226,14 +2286,14 @@
       
       let html = '';
       projects.forEach(p => {
-        let f1 = p.f1 || { lvl: 'ต่ำ', val: 0.15 };
-        let f2 = p.f2 || { lvl: 'ต่ำ', val: 0.15 };
-        let f3 = p.f3 || { lvl: 'ต่ำ', val: 0.15 };
-        let f4 = p.f4 || { lvl: 'ต่ำ', val: 0.15 };
-        let f5 = p.f5 || { lvl: 'ต่ำ', val: 0.15 };
-        let f6 = p.f6 || { lvl: 'ต่ำ', val: 0.15 };
-        let f7 = p.f7 || { lvl: 'ต่ำ', val: 0.15 };
-        let f8 = p.f8 || { lvl: 'ต่ำ', val: 0.15 };
+        let f1 = p.f1 || { lvl: 'ต่ำ', val: 0.30 };
+        let f2 = p.f2 || { lvl: 'ต่ำ', val: 0.30 };
+        let f3 = p.f3 || { lvl: 'ต่ำ', val: 0.30 };
+        let f4 = p.f4 || { lvl: 'ต่ำ', val: 0.30 };
+        let f5 = p.f5 || { lvl: 'ต่ำ', val: 0.30 };
+        let f6 = p.f6 || { lvl: 'ต่ำ', val: 0.30 };
+        let f7 = p.f7 || { lvl: 'ต่ำ', val: 0.30 };
+        let f8 = p.f8 || { lvl: 'ต่ำ', val: 0.30 };
 
         let sumVal = f1.val + f2.val + f3.val + f4.val + f5.val + f6.val + f7.val + f8.val;
         let avgVal = sumVal / 8;
@@ -2265,22 +2325,28 @@
               </div>
             </div>
 
-            <!-- 8 Factors Grid -->
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 8px;">
+            <!-- 8 Factors Grid (Compact Card พร้อมไอคอน ℹ️ แสดงเกณฑ์เมื่อชี้เมาส์ และช่องกรอกตัวเลขโดยตรง) -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 8px;">
               ${pm2FactorDefs.map(fd => {
-                let currentVal = p[fd.key]?.val || 0.15;
+                let currentVal = p[fd.key]?.val ?? 0.30;
+                let isCustom = (Math.abs(currentVal - 0.30) > 0.001 && Math.abs(currentVal - 0.45) > 0.001 && Math.abs(currentVal - 0.70) > 0.001);
                 return `
-                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 6px 8px;">
-                    <div style="font-size: 0.76rem; font-weight: 700; color: #0369a1; margin-bottom: 3px; line-height: 1.2;">
-                      ${fd.name}
+                  <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 6px 8px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                      <div style="font-size: 0.75rem; font-weight: 700; color: #0369a1; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${fd.name}">
+                        ${fd.name}
+                      </div>
+                      <span title="${fd.tooltip.replace(/"/g, '&quot;')}" style="cursor: help; color: #0284c7; font-size: 0.72rem; background: #e0f2fe; border-radius: 50%; width: 17px; height: 17px; display: inline-flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;">ℹ️</span>
                     </div>
-                    <select onchange="onPm2FactorChange('${p.project_id}', '${fd.key}', this.value)" style="width: 100%; font-size: 0.78rem; padding: 3px 4px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: 500; color: #0f172a; background: white; cursor: pointer;">
-                      ${fd.options.map(opt => `
-                        <option value="${opt.val}" ${Math.abs(currentVal - opt.val) < 0.01 ? 'selected' : ''}>
-                          ${opt.text}
-                        </option>
-                      `).join('')}
-                    </select>
+                    <div style="display: flex; align-items: center; gap: 4px;">
+                      <select id="pm2-sel-${safeId}-${fd.key}" onchange="onPm2FactorPresetChange('${p.project_id}', '${fd.key}', this.value)" style="flex: 1; font-size: 0.75rem; padding: 3px 2px; border: 1px solid #94a3b8; border-radius: 4px; font-weight: 500; color: #0f172a; background: white; cursor: pointer;">
+                        <option value="0.30" ${Math.abs(currentVal - 0.30) < 0.001 ? 'selected' : ''}>ต่ำ (0.30)</option>
+                        <option value="0.45" ${Math.abs(currentVal - 0.45) < 0.001 ? 'selected' : ''}>ปานกลาง (0.45)</option>
+                        <option value="0.70" ${Math.abs(currentVal - 0.70) < 0.001 ? 'selected' : ''}>สูง (0.70)</option>
+                        <option value="custom" ${isCustom ? 'selected' : ''}>กำหนดเอง...</option>
+                      </select>
+                      <input type="number" id="pm2-num-${safeId}-${fd.key}" step="0.01" min="0" max="1" value="${currentVal.toFixed(2)}" oninput="onPm2FactorNumericChange('${p.project_id}', '${fd.key}', this.value)" style="width: 58px; font-size: 0.78rem; padding: 3px 2px; text-align: center; border: 1.5px solid #0284c7; border-radius: 4px; font-weight: 700; color: #0c4a6e; background: #f0f9ff;" title="พิมพ์ตัวเลขค่าความเสี่ยงได้โดยตรง (0.00 - 1.00)">
+                    </div>
                   </div>
                 `;
               }).join('')}
@@ -2292,26 +2358,26 @@
       rowsDiv.innerHTML = html;
     }
 
-    function onPm2FactorChange(projectId, factorKey, val) {
+    function applyPm2FactorValue(projectId, factorKey, numVal) {
       if (!selectedEntityName || !entityGroups[selectedEntityName]) return;
       let p = entityGroups[selectedEntityName].records.find(item => item.project_id === projectId);
       if (!p) return;
 
-      let numVal = parseFloat(val) || 0.15;
-      let lvl = numVal >= 0.80 ? 'สูง' : (numVal >= 0.40 ? 'ปานกลาง' : 'ต่ำ');
+      numVal = Math.max(0, Math.min(1, parseFloat(numVal) || 0));
+      let lvl = numVal > 0.70 ? 'สูง' : (numVal >= 0.31 ? 'ปานกลาง' : 'ต่ำ');
 
       p[factorKey] = { lvl: lvl, val: numVal };
       p.isManuallyEdited = true;
 
-      // Recalculate
-      let f1 = p.f1?.val || 0.15;
-      let f2 = p.f2?.val || 0.15;
-      let f3 = p.f3?.val || 0.15;
-      let f4 = p.f4?.val || 0.15;
-      let f5 = p.f5?.val || 0.15;
-      let f6 = p.f6?.val || 0.15;
-      let f7 = p.f7?.val || 0.15;
-      let f8 = p.f8?.val || 0.15;
+      // Recalculate Project
+      let f1 = p.f1?.val ?? 0.30;
+      let f2 = p.f2?.val ?? 0.30;
+      let f3 = p.f3?.val ?? 0.30;
+      let f4 = p.f4?.val ?? 0.30;
+      let f5 = p.f5?.val ?? 0.30;
+      let f6 = p.f6?.val ?? 0.30;
+      let f7 = p.f7?.val ?? 0.30;
+      let f8 = p.f8?.val ?? 0.30;
 
       let sumVal = f1 + f2 + f3 + f4 + f5 + f6 + f7 + f8;
       let avgVal = sumVal / 8;
@@ -2319,8 +2385,22 @@
       p.risk_score = Math.round(avgVal * 100);
       p.risk_level = avgVal > 0.70 ? 'HIGH' : (avgVal >= 0.31 ? 'MEDIUM' : 'LOW');
 
-      // Update badge in panel
       let safeId = p.project_id.replace(/[^a-zA-Z0-9ก-๙]/g, '_');
+      
+      // Synchronize input elements in the panel
+      let selEl = document.getElementById(`pm2-sel-${safeId}-${factorKey}`);
+      let numEl = document.getElementById(`pm2-num-${safeId}-${factorKey}`);
+      if (numEl && document.activeElement !== numEl) {
+        numEl.value = numVal.toFixed(2);
+      }
+      if (selEl) {
+        if (Math.abs(numVal - 0.30) < 0.001) selEl.value = '0.30';
+        else if (Math.abs(numVal - 0.45) < 0.001) selEl.value = '0.45';
+        else if (Math.abs(numVal - 0.70) < 0.001) selEl.value = '0.70';
+        else selEl.value = 'custom';
+      }
+
+      // Update badge & sum in panel project card header
       let sumEl = document.getElementById(`pm2-sum-${safeId}`);
       if (sumEl) sumEl.textContent = sumVal.toFixed(2);
 
@@ -2336,8 +2416,17 @@
         badgeEl.textContent = `${riskLabel} (${avgVal.toFixed(2)})`;
       }
 
-      // Re-render table row and charts
-      renderPm2View(selectedEntityName);
+      // Re-render table and map without closing or resetting the param panel
+      renderPm2View(selectedEntityName, false);
+    }
+
+    function onPm2FactorPresetChange(projectId, factorKey, val) {
+      if (val === 'custom') return;
+      applyPm2FactorValue(projectId, factorKey, parseFloat(val));
+    }
+
+    function onPm2FactorNumericChange(projectId, factorKey, val) {
+      applyPm2FactorValue(projectId, factorKey, parseFloat(val));
     }
 
     function resetSinglePm2Factor(projectId) {
@@ -2346,8 +2435,7 @@
       if (!p) return;
       p.isManuallyEdited = false;
       recalculateDefaultProjectFactors(p);
-      renderPm2View(selectedEntityName);
-      updatePm2ParamPanel();
+      renderPm2View(selectedEntityName, true);
     }
 
     function resetAllSelectedPm2Factors() {
@@ -2358,8 +2446,7 @@
           recalculateDefaultProjectFactors(p);
         }
       });
-      renderPm2View(selectedEntityName);
-      updatePm2ParamPanel();
+      renderPm2View(selectedEntityName, true);
     }
 
     function recalculateDefaultProjectFactors(p) {
@@ -2368,35 +2455,35 @@
       let pName = (p.project_name || '').toLowerCase();
       let diffPct = p.diff_pct || 0;
 
-      let f1_val = 0.15; let f1_lvl = "ต่ำ";
-      if (contractPrice > 50000000) { f1_val = 0.85; f1_lvl = "สูง"; }
-      else if (contractPrice > 10000000) { f1_val = 0.50; f1_lvl = "ปานกลาง"; }
+      let f1_val = 0.30; let f1_lvl = "ต่ำ";
+      if (contractPrice > 50000000) { f1_val = 0.70; f1_lvl = "สูง"; }
+      else if (contractPrice > 10000000) { f1_val = 0.45; f1_lvl = "ปานกลาง"; }
 
-      let f2_val = 0.15; let f2_lvl = "ต่ำ";
+      let f2_val = 0.30; let f2_lvl = "ต่ำ";
       if (pName.includes('อาคารสูง') || pName.includes('สะพาน') || pName.includes('ระบบบำบัด') || pName.includes('เขื่อน')) {
-        f2_val = 0.85; f2_lvl = "สูง";
+        f2_val = 0.70; f2_lvl = "สูง";
       } else if (p.project_type?.includes('ก่อสร้าง') || pName.includes('ก่อสร้าง') || pName.includes('สร้าง')) {
-        f2_val = 0.50; f2_lvl = "ปานกลาง";
+        f2_val = 0.45; f2_lvl = "ปานกลาง";
       }
 
-      let f3_val = 0.15; let f3_lvl = "ต่ำ";
-      let f4_val = 0.15; let f4_lvl = "ต่ำ";
-      let f5_val = 0.15; let f5_lvl = "ต่ำ";
+      let f3_val = 0.30; let f3_lvl = "ต่ำ";
+      let f4_val = 0.30; let f4_lvl = "ต่ำ";
+      let f5_val = 0.30; let f5_lvl = "ต่ำ";
 
-      let f6_val = 0.15; let f6_lvl = "ต่ำ";
-      if (method.includes('เฉพาะเจาะจง')) { f6_val = 0.85; f6_lvl = "สูง"; }
-      else if (method.includes('คัดเลือก')) { f6_val = 0.50; f6_lvl = "ปานกลาง"; }
+      let f6_val = 0.30; let f6_lvl = "ต่ำ";
+      if (method.includes('เฉพาะเจาะจง')) { f6_val = 0.70; f6_lvl = "สูง"; }
+      else if (method.includes('คัดเลือก')) { f6_val = 0.45; f6_lvl = "ปานกลาง"; }
 
-      let f7_val = 0.15; let f7_lvl = "ต่ำ";
+      let f7_val = 0.30; let f7_lvl = "ต่ำ";
       if (method.includes('e-bidding') && diffPct < 0 && diffPct >= -0.25 && contractPrice > 3000000) {
-        f7_val = 0.85; f7_lvl = "สูง";
+        f7_val = 0.70; f7_lvl = "สูง";
       } else if (contractPrice >= 450000 && contractPrice <= 500000 && method.includes('เฉพาะเจาะจง')) {
-        f7_val = 0.85; f7_lvl = "สูง";
+        f7_val = 0.70; f7_lvl = "สูง";
       } else if (diffPct <= -25 && p.project_type?.includes('ก่อสร้าง')) {
-        f7_val = 0.85; f7_lvl = "สูง";
+        f7_val = 0.70; f7_lvl = "สูง";
       }
 
-      let f8_val = 0.15; let f8_lvl = "ต่ำ";
+      let f8_val = 0.30; let f8_lvl = "ต่ำ";
 
       p.f1 = { lvl: f1_lvl, val: f1_val };
       p.f2 = { lvl: f2_lvl, val: f2_val };
@@ -2496,7 +2583,10 @@
     // ==================== STAGE 2: SELECT & RENDER ปม.2 ====================
     function selectEntityForPm2(deptName) {
       selectedEntityName = deptName;
-      document.getElementById('currentFocusEntityText').innerHTML = `หน่วยรับตรวจเป้าหมาย: <strong style="color: #1e40af;">${deptName}</strong>`;
+      const focusEl = document.getElementById('currentFocusEntityText');
+      if (focusEl) {
+        focusEl.innerHTML = `หน่วยรับตรวจเป้าหมาย: <strong style="color: #1e40af; background: #e0f2fe; padding: 2px 8px; border-radius: 4px; border: 1px solid #bae6fd;">${deptName}</strong>`;
+      }
       // By default select all projects of this entity
       selectedProjectsForExport.clear();
       if (entityGroups[deptName]) {
@@ -2631,11 +2721,11 @@
       let contracts = dataSource.filter(p => p.winner === contractorName);
       if (contracts.length === 0) return;
 
-      // Helper: คำนวณช่วงก่อสร้างหลัก (Core Construction Period / กราฟตัว S ช่วงไข่แดง 70-80%)
+      // Helper: คำนวณช่วงดำเนินงานหลัก (Core Execution Period / กราฟตัว S ช่วงส่งมอบงานหลัก 70-80%)
       // ตามขนาดโครงการและระยะเวลา:
-      // - โครงการขนาดใหญ่ (> 2 ล้าน หรือ > 180 วัน): ตัดหัว 15% (เตรียมงาน), ตัดท้าย 15% (ตรวจรับ/เก็บ Defect) -> ก่อสร้างหลัก 70% ตรงกลาง
-      // - โครงการขนาดกลาง (5 แสน - 2 ล้าน หรือ 60 - 180 วัน): ตัดหัว 10%, ตัดท้าย 10% -> ก่อสร้างหลัก 80% ตรงกลาง
-      // - โครงการขนาดเล็ก (< 5 แสน หรือ < 60 วัน): ไม่ตัด (100% เป็นช่วงก่อสร้างหลัก)
+      // - โครงการขนาดใหญ่ (> 2 ล้าน หรือ > 180 วัน): ตัดหัว 15% (เตรียมงาน), ตัดท้าย 15% (ตรวจรับ/ส่งมอบงวดสุดท้าย) -> ช่วงดำเนินงานหลัก 70% ตรงกลาง
+      // - โครงการขนาดกลาง (5 แสน - 2 ล้าน หรือ 60 - 180 วัน): ตัดหัว 10%, ตัดท้าย 10% -> ช่วงดำเนินงานหลัก 80% ตรงกลาง
+      // - โครงการขนาดเล็ก (< 5 แสน หรือ < 60 วัน): ไม่ตัด (100% เป็นช่วงดำเนินงานหลัก)
       function getSCurveCorePeriod(p) {
         let totalSpan = p.contractEndDate.getTime() - p.startDate.getTime();
         let durationDays = Math.round(totalSpan / (1000 * 60 * 60 * 24)) + 1;
@@ -2735,7 +2825,7 @@
             }
           }
 
-          // 2. คำนวณช่วงเวลาที่คาบเกี่ยวเฉพาะช่วงก่อสร้างหลัก (S-Curve Core / ไข่แดง)
+          // 2. คำนวณช่วงเวลาที่คาบเกี่ยวเฉพาะช่วงดำเนินงานหลัก (S-Curve Core Period)
           if (a.sCurve && b.sCurve) {
             let cOverlapStart = new Date(Math.max(a.sCurve.coreStart, b.sCurve.coreStart));
             let cOverlapEnd = new Date(Math.min(a.sCurve.coreEnd, b.sCurve.coreEnd));
@@ -2919,7 +3009,7 @@
       let filteredIds = new Set(filteredProjects.map(p => p.project_id));
       currentActiveWindow = { label: `เดือน ${monthObj.label}`, start: mStart, end: mEnd };
 
-      // คำนวณสถิติเฉพาะเดือนที่เลือก: ชนช่วงก่อสร้างหลัก vs ไม่ใช่ช่วงก่อสร้างหลัก
+      // คำนวณสถิติเฉพาะเดือนที่เลือก: ชนช่วงดำเนินงานหลัก vs นอกช่วงดำเนินงานหลัก
       renderMonthlyBreakdownBox(filteredProjects, monthObj);
 
       renderContractorMapMarkers(filteredProjects, filteredIds, currentOverlapData);
@@ -2939,7 +3029,7 @@
       let mStart = new Date(monthObj.year, monthObj.month, 1);
       let mEnd = new Date(monthObj.year, monthObj.month + 1, 0, 23, 59, 59);
 
-      // 1. สัญญาที่มีช่วงเวลาก่อสร้างหลัก (Core S-Curve) อยู่ในเดือนนี้
+      // 1. สัญญาที่มีช่วงเวลาดำเนินงานหลัก (Core S-Curve) อยู่ในเดือนนี้
       let coreProjects = projects.filter(p => {
         if (!p.sCurve) return false;
         return p.sCurve.coreStart <= mEnd && p.sCurve.coreEnd >= mStart;
@@ -2947,7 +3037,7 @@
       let coreCount = coreProjects.length;
       let coreMoney = coreProjects.reduce((sum, p) => sum + p.contract_price, 0);
 
-      // 2. สัญญาที่อยู่ในเดือนนี้ แต่ไม่ใช่ช่วงก่อสร้างหลัก (เช่น เป็นช่วงเตรียมงาน หรือ ตรวจรับ/defect)
+      // 2. สัญญาที่อยู่ในเดือนนี้ แต่นอกช่วงดำเนินงานหลัก (เช่น เป็นช่วงเตรียมงาน หรือ ตรวจรับ/ส่งมอบ)
       let nonCoreProjects = projects.filter(p => !coreProjects.includes(p));
       let nonCoreCount = nonCoreProjects.length;
       let nonCoreMoney = nonCoreProjects.reduce((sum, p) => sum + p.contract_price, 0);
@@ -2968,10 +3058,10 @@
           </button>
         </div>
         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px;">
-          <!-- Card 1: ชนช่วงก่อสร้างหลัก -->
+          <!-- Card 1: ชนช่วงดำเนินงานหลัก -->
           <div style="background: #fef2f2; border: 1.5px solid #fca5a5; border-radius: 8px; padding: 8px 12px;">
             <div style="font-size: 0.75rem; color: #991b1b; font-weight: 700; display: flex; align-items: center; gap: 4px;">
-              <span>🔨 ลุยงานก่อสร้างหลักทับซ้อน:</span>
+              <span>⚙️ ดำเนินงานหลักทับซ้อน:</span>
             </div>
             <div style="font-size: 1.3rem; font-weight: 800; color: #dc2626; margin: 2px 0;">
               ${coreCount} <span style="font-size: 0.8rem; font-weight: 500;">สัญญา</span>
@@ -2979,13 +3069,13 @@
             <div style="font-size: 0.75rem; color: #7f1d1d; font-weight: 600;">
               วงเงินรวม ฿${(coreMoney / 1000000).toFixed(2)} ล้าน
             </div>
-            <div style="font-size: 0.68rem; color: #991b1b; margin-top: 2px;">(เสี่ยงวิศวกร/เครื่องจักรทับซ้อนสูงสุด)</div>
+            <div style="font-size: 0.68rem; color: #991b1b; margin-top: 2px;">(เสี่ยงบุคลากรหลัก/ทรัพยากรทับซ้อนเกินศักยภาพ)</div>
           </div>
 
-          <!-- Card 2: ไม่ใช่ช่วงก่อสร้างหลัก -->
+          <!-- Card 2: นอกช่วงดำเนินงานหลัก -->
           <div style="background: #fffbeb; border: 1.5px solid #fde68a; border-radius: 8px; padding: 8px 12px;">
             <div style="font-size: 0.75rem; color: #92400e; font-weight: 700; display: flex; align-items: center; gap: 4px;">
-              <span>📋 เตรียมงาน / ตรวจรับ (ไม่ใช่ลุยงานหลัก):</span>
+              <span>📋 นอกช่วงดำเนินงานหลัก (เตรียมงาน/ตรวจรับ/ส่งมอบ):</span>
             </div>
             <div style="font-size: 1.3rem; font-weight: 800; color: #d97706; margin: 2px 0;">
               ${nonCoreCount} <span style="font-size: 0.8rem; font-weight: 500;">สัญญา</span>
@@ -2993,7 +3083,7 @@
             <div style="font-size: 0.75rem; color: #78350f; font-weight: 600;">
               วงเงินรวม ฿${(nonCoreMoney / 1000000).toFixed(2)} ล้าน
             </div>
-            <div style="font-size: 0.68rem; color: #b45309; margin-top: 2px;">(ช่วงตั้งแคมป์/ขออนุมัติ หรือตรวจรับงาน)</div>
+            <div style="font-size: 0.68rem; color: #b45309; margin-top: 2px;">(ช่วงเตรียมการ/เบิกจ่ายล่วงหน้า หรือตรวจรับงาน)</div>
           </div>
 
           <!-- Card 3: รวมทั้งหมดในเดือนนี้ -->
@@ -3120,7 +3210,7 @@
     }
 
     // วาดแผนผังไทม์ไลน์แบบ Gantt Chart Bars
-    // แสดงระยะเวลาตามสัญญา (ขอบนอก) และช่วงก่อสร้างหลัก (Core S-Curve แถบด้านใน)
+    // แสดงระยะเวลาตามสัญญา (ขอบนอก) และช่วงดำเนินงานหลัก (Core S-Curve แถบด้านใน)
     // พร้อมเส้นมาร์กวันสิ้นสุดสัญญา และแถบคร่อมไฮไลต์แนวตั้งโปร่งแสงตามช่วงเวลาที่เลือก
     function renderGanttChart(parsedList, highlightIds = null, activeWindow = null) {
       const container = document.getElementById('ganttTimelineContainer');
@@ -3183,7 +3273,7 @@
         let cWidthPct = Math.max(2, cEndPct - cStartPct);
         let durationDays = Math.round((p.contractEndDate - p.startDate) / (1000 * 60 * 60 * 24)) + 1;
 
-        // คำนวณช่วงก่อสร้างหลัก (Core S-Curve)
+        // คำนวณช่วงดำเนินงานหลัก (Core S-Curve)
         let coreBarHtml = '';
         let coreDesc = '';
         if (p.sCurve) {
@@ -3196,21 +3286,21 @@
           let coreOverlapCount = p.coreOverlapsWith ? p.coreOverlapsWith.length : 0;
           let coreColor = coreOverlapCount > 0 ? '#b91c1c' : '#047857';
 
-          coreDesc = `ช่วงลุยงานหลัก (S-Curve): ${sc.coreStart.toLocaleDateString('th-TH')} ถึง ${sc.coreEnd.toLocaleDateString('th-TH')} (${sc.coreDays} วัน) | เตรียมงาน ${sc.mobilizationDays} วัน, ตรวจรับ ${sc.closeoutDays} วัน`;
+          coreDesc = `ช่วงดำเนินงานหลัก (Core Period): ${sc.coreStart.toLocaleDateString('th-TH')} ถึง ${sc.coreEnd.toLocaleDateString('th-TH')} (${sc.coreDays} วัน) | เตรียมงาน ${sc.mobilizationDays} วัน, ตรวจรับ/ส่งมอบ ${sc.closeoutDays} วัน`;
 
           coreBarHtml = `
             <div style="position: absolute; left: ${coreLeftRelPct}%; width: ${coreWidthRelPct}%; height: 65%; top: 17.5%; background: ${coreColor}; border-radius: 4px; display: flex; align-items: center; justify-content: center; color: #ffffff; font-size: 0.68rem; font-weight: 700; box-shadow: 0 1px 2px rgba(0,0,0,0.25); z-index: 3;" title="${coreDesc}">
-              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;">🔨 ก่อสร้างหลัก (${sc.coreDays} วัน)</span>
+              <span style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: 0 4px;">⚙️ ช่วงดำเนินงานหลัก (${sc.coreDays} วัน)</span>
             </div>
           `;
         }
 
-        // ป้ายแสดงสถานะการทับซ้อน (แสดงทั้งการทับซ้อนรวม และการทับซ้อนช่วงลุยงานหลัก)
+        // ป้ายแสดงสถานะการทับซ้อน (แสดงทั้งการทับซ้อนรวม และการทับซ้อนช่วงดำเนินงานหลัก)
         let overlapCount = p.overlapsWith ? p.overlapsWith.length : 0;
         let coreOverlapCount = p.coreOverlapsWith ? p.coreOverlapsWith.length : 0;
         let badgeHtml = '';
         if (coreOverlapCount > 0) {
-          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;" title="หน้างานลุยพร้อมกัน ${coreOverlapCount} สัญญา">⚠️ ชนงานหลัก ${coreOverlapCount} สัญญา</span>`;
+          badgeHtml = `<span style="background: #fef2f2; color: #dc2626; border: 1px solid #fca5a5; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: bold; white-space: nowrap;" title="ดำเนินงานหลักพร้อมกัน ${coreOverlapCount} สัญญา">⚠️ ชนช่วงดำเนินงานหลัก ${coreOverlapCount} สัญญา</span>`;
         } else if (overlapCount > 0) {
           badgeHtml = `<span style="background: #fffbeb; color: #b45309; border: 1px solid #fde68a; padding: 1px 6px; border-radius: 4px; font-size: 0.72rem; font-weight: 600; white-space: nowrap;" title="คาบเกี่ยวเฉพาะช่วงเตรียมงาน/ตรวจรับ">คาบเกี่ยวสัญญา ${overlapCount} สัญญา</span>`;
         } else {
@@ -3222,7 +3312,7 @@
         let outerBorder = overlapCount > 0 ? '#10b981' : '#34d399';
         let segmentsHtml = `
           <div style="position: absolute; left: ${cStartPct}%; width: ${cWidthPct}%; height: 100%; background: ${outerBarBg}; border: 1.5px solid ${outerBorder}; border-radius: 6px; display: flex; align-items: center; justify-content: space-between; padding: 0 8px; color: #064e3b; font-size: 0.70rem; font-weight: 600; white-space: nowrap; z-index: 2; box-shadow: 0 1px 3px rgba(0,0,0,0.06);" title="สัญญาเต็ม: ${p.startDate.toLocaleDateString('th-TH')} ถึง ${p.contractEndDate.toLocaleDateString('th-TH')} (รวมทั้งสัญญา ${durationDays} วัน)\n${coreDesc}">
-            <span style="z-index: 4; text-shadow: 0 0 2px #fff;">เริ่ม: ${p.startDate.toLocaleDateString('th-TH')} <span style="font-weight: 700; color: #047857; margin-left: 2px;">[ทั้งสัญญา ${durationDays} วัน]</span></span>
+            <span style="z-index: 4; text-shadow: 0 0 2px #fff;">เริ่ม: ${p.startDate.toLocaleDateString('th-TH')}</span>
             ${coreBarHtml}
             <span style="z-index: 4; text-shadow: 0 0 2px #fff;">สิ้นสุด: ${p.contractEndDate.toLocaleDateString('th-TH')}</span>
           </div>
@@ -3303,7 +3393,7 @@
       XLSX.writeFile(wb, `รายงานสัญญาทับซ้อน_${safeName}_${new Date().toISOString().slice(0,10)}.xlsx`);
     }
 
-    function renderPm2View(deptName) {
+    function renderPm2View(deptName, refreshPanel = true) {
       document.getElementById('selectedEntityHeaderName').textContent = deptName;
       const entity = entityGroups[deptName];
       if (!entity) return;
@@ -3354,7 +3444,9 @@
 
       renderEntityMapMarkers(projects);
       updateEntityRiskChart(projects);
-      updatePm2ParamPanel();
+      if (refreshPanel) {
+        updatePm2ParamPanel();
+      }
     }
 
     function renderEntityMapMarkers(projects) {
@@ -3478,8 +3570,8 @@
       let data = [
         ["แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "แบบ ปม.1"],
         ["สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-        ["สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4)", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-        ["ประจำปีงบประมาณ พ.ศ. 2568", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [`สำนักตรวจเงินแผ่นดินจังหวัด${currentProvinceName} (สตภ.4)`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [`ประจำปีงบประมาณ พ.ศ. ${currentBudgetYear}`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [""],
         [
           "ลำดับ",
@@ -3561,9 +3653,9 @@
       let data = [
         ["แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "แบบ ปม.2"],
         ["การตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-        ["สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4)", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [`สำนักตรวจเงินแผ่นดินจังหวัด${currentProvinceName} (สตภ.4)`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [`ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.๑)`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
-        ["ประจำปีงบประมาณ พ.ศ. 2568", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
+        [`ประจำปีงบประมาณ พ.ศ. ${currentBudgetYear}`, "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""],
         [""],
         [
           "ลำดับ",
@@ -3593,14 +3685,14 @@
       ];
 
       projects.forEach((p, idx) => {
-        let f1 = p.f1 || { lvl: "ต่ำ", val: 0.15 };
-        let f2 = p.f2 || { lvl: "ต่ำ", val: 0.15 };
-        let f3 = p.f3 || { lvl: "ต่ำ", val: 0.15 };
-        let f4 = p.f4 || { lvl: "ต่ำ", val: 0.15 };
-        let f5 = p.f5 || { lvl: "ต่ำ", val: 0.15 };
-        let f6 = p.f6 || { lvl: "ต่ำ", val: 0.15 };
-        let f7 = p.f7 || { lvl: "ต่ำ", val: 0.15 };
-        let f8 = p.f8 || { lvl: "ต่ำ", val: 0.15 };
+        let f1 = p.f1 || { lvl: "ต่ำ", val: 0.30 };
+        let f2 = p.f2 || { lvl: "ต่ำ", val: 0.30 };
+        let f3 = p.f3 || { lvl: "ต่ำ", val: 0.30 };
+        let f4 = p.f4 || { lvl: "ต่ำ", val: 0.30 };
+        let f5 = p.f5 || { lvl: "ต่ำ", val: 0.30 };
+        let f6 = p.f6 || { lvl: "ต่ำ", val: 0.30 };
+        let f7 = p.f7 || { lvl: "ต่ำ", val: 0.30 };
+        let f8 = p.f8 || { lvl: "ต่ำ", val: 0.30 };
 
         let sumVal = (f1.val + f2.val + f3.val + f4.val + f5.val + f6.val + f7.val + f8.val);
         let avgVal = sumVal / 8;
@@ -3681,7 +3773,7 @@
         <!DOCTYPE html>
         <html>
         <head>
-          <title>แบบ ปม.1 - สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ</title>
+          <title>แบบ ปม.1 - สำนักตรวจเงินแผ่นดินจังหวัด${currentProvinceName}</title>
           <!-- ฟอนต์ราชการ Sarabun และ TH Sarabun -->
           <link rel="preconnect" href="https://fonts.googleapis.com">
           <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -3706,7 +3798,7 @@
           <div style="text-align: right; font-weight: bold; font-size: 9pt;">ปม.1</div>
           <h2>แบบประเมินความเสี่ยงเพื่อคัดเลือกหน่วยรับตรวจที่อยู่ในเขตอำนาจ</h2>
           <h3>สำหรับการตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</h3>
-          <h4>สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ (สตภ.4) ประจำปีงบประมาณ พ.ศ. 2568</h4>
+          <h4>สำนักตรวจเงินแผ่นดินจังหวัด${currentProvinceName} (สตภ.4) ประจำปีงบประมาณ พ.ศ. ${currentBudgetYear}</h4>
           <table>
             <thead>
               <tr>
@@ -3770,14 +3862,14 @@
       projects.sort((a, b) => b.risk_score - a.risk_score);
 
       let rowsHtml = projects.map((p, idx) => {
-        let f1 = p.f1 || { lvl: "ต่ำ", val: 0.15 };
-        let f2 = p.f2 || { lvl: "ต่ำ", val: 0.15 };
-        let f3 = p.f3 || { lvl: "ต่ำ", val: 0.15 };
-        let f4 = p.f4 || { lvl: "ต่ำ", val: 0.15 };
-        let f5 = p.f5 || { lvl: "ต่ำ", val: 0.15 };
-        let f6 = p.f6 || { lvl: "ต่ำ", val: 0.15 };
-        let f7 = p.f7 || { lvl: "ต่ำ", val: 0.15 };
-        let f8 = p.f8 || { lvl: "ต่ำ", val: 0.15 };
+        let f1 = p.f1 || { lvl: "ต่ำ", val: 0.30 };
+        let f2 = p.f2 || { lvl: "ต่ำ", val: 0.30 };
+        let f3 = p.f3 || { lvl: "ต่ำ", val: 0.30 };
+        let f4 = p.f4 || { lvl: "ต่ำ", val: 0.30 };
+        let f5 = p.f5 || { lvl: "ต่ำ", val: 0.30 };
+        let f6 = p.f6 || { lvl: "ต่ำ", val: 0.30 };
+        let f7 = p.f7 || { lvl: "ต่ำ", val: 0.30 };
+        let f8 = p.f8 || { lvl: "ต่ำ", val: 0.30 };
         let sumVal = (f1.val + f2.val + f3.val + f4.val + f5.val + f6.val + f7.val + f8.val);
         let avgVal = sumVal / 8;
 
@@ -3833,7 +3925,7 @@
           <h2>แบบประเมินความเสี่ยงเพื่อคัดเลือกสัญญา/ งาน/ โครงการ/ กิจกรรม</h2>
           <h3>การตรวจสอบการจัดให้ได้มาซึ่งทรัพย์สินและการบริหารทรัพย์สินของรัฐ</h3>
           <h4>ชื่อหน่วยรับตรวจ: ${selectedEntityName} (ที่ประเมินได้จากแบบ ปม.๑)</h4>
-          <p style="text-align: center; font-size: 9pt; margin: 3px 0;">สำนักตรวจเงินแผ่นดินจังหวัดชัยภูมิ ประจำปีงบประมาณ พ.ศ. 2568</p>
+          <p style="text-align: center; font-size: 9pt; margin: 3px 0;">สำนักตรวจเงินแผ่นดินจังหวัด${currentProvinceName} ประจำปีงบประมาณ พ.ศ. ${currentBudgetYear}</p>
           <table>
             <thead>
               <tr>
